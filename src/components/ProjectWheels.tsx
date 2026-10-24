@@ -30,9 +30,21 @@ export default function ProjectWheels({
     const update = (immediate = false) => {
       const mobile = innerWidth < 760,
         compact = innerHeight < 650;
+      const neighborScale = 0.7;
+      const card = root.current!.querySelector<HTMLElement>(".video-card")!;
+      const angle = (18 * Math.PI) / 180;
+      // Include the rotated neighbor and the active card's expanded height.
+      // Fixed viewport spacing alone lets cards collide on wide screens.
+      const minimumGap =
+        (card.offsetHeight * 1.055) / 2 +
+        (neighborScale *
+          (card.offsetHeight * Math.cos(angle) +
+            card.offsetWidth * Math.sin(angle))) /
+          2 +
+        40;
       const gap = mobile
         ? innerWidth * 0.94
-        : Math.max(225, innerHeight * (compact ? 0.42 : 0.445));
+        : Math.max(225, innerHeight * (compact ? 0.42 : 0.445), minimumGap);
       projects.forEach((_, i) => {
         const d = wheelOffset(i, index),
           active = d === 0;
@@ -49,7 +61,7 @@ export default function ProjectWheels({
           x: mobile ? d * gap : -Math.abs(d) * (innerWidth * 0.115),
           y: mobile ? Math.abs(d) * 22 : d * gap,
           rotation: mobile ? d * 7 : d * -18,
-          scale: active ? (expanded ? 1.055 : 1) : 0.77,
+          scale: active ? (expanded ? 1.055 : 1) : neighborScale,
           opacity: Math.abs(d) > 1 ? 0 : active ? 1 : 0.36,
           zIndex: active ? 5 : 1,
         });

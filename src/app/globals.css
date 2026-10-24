@@ -227,9 +227,9 @@ button:disabled {
 }
 .video-wheel {
   position: absolute;
-  left: 0;
+  left: 4vw;
   top: 50%;
-  width: min(39vw, 110vh);
+  width: min(31vw, 88vh);
   height: 0;
 }
 .video-card {
