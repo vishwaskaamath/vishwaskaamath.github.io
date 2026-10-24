@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.openai/runtime/
+.openai/deploy/
+.openai/site-workflow-state.json
+.env*
+qa/
+next-env.d.ts
