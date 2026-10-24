@@ -61,6 +61,29 @@ button:disabled {
   isolation: isolate;
   touch-action: pan-x;
 }
+.ocean-background {
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+  pointer-events: none;
+  background: #121212 url("/media/ocean-background.jpg") center / cover no-repeat;
+}
+.ocean-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #12121226, #08090966);
+}
+.ocean-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.8s ease;
+}
+.ocean-canvas[data-ready="true"] {
+  opacity: 1;
+}
 .structural-grid {
   position: absolute;
   inset: 0;
@@ -1292,6 +1315,9 @@ button:disabled {
     display: none;
   }
   .particle-canvas {
+    display: none;
+  }
+  .ocean-canvas {
     display: none;
   }
   .title-glyph {

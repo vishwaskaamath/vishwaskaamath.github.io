@@ -14,6 +14,7 @@ import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
+import OceanBackground from "./OceanBackground";
 import Overlay, { type Panel } from "./Overlay";
 
 export default function Portfolio() {
@@ -75,6 +76,7 @@ export default function Portfolio() {
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#121212] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
     >
+      <OceanBackground reducedMotion={reducedMotion} />
       <div className="structural-grid" aria-hidden="true" />
       <div className="ambient-glow" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />

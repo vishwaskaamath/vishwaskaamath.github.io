@@ -21,6 +21,11 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
 - `src/components/ProjectWheels.tsx`: synchronized curved preview and software
   wheels, GSAP transforms, playback lifecycle, and click-to-enlarge behavior.
 - `src/components/ProjectMetadata.tsx`: staggered character slot transitions.
+- `src/components/OceanBackground.tsx`: subtle, slow WebGL wave displacement of
+  the supplied ocean photo. The renderer caps resolution and runs at 30 fps,
+  pauses in hidden tabs, and falls back to the still photo for reduced motion
+  or unavailable WebGL. Adjust the small UV offsets and time factors in the
+  fragment shader to tune wave strength and speed.
 - `src/hooks/useProjectWheel.ts`: wheel gesture threshold, input cooldown,
   wrapping indices, arrow keys, and touch swipes.
 - `src/hooks/useParticles.ts`: capped particle pool, pointer trail, title bursts,
@@ -63,6 +68,8 @@ Display titles and the requested 2026 year are editable presentation metadata.
 Software lists reflect the portfolio review. No client affiliation
 is claimed. The original Videos folder is not modified or deployed. Only
 optimized copies and the supplied résumé are included in `public/`.
+The supplied `Background/wp5569141-black-waves-4k-wallpapers.jpg` is copied to
+`public/media/ocean-background.jpg` for the animated background.
 
 To regenerate web copies and still posters, install the optional FFmpeg binary
 with `node node_modules/ffmpeg-static/install.js`, then run:
