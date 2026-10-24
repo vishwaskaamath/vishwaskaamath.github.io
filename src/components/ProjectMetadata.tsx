@@ -70,7 +70,7 @@ export default function ProjectMetadata({
         {project.title.map((line, i) => (
           <span
             key={`${project.id}-${i}`}
-            className={`title-line ${i === 1 ? "serif-italic" : ""}`}
+            className={`title-line ${i === 1 ? "title-line-secondary" : ""}`}
             aria-hidden="true"
           >
             {Array.from(line).map((letter, j) => (
