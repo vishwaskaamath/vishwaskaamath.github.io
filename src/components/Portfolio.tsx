@@ -1,7 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ArrowDownRight,
   ArrowUpRight,
   Pause,
   Play,
@@ -20,7 +19,6 @@ import Overlay, { type Panel } from "./Overlay";
 export default function Portfolio() {
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [paused, setPaused] = useState(false);
   const cursor = useRef<HTMLDivElement>(null);
   const [cursorLabel, setCursorLabel] = useState("CLICK ANYWHERE");
   const { canvasRef, burst } = useParticles(reducedMotion);
@@ -36,7 +34,6 @@ export default function Portfolio() {
     const query = matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => {
       setReducedMotion(query.matches);
-      if (query.matches) setPaused(true);
     };
     update();
     query.addEventListener("change", update);
@@ -141,21 +138,14 @@ export default function Portfolio() {
         index={index}
         reducedMotion={reducedMotion}
         select={select}
-        onOpen={() => setPanel("project")}
-        paused={paused || !!panel}
-        setPaused={setPaused}
+        paused={reducedMotion || !!panel}
       />
       <ProjectMetadata
         project={projects[index]}
-        index={index}
         direction={direction}
         reducedMotion={reducedMotion}
-        onOpen={() => setPanel("project")}
         onBurst={burst}
       />
-      <div className="side-label" aria-hidden="true">
-        A FEW THINGS I’VE PUT MY HEART INTO <ArrowDownRight size={13} />
-      </div>
       <div className="bottom-center">
         <div className="pagination" aria-label="Choose a project">
           {projects.map((p, i) => (

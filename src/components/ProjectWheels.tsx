@@ -1,7 +1,6 @@
 "use client";
 import { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ArrowUpRight, Pause, Play } from "lucide-react";
 import { projects } from "@/data/projects";
 import { SoftwareIcon } from "./SoftwareIcon";
 
@@ -15,16 +14,12 @@ export default function ProjectWheels({
   index,
   reducedMotion,
   select,
-  onOpen,
   paused,
-  setPaused,
 }: {
   index: number;
   reducedMotion: boolean;
   select: (i: number) => void;
-  onOpen: () => void;
   paused: boolean;
-  setPaused: (v: boolean) => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -180,30 +175,6 @@ export default function ProjectWheels({
                 <span />
                 <span />
               </div>
-              {active && (
-                <>
-                  <span className="video-bug">
-                    <span
-                      className={paused ? "status-led paused" : "status-led"}
-                    />{" "}
-                    {paused ? "PAUSED" : "IN MOTION"}
-                  </span>
-                  <div className="video-toolbar">
-                    <span>{project.kind}</span>
-                    <div>
-                      <button
-                        aria-label={paused ? "Play preview" : "Pause preview"}
-                        onClick={() => setPaused(!paused)}
-                      >
-                        {paused ? <Play size={13} /> : <Pause size={13} />}
-                      </button>
-                      <button aria-label="Open project film" onClick={onOpen}>
-                        <ArrowUpRight size={15} />
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
             </div>
           );
         })}

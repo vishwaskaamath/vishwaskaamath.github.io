@@ -38,11 +38,11 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
 ## Controls
 
 Scroll, use arrow keys, swipe on touch, click a neighboring thumbnail, or use
-the project dots. The center preview expands on click. The View
-project button opens the complete web-optimized film with native controls.
+the project dots. The center preview expands on click. Project previews loop
+automatically without playback controls, status badges, or category labels.
 Background clicks produce expanding particle rings. Visitors who prefer reduced
 motion get immediate transitions, no particle effects, and initially paused
-previews. They can explicitly play a preview.
+previews.
 
 ## Media and editable sample metadata
 

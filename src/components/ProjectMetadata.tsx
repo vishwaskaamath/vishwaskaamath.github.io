@@ -1,22 +1,17 @@
 "use client";
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
-import { ArrowUpRight } from "lucide-react";
 import type { Project } from "@/data/projects";
 
 export default function ProjectMetadata({
   project,
-  index,
   direction,
   reducedMotion,
-  onOpen,
   onBurst,
 }: {
   project: Project;
-  index: number;
   direction: number;
   reducedMotion: boolean;
-  onOpen: () => void;
   onBurst: (x: number, y: number, count?: number) => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
@@ -35,18 +30,6 @@ export default function ProjectMetadata({
           ease: "power3.out",
         },
       );
-      gsap.fromTo(
-        ".meta-reveal",
-        { y: 12, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.7,
-          stagger: 0.075,
-          delay: 0.12,
-          ease: "power2.out",
-        },
-      );
     }, root);
     const rect = root.current?.getBoundingClientRect();
     if (rect) onBurst(rect.x + rect.width / 2, rect.y + rect.height * 0.4, 55);
@@ -59,13 +42,6 @@ export default function ProjectMetadata({
       aria-live="polite"
       aria-atomic="true"
     >
-      <div className="project-eyebrow meta-reveal">
-        <span className="eyebrow-line" />
-        SELECTED WORK
-        <span className="project-number">
-          {String(index + 1).padStart(2, "0")} <span>/ 05</span>
-        </span>
-      </div>
       <h1 className="project-title" aria-label={project.shortTitle}>
         {project.title.map((line, i) => (
           <span
@@ -83,9 +59,6 @@ export default function ProjectMetadata({
           </span>
         ))}
       </h1>
-      <button className="project-cta meta-reveal" onClick={onOpen}>
-        View project <ArrowUpRight size={18} strokeWidth={1.5} />
-      </button>
     </section>
   );
 }
