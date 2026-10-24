@@ -227,9 +227,9 @@ button:disabled {
 }
 .video-wheel {
   position: absolute;
-  left: 6.6%;
-  top: 53%;
-  width: min(36vw, 580px);
+  left: 0;
+  top: 50%;
+  width: min(39vw, 110vh);
   height: 0;
 }
 .video-card {
@@ -341,9 +341,9 @@ button:disabled {
 }
 .software-wheel {
   position: absolute;
-  left: 84.5%;
-  top: 53%;
-  width: clamp(135px, 13.3vw, 210px);
+  left: calc(100% - min(19.5vw, 55vh));
+  top: 50%;
+  width: clamp(180px, 20vw, 360px);
   height: 0;
   perspective: 1000px;
 }
@@ -398,7 +398,7 @@ button:disabled {
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 600;
   letter-spacing: -5px;
-  font-size: clamp(58px, 6.1vw, 96px);
+  font-size: clamp(76px, 8.5vw, 150px);
   color: #b9afff;
   text-shadow:
     0 1px 0 #f1ddff,
@@ -452,7 +452,7 @@ button:disabled {
 }
 .tool-caption {
   position: absolute;
-  top: clamp(95px, 9.2vw, 145px);
+  top: calc(clamp(90px, 10vw, 180px) + 24px);
   left: 0;
   transform: translateX(-50%);
   width: 230px;
@@ -488,11 +488,11 @@ button:disabled {
 }
 .project-metadata {
   position: absolute;
-  left: 46.7%;
-  top: 53%;
-  transform: translateY(-50%);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   z-index: 9;
-  width: 30%;
+  width: 28%;
   pointer-events: none;
   text-align: center;
 }
@@ -501,12 +501,12 @@ button:disabled {
 }
 .project-title {
   font-family: var(--font-tanker), Impact, "Arial Narrow", sans-serif;
-  font-size: clamp(52px, 6.1vw, 98px);
+  font-size: clamp(44px, 4.6vw, 98px);
   font-weight: 400;
   font-synthesis: none;
   letter-spacing: 0.005em;
   line-height: 0.98;
-  margin: 28px 0 25px;
+  margin: 0;
   color: #eeeede;
 }
 .title-line {
@@ -984,15 +984,6 @@ button:disabled {
   margin-left: 8px;
 }
 @media (min-width: 1800px) {
-  .video-wheel {
-    left: 9%;
-  }
-  .project-metadata {
-    left: 47%;
-  }
-  .project-title {
-    font-size: 90px;
-  }
   .identity-copy {
     font-size: 12px;
   }
@@ -1010,20 +1001,6 @@ button:disabled {
   .main-nav button {
     padding: 9px 12px;
   }
-  .software-wheel {
-    left: 86%;
-  }
-  .project-metadata {
-    left: 47%;
-    width: 31%;
-  }
-  .project-title {
-    font-size: 5.4vw;
-  }
-  .video-wheel {
-    width: 36vw;
-    left: 6%;
-  }
   .tool-caption > span:last-child {
     font-size: 8px;
   }
@@ -1038,22 +1015,6 @@ button:disabled {
 @media (max-height: 650px) and (min-width: 760px) {
   .hud-header {
     top: 22px;
-  }
-  .video-wheel,
-  .project-metadata,
-  .software-wheel {
-    top: 54%;
-  }
-  .video-wheel {
-    width: 32vw;
-    left: 8%;
-  }
-  .project-title {
-    font-size: 4.5vw;
-    margin: 18px 0;
-  }
-  .software-wheel {
-    width: 12vw;
   }
   .hud-footer {
     bottom: 22px;
@@ -1111,9 +1072,9 @@ button:disabled {
     display: none;
   }
   .video-wheel {
-    left: 9%;
-    top: 41%;
-    width: 82%;
+    left: 5%;
+    top: 40%;
+    width: 90%;
     height: 0;
   }
   .video-card {
@@ -1123,18 +1084,18 @@ button:disabled {
     inset: -7px;
   }
   .software-wheel {
-    top: 72%;
-    left: 80%;
-    width: 65px;
+    top: 80%;
+    left: 50%;
+    width: 82px;
   }
   .software-position {
-    width: 65px;
+    width: 100%;
   }
   .software-tile {
     border-radius: 21%;
   }
   .adobe-symbol {
-    font-size: 32px;
+    font-size: 40px;
     letter-spacing: -2px;
   }
   .tile-brand {
@@ -1150,8 +1111,8 @@ button:disabled {
     width: 2px;
   }
   .tool-caption {
-    top: 45px;
-    width: 95px;
+    top: 56px;
+    width: 180px;
     gap: 5px;
   }
   .tool-caption .micro-label {
@@ -1163,13 +1124,13 @@ button:disabled {
     line-height: 1.5;
   }
   .project-metadata {
-    left: 8%;
-    top: 73%;
-    width: 65%;
+    left: 50%;
+    top: 64%;
+    width: 90%;
   }
   .project-title {
     font-size: clamp(40px, 10vw, 64px);
-    margin: 14px 0 13px;
+    margin: 0;
     letter-spacing: 0.005em;
     line-height: 1;
   }
@@ -1277,10 +1238,10 @@ button:disabled {
     top: 40%;
   }
   .project-metadata {
-    top: 70%;
+    top: 64%;
   }
   .software-wheel {
-    top: 69%;
+    top: 80%;
   }
   .bottom-center {
     bottom: 90px;
@@ -1297,20 +1258,20 @@ button:disabled {
     top: 51px;
   }
   .video-wheel {
-    top: 41%;
-    width: 69%;
-    left: 15.5%;
+    top: 40%;
+    width: 90%;
+    left: 5%;
   }
   .project-metadata {
-    top: 73%;
-    left: 9%;
+    top: 63%;
+    left: 50%;
   }
   .project-title {
     font-size: 38px;
-    margin: 10px 0;
+    margin: 0;
   }
   .software-wheel {
-    top: 72%;
+    top: 78%;
   }
   .hud-footer {
     bottom: 13px;

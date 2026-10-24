@@ -32,6 +32,9 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
   Studio, and Contact. Escape closes them and focus returns to the trigger.
 - `src/app/globals.css`: layout, materials, CRT-inspired shading, and responsive
   styling. No WebGL dependency is needed for the 3D software tiles.
+  Desktop titles sit at the viewport's horizontal and vertical midpoint;
+  enlarged video and software wheels balance around it. Mobile uses a centered
+  vertical stack.
 - `src/app/fonts/Tanker-Regular.otf`: installed Tanker font, self-hosted through
   `next/font/local` for the project titles. Its CSS variable is `--font-tanker`.
 
