@@ -23,7 +23,7 @@ export default function Portfolio() {
   const cursor = useRef<HTMLDivElement>(null);
   const [cursorLabel, setCursorLabel] = useState("CLICK ANYWHERE");
   const { canvasRef, burst } = useParticles(reducedMotion);
-  const { index, direction, select } = useProjectWheel(
+  const { index, engine, select } = useProjectWheel(
     projects.length,
     !!panel,
     reducedMotion,
@@ -134,13 +134,14 @@ export default function Portfolio() {
       </header>
       <ProjectWheels
         index={index}
+        engine={engine}
         reducedMotion={reducedMotion}
         select={select}
         paused={reducedMotion || !!panel}
       />
       <ProjectMetadata
-        project={projects[index]}
-        direction={direction}
+        index={index}
+        engine={engine}
         reducedMotion={reducedMotion}
         onBurst={burst}
       />

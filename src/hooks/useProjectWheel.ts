@@ -1,89 +1,91 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ScrollPhysics } from "@/lib/scrollPhysics";
 
-export function useProjectWheel(
-  count: number,
-  disabled: boolean,
-  reducedMotion: boolean,
-) {
+export function useProjectWheel(count: number, disabled: boolean, reducedMotion: boolean) {
+  const engine = useMemo(() => new ScrollPhysics(count), [count]);
   const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
-  const lastStep = useRef(0);
-  const select = useCallback(
-    (next: number, force = false) => {
-      const now = performance.now();
-      if (
-        (disabled && !force) ||
-        (!force && now - lastStep.current < (reducedMotion ? 180 : 850))
-      )
-        return;
-      lastStep.current = now;
-      setDirection(next > index ? 1 : -1);
-      setIndex(((next % count) + count) % count);
-    },
-    [count, disabled, index, reducedMotion],
-  );
-  const step = useCallback(
-    (delta: number) => select(index + delta),
-    [select, index],
-  );
+  const options = useRef({ disabled, reducedMotion });
+  options.current = { disabled, reducedMotion };
+
+  const select = useCallback((next: number, force = false) => {
+    if (options.current.disabled && !force) return;
+    engine.select(next, performance.now());
+  }, [engine]);
+
   useEffect(() => {
-    let accumulated = 0,
-      lastWheel = 0,
-      startX = 0,
-      startY = 0;
-    const wheel = (event: WheelEvent) => {
-      if (
-        disabled ||
-        event.ctrlKey ||
-        (event.target as HTMLElement).closest("dialog")
-      )
-        return;
-      event.preventDefault();
-      const now = performance.now();
-      if (now - lastWheel > 150) accumulated = 0;
-      lastWheel = now;
-      accumulated += event.deltaY * (event.deltaMode === 1 ? 16 : 1);
-      if (Math.abs(accumulated) > 36) {
-        step(Math.sign(accumulated));
-        accumulated = 0;
+    let raf = 0;
+    let activeIndex = engine.read().index;
+    let dragging = false;
+    let touchX = 0;
+    let touchY = 0;
+    const blocked = (target: EventTarget | null) =>
+      target instanceof Element && !!target.closest("dialog,input,textarea,select,[contenteditable='true']");
+
+    const frame = (now: number) => {
+      const current = engine.advance(now, options.current.reducedMotion);
+      if (current.index !== activeIndex) {
+        activeIndex = current.index;
+        setIndex(activeIndex); // React only updates semantic labels, never animation positions.
       }
+      raf = requestAnimationFrame(frame);
+    };
+    const wheel = (event: WheelEvent) => {
+      if (options.current.disabled || event.ctrlKey || blocked(event.target)) return;
+      event.preventDefault();
+      engine.wheel(event.deltaY, performance.now());
     };
     const key = (event: KeyboardEvent) => {
-      if (
-        disabled ||
-        (event.target as HTMLElement).closest("input,textarea,select,dialog")
-      )
-        return;
-      if (
-        ["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(event.key)
-      ) {
+      if (options.current.disabled || blocked(event.target)) return;
+      if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(event.key)) {
         event.preventDefault();
-        step(["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1);
+        engine.step(["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1, performance.now());
       }
     };
     const start = (event: TouchEvent) => {
-      startX = event.touches[0].clientX;
-      startY = event.touches[0].clientY;
+      if (options.current.disabled || blocked(event.target) || event.touches.length !== 1) return;
+      if (event.target instanceof Element && event.target.closest("button:not(.video-hit),a")) return;
+      dragging = true;
+      touchX = event.touches[0].clientX;
+      touchY = event.touches[0].clientY;
     };
-    const end = (event: TouchEvent) => {
-      if (disabled || (event.target as HTMLElement).closest("dialog,button,a"))
-        return;
-      const dx = startX - event.changedTouches[0].clientX,
-        dy = startY - event.changedTouches[0].clientY;
+    const move = (event: TouchEvent) => {
+      if (!dragging || options.current.disabled || event.touches.length !== 1) return;
+      const dx = touchX - event.touches[0].clientX;
+      const dy = touchY - event.touches[0].clientY;
       const delta = Math.abs(dy) > Math.abs(dx) ? dy : dx;
-      if (Math.abs(delta) > 45) step(Math.sign(delta));
+      touchX = event.touches[0].clientX;
+      touchY = event.touches[0].clientY;
+      if (delta) {
+        event.preventDefault();
+        engine.add(delta * 0.004, performance.now());
+      }
     };
+    const end = () => { dragging = false; };
+    const visibility = () => {
+      cancelAnimationFrame(raf);
+      if (!document.hidden) raf = requestAnimationFrame(frame);
+    };
+
+    raf = requestAnimationFrame(frame);
     window.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("keydown", key);
     window.addEventListener("touchstart", start, { passive: true });
+    window.addEventListener("touchmove", move, { passive: false });
     window.addEventListener("touchend", end, { passive: true });
+    window.addEventListener("touchcancel", end, { passive: true });
+    document.addEventListener("visibilitychange", visibility);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("wheel", wheel);
       window.removeEventListener("keydown", key);
       window.removeEventListener("touchstart", start);
+      window.removeEventListener("touchmove", move);
       window.removeEventListener("touchend", end);
+      window.removeEventListener("touchcancel", end);
+      document.removeEventListener("visibilitychange", visibility);
     };
-  }, [disabled, step]);
-  return { index, direction, step, select };
+  }, [engine]);
+
+  return { index, engine, select };
 }

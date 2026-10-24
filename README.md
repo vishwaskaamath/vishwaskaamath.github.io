@@ -18,16 +18,24 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
 
 - `src/data/projects.ts`: five projects, display titles, role, year, descriptions,
   software, media paths, and contact information.
-- `src/components/ProjectWheels.tsx`: synchronized curved preview and software
-  wheels, GSAP transforms, playback lifecycle, and click-to-enlarge behavior.
-- `src/components/ProjectMetadata.tsx`: staggered character slot transitions.
+- `src/components/ProjectWheels.tsx`: continuous curved preview and software
+  wheels, persistent video elements, playback lifecycle, and click-to-enlarge.
+- `src/components/ProjectMetadata.tsx`: simultaneous masked title/role/year
+  reels, velocity-driven horizontal text slices, and stippled particle bursts.
 - `src/components/OceanBackground.tsx`: subtle, slow WebGL wave displacement of
   the supplied ocean photo. The renderer caps resolution and runs at 30 fps,
   pauses in hidden tabs, and falls back to the still photo for reduced motion
   or unavailable WebGL. Adjust the small UV offsets and time factors in the
   fragment shader to tune wave strength and speed.
-- `src/hooks/useProjectWheel.ts`: wheel gesture threshold, input cooldown,
-  wrapping indices, arrow keys, and touch swipes.
+- `src/hooks/useProjectWheel.ts`: unthrottled wheel input, continuous touch input,
+  keyboard/dot selection, and a single requestAnimationFrame clock.
+- `src/lib/scrollPhysics.ts`: every wheel event adds `deltaY * 0.0025`;
+  every animation frame lerps by `0.1`; 120ms of idle input rounds the target.
+  All three columns subscribe to the same continuous position. Current and
+  target coordinates rebase together modulo the project count, preserving
+  direction and travel through unlimited full turns. No cooldowns or tween locks.
+  `node scripts/test-scroll-physics.mjs` checks input, snapping, seam continuity,
+  rapid reversal, and synchronization without a browser or extra dependencies.
 - `src/hooks/useParticles.ts`: capped particle pool, pointer trail, title bursts,
   and expanding stippled rings. Canvas respects device pixel ratio and pauses
   when the page is hidden.
