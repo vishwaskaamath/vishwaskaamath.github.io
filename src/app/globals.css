@@ -782,32 +782,28 @@ button:disabled {
   margin-left: 4px;
   color: #aeb39f;
 }
-.cursor-tag {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 45;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s;
-  will-change: transform;
-  border-radius: 5px;
-  background: var(--coral);
-  color: #2c211c;
-  padding: 7px 9px;
-  font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 0.7px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  box-shadow: 0 3px 12px #0002;
+.ribbon-cursor-enabled,
+.ribbon-cursor-enabled * {
+  cursor: none !important;
 }
-.cursor-tag > span {
-  width: 3px;
-  height: 3px;
-  background: #3b2722;
-  border-radius: 50%;
+.ribbon-cursor {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  z-index: 10000;
+  pointer-events: none;
+}
+.ribbon-cursor::backdrop {
+  background: transparent;
+  pointer-events: none;
 }
 .overlay {
   border: 1px solid #ffffff20;
@@ -1287,9 +1283,6 @@ button:disabled {
   .pagination button[aria-current="true"] {
     width: 24px;
   }
-  .cursor-tag {
-    display: none;
-  }
   .overlay {
     max-height: calc(100dvh - 35px);
     width: calc(100vw - 24px);
@@ -1415,9 +1408,6 @@ button:disabled {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
-  }
-  .cursor-tag {
-    display: none;
   }
   .particle-canvas {
     display: none;

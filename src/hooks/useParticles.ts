@@ -60,21 +60,6 @@ export function useParticles(reducedMotion: boolean) {
       canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    const move = (event: PointerEvent) => {
-      if (event.pointerType === "touch") return;
-      for (let i = 0; i < 5; i++)
-        particles.current.push({
-          x: event.clientX + (Math.random() - 0.5) * 16,
-          y: event.clientY + (Math.random() - 0.5) * 16,
-          vx: (Math.random() - 0.5) * 0.6,
-          vy: (Math.random() - 0.5) * 0.6,
-          life: 22 + Math.random() * 28,
-          max: 50,
-          size: 0.4 + Math.random() * 0.9,
-        });
-      if (particles.current.length > 650)
-        particles.current.splice(0, particles.current.length - 650);
-    };
     const click = (event: PointerEvent) => {
       if (
         (event.target as HTMLElement).closest(
@@ -139,13 +124,11 @@ export function useParticles(reducedMotion: boolean) {
     resize();
     raf = requestAnimationFrame(draw);
     window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", move);
     window.addEventListener("pointerdown", click);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerdown", click);
       document.removeEventListener("visibilitychange", visibility);
       particles.current = [];

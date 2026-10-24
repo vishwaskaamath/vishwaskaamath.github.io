@@ -36,7 +36,12 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
   direction and travel through unlimited full turns. No cooldowns or tween locks.
   `node scripts/test-scroll-physics.mjs` checks input, snapping, seam continuity,
   rapid reversal, and synchronization without a browser or extra dependencies.
-- `src/hooks/useParticles.ts`: capped particle pool, pointer trail, title bursts,
+- `src/components/RibbonCursor.tsx`: 28-point light ribbon, 0.35 head / 0.42 chain
+  interpolation, tapered quadratic segments, additive bloom, and a 3px hotspot.
+  The fixed canvas hides the native mouse cursor and uses a manual popover to
+  remain above native dialogs. Pointer events pass through; touch keeps normal
+  input. Reduced motion shows only the dot. Rendering sleeps after retraction.
+- `src/hooks/useParticles.ts`: capped particle pool, title bursts,
   and expanding stippled rings. Canvas respects device pixel ratio and pauses
   when the page is hidden.
 - `src/hooks/useAmbientAudio.ts`: original synthesized ambient pad. Sound starts

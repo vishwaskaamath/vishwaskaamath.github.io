@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowUpRight,
   Pause,
@@ -7,7 +7,6 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import gsap from "gsap";
 import { projects } from "@/data/projects";
 import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
@@ -15,13 +14,12 @@ import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
 import OceanBackground from "./OceanBackground";
+import RibbonCursor from "./RibbonCursor";
 import Overlay, { type Panel } from "./Overlay";
 
 export default function Portfolio() {
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const cursor = useRef<HTMLDivElement>(null);
-  const [cursorLabel, setCursorLabel] = useState("CLICK ANYWHERE");
   const { canvasRef, burst } = useParticles(reducedMotion);
   const { index, engine, select } = useProjectWheel(
     projects.length,
@@ -40,36 +38,6 @@ export default function Portfolio() {
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
-  useEffect(() => {
-    const el = cursor.current;
-    if (!el || reducedMotion) return;
-    const x = gsap.quickTo(el, "x", { duration: 0.55, ease: "power3.out" }),
-      y = gsap.quickTo(el, "y", { duration: 0.55, ease: "power3.out" });
-    const move = (event: PointerEvent) => {
-      if (event.pointerType === "touch") return;
-      const interactive = !!(event.target as HTMLElement).closest(
-        "button,a,dialog",
-      );
-      el.style.opacity = interactive || panel ? "0" : "1";
-      x(event.clientX + 18);
-      y(event.clientY + 20);
-    };
-    const leave = () => {
-      el.style.opacity = "0";
-    };
-    const wheel = () => {
-      setCursorLabel("SCROLL TO EXPLORE");
-    };
-    window.addEventListener("pointermove", move);
-    document.addEventListener("pointerleave", leave);
-    window.addEventListener("wheel", wheel, { passive: true });
-    return () => {
-      window.removeEventListener("pointermove", move);
-      document.removeEventListener("pointerleave", leave);
-      window.removeEventListener("wheel", wheel);
-      gsap.killTweensOf(el);
-    };
-  }, [panel, reducedMotion]);
 
   return (
     <main
@@ -182,9 +150,6 @@ export default function Portfolio() {
           </span>
         </button>
       </footer>
-      <div className="cursor-tag" ref={cursor} aria-hidden="true">
-        <span /> {cursorLabel}
-      </div>
       <Overlay
         panel={panel}
         project={projects[index]}
@@ -192,6 +157,7 @@ export default function Portfolio() {
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
+      <RibbonCursor reducedMotion={reducedMotion} layerKey={panel} />
     </main>
   );
 }
