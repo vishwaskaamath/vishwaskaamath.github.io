@@ -83,13 +83,6 @@ export default function ProjectMetadata({
           </span>
         ))}
       </h1>
-      <div className="project-details meta-reveal">
-        <span className="role-pill">
-          <span />
-          {project.role}
-        </span>
-        <span className="project-year">{project.year}</span>
-      </div>
       <button className="project-cta meta-reveal" onClick={onOpen}>
         View project <ArrowUpRight size={18} strokeWidth={1.5} />
       </button>

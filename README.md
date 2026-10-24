@@ -36,7 +36,7 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
 ## Controls
 
 Scroll, use arrow keys, swipe on touch, click a neighboring thumbnail, or use
-the project dots and arrows. The center preview expands on click. The View
+the project dots. The center preview expands on click. The View
 project button opens the complete web-optimized film with native controls.
 Background clicks produce expanding particle rings. Visitors who prefer reduced
 motion get immediate transitions, no particle effects, and initially paused
@@ -54,8 +54,8 @@ The five films are web copies of the supplied files:
 | Made of music        | The Art That Is Music.mp4                   |
 | A little more motion | In Moe.mp4                                  |
 
-Display titles, the requested 2026 year, and tool associations are editable
-presentation metadata, not verified production credits. No client affiliation
+Display titles and the requested 2026 year are editable presentation metadata.
+Software lists reflect the portfolio review. No client affiliation
 is claimed. The original Videos folder is not modified or deployed. Only
 optimized copies and the supplied résumé are included in `public/`.
 

@@ -217,24 +217,6 @@ button:disabled {
   background: #999;
   box-shadow: none;
 }
-.intro-caption {
-  position: absolute;
-  left: 7.3%;
-  top: 21%;
-  z-index: 8;
-}
-.intro-caption > span {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  color: var(--coral);
-}
-.intro-caption p {
-  font-size: 12px;
-  line-height: 1.6;
-  color: #aaa99f;
-  margin: 10px 0 0;
-}
 .edition-caption {
   position: absolute;
   right: 4%;
@@ -640,36 +622,6 @@ button:disabled {
   display: inline-block;
   will-change: transform;
 }
-.project-details {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.role-pill {
-  border: 1px solid #ffffff17;
-  border-radius: 30px;
-  font-size: 8px;
-  font-family: var(--mono);
-  letter-spacing: 1px;
-  padding: 7px 9px;
-  color: #b6b8a9;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  background: #ffffff02;
-}
-.role-pill > span {
-  display: block;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--coral);
-}
-.project-year {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: #777a6e;
-}
 .project-cta {
   margin-top: 33px;
   padding: 0 0 9px;
@@ -717,45 +669,6 @@ button:disabled {
   align-items: center;
   flex-direction: column;
   gap: 15px;
-}
-.scroll-instruction {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 1.2px;
-  color: #909284;
-}
-.scroll-instruction > svg {
-  color: #777e6b;
-}
-.mouse-outline {
-  height: 17px;
-  width: 11px;
-  border: 1px solid #74796b;
-  border-radius: 5px;
-  position: relative;
-}
-.mouse-outline i {
-  position: absolute;
-  top: 3px;
-  left: 4px;
-  width: 1px;
-  height: 4px;
-  background: #c0c5b0;
-  animation: scroll-dot 2.5s infinite;
-}
-@keyframes scroll-dot {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.3;
-  }
-  50% {
-    transform: translateY(4px);
-    opacity: 1;
-  }
 }
 .pagination {
   display: flex;
@@ -909,57 +822,6 @@ button:disabled {
 .player-control {
   margin-left: 4px;
   color: #aeb39f;
-}
-.footer-signoff {
-  position: absolute;
-  right: 170px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 9px;
-  font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 0.7px;
-  color: #b1b5a1;
-}
-.footer-signoff > span:last-child {
-  font-size: 6px;
-  letter-spacing: 0.8px;
-  color: #676e5e;
-}
-.asterisk {
-  color: var(--coral);
-  font-size: 12px;
-  padding-left: 4px;
-}
-.project-controls {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.project-controls > span {
-  font-family: var(--mono);
-  font-size: 10px;
-  margin-right: 10px;
-  color: #c6cab8;
-}
-.project-controls > span > span {
-  color: #626b59;
-}
-.project-controls button {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #ffffff20;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #c4c9b5;
-  transition: background 0.2s;
-}
-.project-controls button:hover {
-  background: var(--ink);
-  color: var(--bg);
 }
 .cursor-tag {
   position: fixed;
@@ -1257,9 +1119,6 @@ button:disabled {
   .project-metadata {
     left: 47%;
   }
-  .intro-caption {
-    left: 9%;
-  }
   .project-title {
     font-size: 90px;
   }
@@ -1279,12 +1138,6 @@ button:disabled {
   }
   .main-nav button {
     padding: 9px 12px;
-  }
-  .intro-caption {
-    top: 22%;
-  }
-  .footer-signoff {
-    display: none;
   }
   .software-wheel {
     left: 86%;
@@ -1308,13 +1161,6 @@ button:disabled {
   .eyebrow-line {
     width: 14px;
   }
-  .role-pill {
-    font-size: 6px;
-    letter-spacing: 0.5px;
-  }
-  .project-details {
-    gap: 9px;
-  }
   .tool-caption > span:last-child {
     font-size: 8px;
   }
@@ -1336,12 +1182,8 @@ button:disabled {
   .hud-header {
     top: 22px;
   }
-  .intro-caption,
   .edition-caption {
     top: 20%;
-  }
-  .intro-caption p {
-    display: none;
   }
   .video-wheel,
   .project-metadata,
@@ -1418,17 +1260,6 @@ button:disabled {
     gap: 5px;
   }
   .header-contact svg {
-    display: none;
-  }
-  .intro-caption {
-    top: 22%;
-    left: 7%;
-  }
-  .intro-caption > span {
-    font-size: 7px;
-    letter-spacing: 1px;
-  }
-  .intro-caption p {
     display: none;
   }
   .edition-caption {
@@ -1522,21 +1353,6 @@ button:disabled {
     letter-spacing: -0.06em;
     line-height: 1;
   }
-  .project-details {
-    gap: 10px;
-  }
-  .role-pill {
-    font-size: 5px;
-    letter-spacing: 0.7px;
-    padding: 5px 7px;
-  }
-  .role-pill > span {
-    width: 2px;
-    height: 2px;
-  }
-  .project-year {
-    font-size: 7px;
-  }
   .project-cta {
     font-size: 9px;
     gap: 26px;
@@ -1579,24 +1395,9 @@ button:disabled {
   .player-control {
     display: none;
   }
-  .project-controls > span {
-    font-size: 8px;
-    margin-right: 5px;
-  }
-  .project-controls button {
-    height: 28px;
-    width: 28px;
-  }
-  .project-controls button svg {
-    height: 14px;
-    width: 14px;
-  }
   .bottom-center {
     bottom: 59px;
     gap: 0;
-  }
-  .scroll-instruction {
-    display: none;
   }
   .pagination {
     gap: 2px;
@@ -1686,7 +1487,6 @@ button:disabled {
   .main-nav {
     top: 51px;
   }
-  .intro-caption,
   .edition-caption {
     top: 21%;
   }

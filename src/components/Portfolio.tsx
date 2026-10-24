@@ -1,10 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ArrowDown,
   ArrowDownRight,
-  ArrowLeft,
-  ArrowRight,
   ArrowUpRight,
   Pause,
   Play,
@@ -12,7 +9,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import gsap from "gsap";
-import { profile, projects } from "@/data/projects";
+import { projects } from "@/data/projects";
 import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
@@ -24,11 +21,10 @@ export default function Portfolio() {
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [paused, setPaused] = useState(false);
-  const [localTime, setLocalTime] = useState("--:--");
   const cursor = useRef<HTMLDivElement>(null);
   const [cursorLabel, setCursorLabel] = useState("CLICK ANYWHERE");
   const { canvasRef, burst } = useParticles(reducedMotion);
-  const { index, direction, step, select } = useProjectWheel(
+  const { index, direction, select } = useProjectWheel(
     projects.length,
     !!panel,
     reducedMotion,
@@ -45,20 +41,6 @@ export default function Portfolio() {
     update();
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
-  }, []);
-  useEffect(() => {
-    const update = () =>
-      setLocalTime(
-        new Intl.DateTimeFormat("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-          timeZone: "Asia/Kolkata",
-        }).format(new Date()),
-      );
-    update();
-    const timer = setInterval(update, 30000);
-    return () => clearInterval(timer);
   }, []);
   useEffect(() => {
     const el = cursor.current;
@@ -151,14 +133,6 @@ export default function Portfolio() {
           <span className="status-led" /> LET’S TALK <ArrowUpRight size={14} />
         </button>
       </header>
-      <div className="intro-caption">
-        <span>DESIGN IN MOTION.</span>
-        <p>
-          Stories you can feel.
-          <br />
-          Experiences you remember.
-        </p>
-      </div>
       <div className="edition-caption">
         <span className="micro-label">PORTFOLIO — VOL. 01</span>
         <span>MOTION · FILM · DIGITAL</span>
@@ -183,12 +157,6 @@ export default function Portfolio() {
         A FEW THINGS I’VE PUT MY HEART INTO <ArrowDownRight size={13} />
       </div>
       <div className="bottom-center">
-        <span className="scroll-instruction">
-          <span className="mouse-outline">
-            <i />
-          </span>
-          SCROLL TO EXPLORE <ArrowDown size={12} />
-        </span>
         <div className="pagination" aria-label="Choose a project">
           {projects.map((p, i) => (
             <button
@@ -224,23 +192,6 @@ export default function Portfolio() {
             {playing ? <Pause size={12} /> : <Play size={12} />}
           </span>
         </button>
-        <div className="footer-signoff">
-          <span>
-            CRAFTED WITH INTENTION <span className="asterisk">✳</span>
-          </span>
-          <span>BANGALORE, IN · {localTime}</span>
-        </div>
-        <div className="project-controls">
-          <span>
-            {String(index + 1).padStart(2, "0")} <span>/ 05</span>
-          </span>
-          <button aria-label="Previous project" onClick={() => step(-1)}>
-            <ArrowLeft size={18} />
-          </button>
-          <button aria-label="Next project" onClick={() => step(1)}>
-            <ArrowRight size={18} />
-          </button>
-        </div>
       </footer>
       <div className="cursor-tag" ref={cursor} aria-hidden="true">
         <span /> {cursorLabel}
