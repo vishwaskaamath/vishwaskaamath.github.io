@@ -130,10 +130,6 @@ export default function Portfolio() {
           <span className="status-led" /> LET’S TALK <ArrowUpRight size={14} />
         </button>
       </header>
-      <div className="edition-caption">
-        <span className="micro-label">PORTFOLIO — VOL. 01</span>
-        <span>MOTION · FILM · DIGITAL</span>
-      </div>
       <ProjectWheels
         index={index}
         reducedMotion={reducedMotion}

@@ -19,8 +19,8 @@ export type Project = {
 export const projects: Project[] = [
   {
     id: "pocket",
-    title: ["Pocket", "possibilities."],
-    shortTitle: "Pocket possibilities",
+    title: ["SaaS", "in Motion"],
+    shortTitle: "SaaS in Motion",
     role: "MOTION GRAPHICS",
     year: "2026",
     software: "ae",
@@ -34,8 +34,8 @@ export const projects: Project[] = [
   },
   {
     id: "nightcity",
-    title: ["After", "the neon."],
-    shortTitle: "After the neon",
+    title: ["Cyberpunk", "2077"],
+    shortTitle: "Cyberpunk 2077",
     role: "VIDEO EDITING",
     year: "2026",
     software: "pr",
@@ -49,8 +49,8 @@ export const projects: Project[] = [
   },
   {
     id: "dolce",
-    title: ["Beyond", "the frame."],
-    shortTitle: "Beyond the frame",
+    title: ["Spartan", "Protocol"],
+    shortTitle: "Spartan Protocol",
     role: "VIDEO EDITING",
     year: "2026",
     software: "pr",
@@ -64,8 +64,8 @@ export const projects: Project[] = [
   },
   {
     id: "music",
-    title: ["Made", "of music."],
-    shortTitle: "Made of music",
+    title: ["Art that", "is Music"],
+    shortTitle: "Art that is Music",
     role: "VIDEO EDITING",
     year: "2026",
     software: "pr",
@@ -79,8 +79,8 @@ export const projects: Project[] = [
   },
   {
     id: "inmoe",
-    title: ["A little", "more motion."],
-    shortTitle: "A little more motion",
+    title: ["Urban", "Rhythm"],
+    shortTitle: "Urban Rhythm",
     role: "VIDEO EDITING",
     year: "2026",
     software: "ps",
