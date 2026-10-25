@@ -16,6 +16,7 @@ import ProjectMetadata from "./ProjectMetadata";
 import OceanBackground from "./OceanBackground";
 import RibbonCursor from "./RibbonCursor";
 import WarpedText from "./WarpedText";
+import CrtBezel from "./CrtBezel";
 import Overlay, { type Panel } from "./Overlay";
 
 export default function Portfolio() {
@@ -158,6 +159,7 @@ export default function Portfolio() {
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
+      <CrtBezel />
       <RibbonCursor reducedMotion={reducedMotion} layerKey={panel} />
     </main>
   );

@@ -805,6 +805,27 @@ button:disabled {
   background: transparent;
   pointer-events: none;
 }
+.crt-bezel {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 999;
+  pointer-events: none;
+}
+.crt-frame, .crt-specks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.crt-flare, .crt-specks { mix-blend-mode: screen; }
+@media (min-width: 760px) {
+  .hud-header { top: 48px; left: max(3.5%, 54px); right: max(3.5%, 54px); }
+  .hud-footer { left: max(3.5%, 54px); right: max(3.5%, 54px); }
+}
 .warp-definitions {
   position: absolute;
   width: 0;

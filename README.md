@@ -103,3 +103,6 @@ project assets.
 
 ### Cursor proximity deformation
 `WarpedText` splits accessible text into independently deformed glyphs with a 95px squared falloff and a velocity-driven SVG turbulence filter. `LiquidSurface` filters the original live DOM/video with a cached radial displacement texture; the 140px lens and directional wake follow local coordinates, including wheel rotation and scale. A neutral displacement field leaves the rest of the surface intact. Both use `lib/proximity.ts` for a shared read-then-write animation loop, suspend when idle, and respect reduced motion/touch input. Media intensity returns to exactly zero with 0.08 damping, removing the filter entirely at rest.
+
+### CRT casing and proximity lighting
+`CrtBezel` adds a matte, grain-textured SVG casing with a barrel-curved cavity, inset shadow, and double metallic rim. `bezelGeometry.ts` projects the pointer onto eight cubic boundary sections; a 150px field drives the white/mint specular streak and bounded 10px bloom. Above 50% intensity, a DPR-capped canvas emits short-lived outward rim specks. The frame passes through clicks, respects reduced motion, and shares the hover RAF sampler. Run `node scripts/test-bezel-geometry.mjs` to check projection accuracy and outward normals across desktop/mobile sizes.
