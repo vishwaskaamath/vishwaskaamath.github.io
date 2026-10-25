@@ -1,6 +1,7 @@
 "use client";
 import { useLayoutEffect, useRef } from "react";
 import { projects } from "@/data/projects";
+import WarpedText from "./WarpedText";
 import { reelOffset, type ScrollPhysics } from "@/lib/scrollPhysics";
 
 export default function ProjectMetadata({
@@ -76,10 +77,10 @@ export default function ProjectMetadata({
           <span className={`title-reel ${line === 1 ? "title-line-secondary" : ""}`} key={line} aria-hidden="true">
             {projects.map((project, i) => (
               <span className="title-slot" data-title-slot={i} key={project.id}>
-                <span className="title-solid">{project.title[line]}</span>
+                <span className="title-solid"><WarpedText>{project.title[line]}</WarpedText></span>
                 <span className="title-slices">
                   {["top", "middle", "bottom"].map((slice) => (
-                    <span className={`title-slice slice-${slice}`} key={slice}>{project.title[line]}</span>
+                    <span className={`title-slice slice-${slice}`} key={slice}><WarpedText>{project.title[line]}</WarpedText></span>
                   ))}
                 </span>
               </span>
@@ -90,8 +91,8 @@ export default function ProjectMetadata({
       <div className="metadata-reel" aria-label={`${projects[index].role}, ${projects[index].year}`}>
         {projects.map((project, i) => (
           <div className="metadata-slot" data-meta-slot={i} key={project.id} aria-hidden="true">
-            <span className="role-badge">{project.role}</span>
-            <span className="project-year">{project.year}</span>
+            <span className="role-badge"><WarpedText>{project.role}</WarpedText></span>
+            <span className="project-year"><WarpedText>{String(project.year)}</WarpedText></span>
           </div>
         ))}
       </div>

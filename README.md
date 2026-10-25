@@ -100,3 +100,6 @@ Inspired by the spatial wheel composition at https://carterogunsola.com/.
 All application source, software tiles, and interface details are implemented
 for this portfolio. The work uses the supplied media, not the reference site's
 project assets.
+
+### Cursor proximity deformation
+`WarpedText` splits accessible text into independently deformed glyphs with a 95px squared falloff and a velocity-driven SVG turbulence filter. `LiquidSurface` filters the original live DOM/video with a cached radial displacement texture; the 140px lens and directional wake follow local coordinates, including wheel rotation and scale. A neutral displacement field leaves the rest of the surface intact. Both use `lib/proximity.ts` for a shared read-then-write animation loop, suspend when idle, and respect reduced motion/touch input. Media intensity returns to exactly zero with 0.08 damping, removing the filter entirely at rest.

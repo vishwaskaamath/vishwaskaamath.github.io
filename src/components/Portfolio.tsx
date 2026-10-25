@@ -15,6 +15,7 @@ import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
 import OceanBackground from "./OceanBackground";
 import RibbonCursor from "./RibbonCursor";
+import WarpedText from "./WarpedText";
 import Overlay, { type Panel } from "./Overlay";
 
 export default function Portfolio() {
@@ -63,7 +64,7 @@ export default function Portfolio() {
             <i />
           </span>
           <span className="identity-copy">
-            VISHWAS KAMATH<span>INDEPENDENT CREATIVE</span>
+            <b className="identity-name"><WarpedText>VISHWAS KAMATH</WarpedText></b><span><WarpedText>INDEPENDENT CREATIVE</WarpedText></span>
           </span>
         </button>
         <nav className="main-nav" aria-label="Main navigation">
@@ -82,7 +83,7 @@ export default function Portfolio() {
                     : setPanel(label.toLowerCase() as Panel)
                 }
               >
-                {label}
+                <WarpedText>{label}</WarpedText>
               </button>
             ),
           )}
@@ -97,7 +98,7 @@ export default function Portfolio() {
           </button>
         </nav>
         <button className="header-contact" onClick={() => setPanel("contact")}>
-          <span className="status-led" /> LET’S TALK <ArrowUpRight size={14} />
+          <span className="status-led" /> <WarpedText>LET’S TALK</WarpedText> <ArrowUpRight size={14} />
         </button>
       </header>
       <ProjectWheels
@@ -137,8 +138,8 @@ export default function Portfolio() {
             <span />
           </span>
           <span className="audio-track">
-            A softer frequency
-            <span>ORIGINAL AMBIENT · {playing ? "PLAYING" : "SOUND OFF"}</span>
+            <b className="track-name"><WarpedText>A softer frequency</WarpedText></b>
+            <span><WarpedText>{`ORIGINAL AMBIENT · ${playing ? "PLAYING" : "SOUND OFF"}`}</WarpedText></span>
           </span>
           <span className="equalizer" aria-hidden="true">
             {[0, 1, 2, 3, 4].map((i) => (

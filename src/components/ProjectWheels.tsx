@@ -3,6 +3,8 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
 import { SoftwareIcon } from "./SoftwareIcon";
+import LiquidSurface from "./LiquidSurface";
+import WarpedText from "./WarpedText";
 
 export default function ProjectWheels({
   index, engine, reducedMotion, select, paused,
@@ -109,11 +111,11 @@ export default function ProjectWheels({
                   if (i === engine.read().index) setExpanded((value) => !value);
                   else { setExpanded(false); select(i); }
                 }}>
-                <div className="video-surface">
+                <LiquidSurface className="video-lens"><div className="video-surface">
                   <video src={project.video} poster={project.poster} muted playsInline loop preload="auto" aria-label={`${project.shortTitle} preview`} />
                   <div className="crt-shading" />
                   <div className="glitch-flash" />
-                </div>
+                </div></LiquidSurface>
               </button>
               <div className="video-corners" aria-hidden="true"><span /><span /><span /><span /></div>
             </div>
@@ -123,14 +125,14 @@ export default function ProjectWheels({
       <div className="software-wheel" aria-label={`Creative tools for ${projects[index].shortTitle}`}>
         {projects.map((project, i) => (
           <div key={project.id} className="software-position" data-software={i} aria-hidden={i !== index}>
-            <SoftwareIcon software={project.software} />
+            <LiquidSurface><SoftwareIcon software={project.software} /></LiquidSurface>
           </div>
         ))}
         <div className="tool-caption">
           {projects.map((project, i) => (
             <div key={project.id} className="tool-caption-slot" data-tool-caption={i} aria-hidden={i !== index}>
-              <span className="micro-label">THE TOOLKIT</span>
-              <span>{project.tools.join(" + ")}</span>
+              <span className="micro-label"><WarpedText>THE TOOLKIT</WarpedText></span>
+              <span><WarpedText>{project.tools.join(" + ")}</WarpedText></span>
             </div>
           ))}
         </div>
