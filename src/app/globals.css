@@ -61,33 +61,30 @@ button:disabled {
   isolation: isolate;
   touch-action: pan-x;
 }
-.ocean-background {
-  position: absolute;
+.wavy-background {
+  position: fixed;
   inset: 0;
-  z-index: -4;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 0;
   pointer-events: none;
-  background: #121212 url("/media/ocean-background.jpg") center / cover no-repeat;
+  background: #070707;
+  overflow: hidden;
 }
-.ocean-background::after {
-  content: "";
+.wavy-canvas, .wavy-fallback {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, #12121226, #08090966);
-}
-.ocean-canvas {
   display: block;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  transition: opacity 1.8s ease;
+  pointer-events: none;
 }
-.ocean-canvas[data-ready="true"] {
-  opacity: 1;
-}
+.wavy-fallback { display: none; }
 .structural-grid {
   position: absolute;
   inset: 0;
-  z-index: -3;
+  z-index: 1;
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
@@ -95,18 +92,11 @@ button:disabled {
   background-position: -1px -1px;
   pointer-events: none;
 }
-.ambient-glow {
+.wavy-grain {
   position: absolute;
   inset: 0;
-  z-index: -2;
-  background: radial-gradient(ellipse at 54% 47%, #22221d42, transparent 57%);
-  pointer-events: none;
-}
-.grain {
-  position: absolute;
-  inset: 0;
-  z-index: 15;
-  opacity: 0.045;
+  opacity: 0.04;
+  mix-blend-mode: soft-light;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.96' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.7' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -245,6 +235,7 @@ button:disabled {
 .project-wheels {
   position: absolute;
   inset: 0;
+  z-index: 2;
   pointer-events: none;
   perspective: 1200px;
 }
@@ -1458,9 +1449,6 @@ button:disabled {
     scroll-behavior: auto !important;
   }
   .particle-canvas {
-    display: none;
-  }
-  .ocean-canvas {
     display: none;
   }
   .title-slot,

@@ -13,7 +13,7 @@ import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
-import OceanBackground from "./OceanBackground";
+import WavyBackground from "./WavyBackground";
 import RibbonCursor from "./RibbonCursor";
 import WarpedText from "./WarpedText";
 import CrtBezel from "./CrtBezel";
@@ -43,13 +43,11 @@ export default function Portfolio() {
 
   return (
     <main
-      className="portfolio relative h-dvh w-screen overflow-hidden bg-[#121212] text-[#eeeee7]"
+      className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
     >
-      <OceanBackground reducedMotion={reducedMotion} />
+      <WavyBackground reducedMotion={reducedMotion} />
       <div className="structural-grid" aria-hidden="true" />
-      <div className="ambient-glow" aria-hidden="true" />
-      <div className="grain" aria-hidden="true" />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
       <header className="hud-header">
         <button

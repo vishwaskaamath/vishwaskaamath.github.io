@@ -22,11 +22,12 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
   wheels, persistent video elements, playback lifecycle, and click-to-enlarge.
 - `src/components/ProjectMetadata.tsx`: simultaneous masked title/role/year
   reels, velocity-driven horizontal text slices, and stippled particle bursts.
-- `src/components/OceanBackground.tsx`: subtle, slow WebGL wave displacement of
-  the supplied ocean photo. The renderer caps resolution and runs at 30 fps,
-  pauses in hidden tabs, and falls back to the still photo for reduced motion
-  or unavailable WebGL. Adjust the small UV offsets and time factors in the
-  fragment shader to tune wave strength and speed.
+- `src/components/WavyBackground.tsx`: procedural 2D Perlin noise and layered
+  sine-wave ridges, rendered in WebGL on every animation frame. The palette
+  stays between #070707 and #181818 with a 0.04-opacity soft-light grain layer.
+  Resolution is capped at 1.6 megapixels; hidden tabs pause, reduced motion
+  renders a still texture, and a 30fps Canvas 2D fallback handles unavailable
+  or lost GPU contexts. No photograph, light streaks, or particles are used.
 - `src/hooks/useProjectWheel.ts`: unthrottled wheel input, continuous touch input,
   keyboard/dot selection, and a single requestAnimationFrame clock.
 - `src/lib/scrollPhysics.ts`: every wheel event adds `deltaY * 0.0025`;
@@ -81,8 +82,8 @@ Display titles and the requested 2026 year are editable presentation metadata.
 Software lists reflect the portfolio review. No client affiliation
 is claimed. The original Videos folder is not modified or deployed. Only
 optimized copies and the supplied résumé are included in `public/`.
-The supplied `Background/wp5569141-black-waves-4k-wallpapers.jpg` is copied to
-`public/media/ocean-background.jpg` for the animated background.
+The earlier supplied ocean photo remains in `public/media/ocean-background.jpg`
+as an unused asset. The current background is generated entirely in code.
 
 To regenerate web copies and still posters, install the optional FFmpeg binary
 with `node node_modules/ffmpeg-static/install.js`, then run:
