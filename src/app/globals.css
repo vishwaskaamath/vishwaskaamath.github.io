@@ -72,7 +72,7 @@ button:disabled {
   background: #070707;
   overflow: hidden;
 }
-.wavy-canvas, .wavy-fallback {
+.wavy-canvas {
   position: absolute;
   inset: 0;
   display: block;
@@ -80,7 +80,7 @@ button:disabled {
   height: 100%;
   pointer-events: none;
 }
-.wavy-fallback { display: none; }
+
 .structural-grid {
   position: absolute;
   inset: 0;

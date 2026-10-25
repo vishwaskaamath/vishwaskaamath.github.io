@@ -22,12 +22,7 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
   wheels, persistent video elements, playback lifecycle, and click-to-enlarge.
 - `src/components/ProjectMetadata.tsx`: simultaneous masked title/role/year
   reels, velocity-driven horizontal text slices, and stippled particle bursts.
-- `src/components/WavyBackground.tsx`: procedural 2D Perlin noise and layered
-  sine-wave ridges, rendered in WebGL on every animation frame. The palette
-  stays between #070707 and #181818 with a 0.04-opacity soft-light grain layer.
-  Resolution is capped at 1.6 megapixels; hidden tabs pause, reduced motion
-  renders a still texture, and a 30fps Canvas 2D fallback handles unavailable
-  or lost GPU contexts. No photograph, light streaks, or particles are used.
+- `src/components/WavyBackground.tsx`: Canvas 2D domain-warped contours at 12px spacing, with 3.5px slope-lit strokes and a separate 75-filament translucent silk ribbon. Both use the supplied sine/cosine formulas and advance by 0.012 per animation frame. Fine grain stays at 0.04 opacity; hidden tabs pause and reduced motion freezes the texture. No photograph or background particles are used.
 - `src/hooks/useProjectWheel.ts`: unthrottled wheel input, continuous touch input,
   keyboard/dot selection, and a single requestAnimationFrame clock.
 - `src/lib/scrollPhysics.ts`: every wheel event adds `deltaY * 0.0025`;
