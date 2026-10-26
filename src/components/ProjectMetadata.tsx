@@ -1,5 +1,5 @@
 "use client";
-import { useLayoutEffect, useRef } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 import { projects } from "@/data/projects";
 import WarpedText from "./WarpedText";
 import { reelOffset, type ScrollPhysics } from "@/lib/scrollPhysics";
@@ -12,6 +12,8 @@ export default function ProjectMetadata({
   reducedMotion: boolean;
   onBurst: (x: number, y: number, count?: number) => void;
 }) {
+  const filterId = `title-scroll-${useId().replace(/:/g, "")}`;
+  const displacement = useRef<SVGFEDisplacementMapElement>(null);
   const root = useRef<HTMLElement>(null);
   const options = useRef({ reducedMotion, onBurst });
   options.current = { reducedMotion, onBurst };
@@ -43,24 +45,24 @@ export default function ProjectMetadata({
         element.querySelector('h1')?.setAttribute('aria-label', projects[active].shortTitle);
         element.querySelector('.metadata-reel')?.setAttribute('aria-label', `${projects[active].role}, ${projects[active].year}`);
       }
-      slots.forEach((slot, i) => {
-        const d = reelOffset(slotIndices[i], currentScroll, projects.length);
-        slot.style.transform = `translate3d(0, ${d * 100}%, 0)`;
-        slot.style.visibility = Math.abs(d) < 1 ? "visible" : "hidden";
-      });
       const speed = Math.abs(scrollVelocity);
       const moving = !options.current.reducedMotion && speed > 0.02;
       if (moving !== wasMoving) {
         element.dataset.distorting = String(moving);
         wasMoving = moving;
       }
-      // Proportional at normal speeds; cap extreme trackpad flings for legibility.
-      const slice = moving ? Math.max(-24, Math.min(24, scrollVelocity * 15)) : 0;
-      const skew = moving ? Math.max(-8, Math.min(8, scrollVelocity * 4)) : 0;
-      element.style.setProperty("--title-skew", `${skew}deg`);
-      element.style.setProperty("--slice-top", `${slice}px`);
-      element.style.setProperty("--slice-middle", `${-slice * 0.65}px`);
-      element.style.setProperty("--slice-bottom", `${slice * 0.35}px`);
+      displacement.current?.setAttribute("scale", String(moving ? scrollVelocity * 85 : 0));
+      slots.forEach((slot, i) => {
+        const offset = reelOffset(slotIndices[i], currentScroll, projects.length);
+        const distance = Math.abs(offset);
+        const opacity = Math.max(0, 1 - Math.pow(distance * 1.4, 2));
+        const isTitle = slot.dataset.titleSlot !== undefined;
+        slot.style.transform = isTitle ? `translate3d(0, ${offset * 135}%, 0)` : `translate3d(0, ${offset * 24}px, 0)`;
+        slot.style.opacity = String(opacity);
+        slot.style.visibility = opacity > 0 ? "visible" : "hidden";
+        const blur = isTitle && distance > 0.001 ? `blur(${distance * 4}px)` : "";
+        slot.style.filter = [moving ? `url(#${filterId})` : "", blur].filter(Boolean).join(" ") || "none";
+      });
       if (moving) {
         particleBudget += Math.min(speed, 2) * (deltaMs / (1000 / 60)) * 1.8;
         const count = Math.min(10, Math.floor(particleBudget));
@@ -75,21 +77,25 @@ export default function ProjectMetadata({
       resize.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [engine]);
+  }, [engine, filterId]);
 
   return (
     <section className="project-metadata" ref={root}>
-      <h1 className="project-title" aria-label={projects[index].shortTitle}>
-        {[0, 1].map((line) => (
-          <span className={`title-reel ${line === 1 ? "title-line-secondary" : ""}`} key={line} aria-hidden="true">
-            {projects.map((project, i) => (
-              <span className="title-slot" data-title-slot={i} key={project.id}>
-                <span className="title-solid"><WarpedText>{project.title[line]}</WarpedText></span>
-                <span className="title-slices">
-                  {["top", "middle", "bottom"].map((slice) => (
-                    <span className={`title-slice slice-${slice}`} key={slice}>{project.title[line]}</span>
-                  ))}
-                </span>
+      <svg className="warp-definitions" aria-hidden="true"><defs>
+        <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.001 0.18" numOctaves="1" seed="8" result="noise" />
+          {/* Neutral green keeps the displacement strictly horizontal. */}
+          <feColorMatrix in="noise" type="matrix" values="1 0 0 0 0  0 0 0 0 0.5  0 0 1 0 0  0 0 0 1 0" result="horizontalNoise" />
+          <feDisplacementMap ref={displacement} in="SourceGraphic" in2="horizontalNoise" scale="0" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs></svg>
+      <h1 className="project-title title-stage" aria-label={projects[index].shortTitle}>
+        {projects.map((project, i) => (
+          <span className="title-slot" data-title-slot={i} key={project.id} aria-hidden="true"
+            style={{ visibility: i === index ? "visible" : "hidden" }}>
+            {project.title.map((line, lineIndex) => (
+              <span className={`title-solid ${lineIndex === 1 ? "title-line-secondary" : ""}`} key={lineIndex}>
+                <WarpedText>{line}</WarpedText>
               </span>
             ))}
           </span>
