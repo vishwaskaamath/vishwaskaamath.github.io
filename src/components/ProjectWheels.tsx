@@ -5,15 +5,17 @@ import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhys
 import SoftwareTile from "./SoftwareTile";
 import WarpedText from "./WarpedText";
 import VideoBezel from "./VideoBezel";
+import type { FullscreenSource } from "./FullscreenVideo";
 
 export default function ProjectWheels({
-  index, engine, reducedMotion, select, paused,
+  index, engine, reducedMotion, select, paused, onExpand,
 }: {
   index: number;
   engine: ScrollPhysics;
   reducedMotion: boolean;
   select: (i: number) => void;
   paused: boolean;
+  onExpand: (source: FullscreenSource) => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const expanded = useRef(false);
@@ -57,7 +59,7 @@ export default function ProjectWheels({
           card.setAttribute('aria-hidden', String(!nearby));
           const hit = card.querySelector('button')!;
           hit.tabIndex = nearby ? 0 : -1;
-          hit.setAttribute('aria-label', i === active ? `Enlarge ${projects[i].shortTitle} preview` : `Select ${projects[i].shortTitle}`);
+          hit.setAttribute('aria-label', i === active ? `Open ${projects[i].shortTitle} fullscreen` : `Select ${projects[i].shortTitle}`);
           icons[i].setAttribute('aria-hidden', String(i !== active));
           captions[i].setAttribute('aria-hidden', String(i !== active));
         });
@@ -119,13 +121,14 @@ export default function ProjectWheels({
           return (
             <div key={project.id} className={`video-card ${active ? "is-active" : ""}`} data-video={i} aria-hidden={!nearby}>
               <button className="video-hit" tabIndex={nearby ? 0 : -1}
-                aria-label={active ? `${expanded.current ? "Reduce" : "Enlarge"} ${project.shortTitle} preview` : `Select ${project.shortTitle}`}
+                aria-label={active ? `Open ${project.shortTitle} fullscreen` : `Select ${project.shortTitle}`}
                 onClick={(event) => {
                   if (i === engine.read().index) {
-                    expanded.current = !expanded.current;
-                    options.current.expanded = expanded.current;
-                    event.currentTarget.setAttribute('aria-label', `${expanded.current ? 'Reduce' : 'Enlarge'} ${project.shortTitle} preview`);
-                    engine.invalidate();
+                    const trigger = event.currentTarget;
+                    const card = trigger.closest<HTMLElement>('[data-video]')!;
+                    const preview = card.querySelector('video')!;
+                    const rect = card.getBoundingClientRect();
+                    onExpand({rect:{top:rect.top,left:rect.left,width:rect.width,height:rect.height},card,preview,trigger,time:preview.currentTime,title:project.shortTitle});
                   } else { expanded.current = false; options.current.expanded = false; select(i); }
                 }}>
                 <VideoBezel><div className="video-surface">

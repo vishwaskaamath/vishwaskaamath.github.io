@@ -23,7 +23,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
       target instanceof Element && !!target.closest("dialog,input,textarea,select,[contenteditable='true']");
 
     const frame = (now: number) => {
-      const current = engine.advance(now, options.current.reducedMotion);
+      const current = options.current.disabled ? engine.read() : engine.advance(now, options.current.reducedMotion);
       index.current = current.index;
       raf = requestAnimationFrame(frame);
     };

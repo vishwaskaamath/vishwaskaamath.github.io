@@ -17,10 +17,13 @@ import WavyBackground from "./WavyBackground";
 import RibbonCursor from "./RibbonCursor";
 import WarpedText from "./WarpedText";
 import LoadingScreen from "./LoadingScreen";
+import FullscreenVideo, { type FullscreenSource } from "./FullscreenVideo";
 import Overlay, { type Panel } from "./Overlay";
 
 export default function Portfolio() {
   const pagination = useRef<HTMLDivElement>(null);
+  const [fullscreen, setFullscreen] = useState<FullscreenSource | null>(null);
+  const closeFullscreen = useCallback(() => setFullscreen(null), []);
   const [loading, setLoading] = useState(true);
   const loaded = useCallback(() => setLoading(false), []);
   const [panel, setPanel] = useState<Panel>(null);
@@ -28,7 +31,7 @@ export default function Portfolio() {
   const { canvasRef, burst } = useParticles(reducedMotion);
   const { index, engine, select } = useProjectWheel(
     projects.length,
-    !!panel || loading,
+    !!panel || loading || !!fullscreen,
     reducedMotion,
   );
   const { playing, toggle } = useAmbientAudio();
@@ -54,7 +57,7 @@ export default function Portfolio() {
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
     >
-      <WavyBackground reducedMotion={reducedMotion} paused={loading} />
+      <WavyBackground reducedMotion={reducedMotion} paused={loading || !!fullscreen} />
       <div className="structural-grid" aria-hidden="true" />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
       <header className="hud-header">
@@ -113,7 +116,8 @@ export default function Portfolio() {
         engine={engine}
         reducedMotion={reducedMotion}
         select={select}
-        paused={reducedMotion || !!panel || loading}
+        paused={reducedMotion || !!panel || loading || !!fullscreen}
+        onExpand={(source) => { if (playing) toggle(); setFullscreen(source); }}
       />
       <ProjectMetadata
         index={index}
@@ -165,8 +169,9 @@ export default function Portfolio() {
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
+      {fullscreen && <FullscreenVideo source={fullscreen} onClose={closeFullscreen} reducedMotion={reducedMotion} />}
       {loading && <LoadingScreen onComplete={loaded} />}
-      <RibbonCursor reducedMotion={reducedMotion} layerKey={panel} />
+      <RibbonCursor reducedMotion={reducedMotion} layerKey={fullscreen ? "fullscreen" : panel} />
     </main>
   );
 }
