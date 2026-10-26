@@ -5,6 +5,7 @@ import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhys
 import { SoftwareIcon } from "./SoftwareIcon";
 import LiquidSurface from "./LiquidSurface";
 import WarpedText from "./WarpedText";
+import VideoBezel from "./VideoBezel";
 
 export default function ProjectWheels({
   index, engine, reducedMotion, select, paused,
@@ -128,13 +129,12 @@ export default function ProjectWheels({
                     engine.invalidate();
                   } else { expanded.current = false; options.current.expanded = false; select(i); }
                 }}>
-                <LiquidSurface className="video-lens"><div className="video-surface">
+                <VideoBezel><div className="video-surface">
                   <video src={project.video} poster={project.poster} muted playsInline loop preload="metadata" aria-label={`${project.shortTitle} preview`} />
                   <div className="crt-shading" />
                   <div className="glitch-flash" />
-                </div></LiquidSurface>
+                </div></VideoBezel>
               </button>
-              <div className="video-corners" aria-hidden="true"><span /><span /><span /><span /></div>
             </div>
           );
         })}

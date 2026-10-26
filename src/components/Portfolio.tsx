@@ -16,7 +16,6 @@ import ProjectMetadata from "./ProjectMetadata";
 import WavyBackground from "./WavyBackground";
 import RibbonCursor from "./RibbonCursor";
 import WarpedText from "./WarpedText";
-import CrtBezel from "./CrtBezel";
 import LoadingScreen from "./LoadingScreen";
 import Overlay, { type Panel } from "./Overlay";
 
@@ -166,7 +165,6 @@ export default function Portfolio() {
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
-      <CrtBezel />
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor reducedMotion={reducedMotion} layerKey={panel} />
     </main>

@@ -41,7 +41,9 @@ export default function LiquidSurface({ children, className = '' }: { children: 
       if (reelCard?.style.visibility === 'hidden' && !intensity) return;
       const rect = element.getBoundingClientRect();
       const visible = element.checkVisibility({ visibilityProperty: true });
-      const nearby = pointer.enabled && visible && pointer.x >= rect.left && pointer.x <= rect.right && pointer.y >= rect.top && pointer.y <= rect.bottom;
+      const videoCard = reelCard?.hasAttribute('data-video');
+      const eligible = !videoCard || reelCard?.classList.contains('is-active');
+      const nearby = pointer.enabled && visible && eligible && pointer.x >= rect.left && pointer.x <= rect.right && pointer.y >= rect.top && pointer.y <= rect.bottom;
       if (!nearby && !intensity) return;
       const width = element.offsetWidth, height = element.offsetHeight;
       // Basis probes account for wheel rotation/scale without feeding deformation back into coordinates.
@@ -55,7 +57,7 @@ export default function LiquidSurface({ children, className = '' }: { children: 
       const inside = nearby && localX >= 0 && localX <= width && localY >= 0 && localY <= height;
       const localVx = (pointer.vx * by - pointer.vy * bx) / det;
       const localVy = (pointer.vy * ax - pointer.vx * ay) / det;
-      const target = inside ? Math.min(1, Math.hypot(pointer.vx, pointer.vy) / 10) : 0;
+      const target = inside ? Math.min(1, (videoCard ? 0.24 : 0) + Math.hypot(pointer.vx, pointer.vy) / 10) : 0;
       return () => {
         intensity = damp(intensity, target, 0.08);
         vx = damp(vx, inside ? localVx : 0, 0.08);
