@@ -20,6 +20,7 @@ type Ripple = {
 
 /** One capped, DPR-aware canvas; no React renders in the animation loop. */
 export function useParticles(reducedMotion: boolean) {
+  const wakeRef = useRef<() => void>(() => {});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Particle[]>([]);
   const ripples = useRef<Ripple[]>([]);
@@ -40,6 +41,7 @@ export function useParticles(reducedMotion: boolean) {
         });
       }
       particles.current = particles.current.slice(-650);
+      wakeRef.current();
     },
     [reducedMotion],
   );
@@ -55,7 +57,7 @@ export function useParticles(reducedMotion: boolean) {
     const resize = () => {
       width = innerWidth;
       height = innerHeight;
-      const dpr = Math.min(devicePixelRatio, 2);
+      const dpr = Math.min(devicePixelRatio, 1.5);
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -82,6 +84,7 @@ export function useParticles(reducedMotion: boolean) {
       burst(event.clientX, event.clientY, 45);
     };
     const draw = (now: number) => {
+      raf = 0;
       const dt = Math.min((now - last) / 16.67 || 1, 2);
       last = now;
       ctx.clearRect(0, 0, width, height);
@@ -112,22 +115,23 @@ export function useParticles(reducedMotion: boolean) {
           );
         }
       }
-      raf = requestAnimationFrame(draw);
+      if (particles.current.length || ripples.current.length) raf = requestAnimationFrame(draw);
     };
+    const wake = () => {
+      if (!raf && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(draw); }
+    };
+    wakeRef.current = wake;
     const visibility = () => {
-      cancelAnimationFrame(raf);
-      if (!document.hidden) {
-        last = performance.now();
-        raf = requestAnimationFrame(draw);
-      }
+      cancelAnimationFrame(raf); raf = 0;
+      if (!document.hidden && (particles.current.length || ripples.current.length)) wake();
     };
     resize();
-    raf = requestAnimationFrame(draw);
     window.addEventListener("resize", resize);
     window.addEventListener("pointerdown", click);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       cancelAnimationFrame(raf);
+      wakeRef.current = () => {};
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointerdown", click);
       document.removeEventListener("visibilitychange", visibility);

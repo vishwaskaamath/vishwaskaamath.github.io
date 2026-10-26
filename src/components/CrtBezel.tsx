@@ -10,7 +10,6 @@ export default function CrtBezel() {
   const svg = useRef<SVGSVGElement>(null);
   const gradient = useRef<SVGRadialGradientElement>(null);
   const flare = useRef<SVGGElement>(null);
-  const bloom = useRef<SVGFilterElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const id = `crt-${useId().replace(/:/g, '')}`;
   useEffect(() => {
@@ -54,9 +53,8 @@ export default function CrtBezel() {
         gradient.current?.setAttribute('cy', String(y));
         gradient.current?.setAttribute('fx', String(x));
         gradient.current?.setAttribute('fy', String(y));
-        bloom.current?.setAttribute('x', String(x - 180));
-        bloom.current?.setAttribute('y', String(y - 180));
         flare.current!.style.opacity = String(intensity);
+        flare.current!.style.display = intensity < 0.002 ? 'none' : '';
         element.dataset.glow = intensity.toFixed(3);
         element.dataset.edge = String(closest?.edge ?? -1);
         if (ctx) {
@@ -101,7 +99,6 @@ export default function CrtBezel() {
           <stop offset="0.46" stopColor="#a4fff6" stopOpacity="0.7" /><stop offset="0.78" stopColor="#a4fff6" stopOpacity="0.16" /><stop offset="1" stopColor="#a4fff6" stopOpacity="0" />
         </radialGradient>
         <filter id={`${id}-shadow`} x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="7" /></filter>
-        <filter id={`${id}-bloom`} ref={bloom} filterUnits="userSpaceOnUse" x="460" y="-160" width="360" height="360"><feGaussianBlur stdDeviation="10" /></filter>
         <filter id={`${id}-grain`}><feTurbulence baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" /><feColorMatrix type="saturate" values="0" /><feComposite in2="SourceGraphic" operator="in" /></filter>
       </defs>
       <path data-rim fill="none" stroke="#000" strokeWidth="22" opacity="0.9" filter={`url(#${id}-shadow)`} />
@@ -112,9 +109,9 @@ export default function CrtBezel() {
       <path data-rim fill="none" stroke={`url(#${id}-metal)`} strokeWidth="2" />
       <path data-rim fill="none" stroke="#ccd7cf" strokeWidth="0.5" opacity="0.15" />
       <g ref={flare} className="crt-flare" style={{ opacity: 0 }}>
-        <path data-rim fill="none" stroke={`url(#${id}-glow)`} strokeWidth="20" filter={`url(#${id}-bloom)`} />
-        <path data-rim fill="none" stroke={`url(#${id}-glow)`} strokeWidth="5" opacity="0.55" />
-        <path data-rim fill="none" stroke={`url(#${id}-glow)`} strokeWidth="1.6" />
+        <path data-rim fill="none" stroke={`url(#${id}-glow)`} strokeWidth="20" opacity="0.08" />
+        <path data-rim fill="none" stroke={`url(#${id}-glow)`} strokeWidth="10" opacity="0.28" />
+        <path data-rim fill="none" stroke={`url(#${id}-glow)`} strokeWidth="5" />
       </g>
     </svg>
     <canvas ref={canvas} className="crt-specks" />

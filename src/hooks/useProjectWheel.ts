@@ -1,10 +1,10 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ScrollPhysics } from "@/lib/scrollPhysics";
 
 export function useProjectWheel(count: number, disabled: boolean, reducedMotion: boolean) {
   const engine = useMemo(() => new ScrollPhysics(count), [count]);
-  const [index, setIndex] = useState(0);
+  const index = useRef(0);
   const options = useRef({ disabled, reducedMotion });
   options.current = { disabled, reducedMotion };
 
@@ -15,7 +15,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
 
   useEffect(() => {
     let raf = 0;
-    let activeIndex = engine.read().index;
+
     let dragging = false;
     let touchX = 0;
     let touchY = 0;
@@ -24,10 +24,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
 
     const frame = (now: number) => {
       const current = engine.advance(now, options.current.reducedMotion);
-      if (current.index !== activeIndex) {
-        activeIndex = current.index;
-        setIndex(activeIndex); // React only updates semantic labels, never animation positions.
-      }
+      index.current = current.index;
       raf = requestAnimationFrame(frame);
     };
     const wheel = (event: WheelEvent) => {
@@ -87,5 +84,5 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
     };
   }, [engine]);
 
-  return { index, engine, select };
+  return { index: index.current, engine, select };
 }

@@ -22,21 +22,24 @@ in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
   wheels, persistent video elements, playback lifecycle, and click-to-enlarge.
 - `src/components/ProjectMetadata.tsx`: simultaneous masked title/role/year
   reels, velocity-driven horizontal text slices, and stippled particle bursts.
-- `src/components/WavyBackground.tsx`: Canvas 2D domain-warped contours at 12px spacing, with 3.5px slope-lit strokes and a separate 75-filament translucent silk ribbon. Both use the supplied sine/cosine formulas and advance by 0.012 per animation frame. Fine grain stays at 0.04 opacity; hidden tabs pause and reduced motion freezes the texture. No photograph or background particles are used.
+- `src/components/WavyBackground.tsx` and `src/lib/waveRenderer.ts`: GPU-meshed domain-warped contours at 12px spacing, with 3.5px slope-lit strokes and a separate 75-filament translucent silk ribbon. Both use the supplied sine/cosine formulas and advance by 0.012 per animation frame. The fast path uses a static mesh, time uniforms, and five WebGL draw calls at DPR 1. The Canvas 2D fallback uses 28px vertices, four connected opacity batches and one ribbon stroke. Fine grain stays at 0.04 opacity; hidden tabs pause and reduced motion freezes the texture. No photograph or background particles are used.
 - `src/hooks/useProjectWheel.ts`: unthrottled wheel input, continuous touch input,
   keyboard/dot selection, and a single requestAnimationFrame clock.
 - `src/lib/scrollPhysics.ts`: every wheel event adds `deltaY * 0.0025`;
   every animation frame lerps by `0.1`; 120ms of idle input rounds the target.
   All three columns subscribe to the same continuous position. Current and
   target coordinates rebase together modulo the project count, preserving
-  direction and travel through unlimited full turns. No cooldowns or tween locks.
+  direction and travel through unlimited full turns. Settled subscribers sleep; semantic labels and pagination update through refs without React renders. No cooldowns or tween locks.
   `node scripts/test-scroll-physics.mjs` checks input, snapping, seam continuity,
   rapid reversal, and synchronization without a browser or extra dependencies.
-- `src/components/RibbonCursor.tsx`: 28-point light ribbon, 0.35 head / 0.42 chain
-  interpolation, tapered quadratic segments, additive bloom, and a 3px hotspot.
-  The fixed canvas hides the native mouse cursor and uses a manual popover to
-  remain above native dialogs. Pointer events pass through; touch keeps normal
-  input. Reduced motion shows only the dot. Rendering sleeps after retraction.
+- `src/components/RibbonCursor.tsx` and `src/lib/lightTrail.ts`: raw-pointer head,
+  32 immutable path samples recorded every 3px, centripetal Catmull–Rom geometry,
+  age-based taper, and three additive glow passes without canvas shadow blur.
+  Coalesced pointer input preserves fast arcs; idle tails expire and rendering sleeps.
+  `node scripts/test-light-trail.mjs` checks circular fidelity and history limits.
+- `src/components/LoadingScreen.tsx`: 2.4-second figure-eight-to-ring intro,
+  followed by a 900ms expanding liquid SVG mask reveal. Counter updates bypass
+  React. The overlay unmounts on completion and reduced motion skips the intro.
 - `src/hooks/useParticles.ts`: capped particle pool, title bursts,
   and expanding stippled rings. Canvas respects device pixel ratio and pauses
   when the page is hidden.

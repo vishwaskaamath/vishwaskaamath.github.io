@@ -830,7 +830,7 @@ button:disabled {
 .warped-text { position: relative; }
 .identity-name, .track-name { font-weight: inherit; }
 .warp-text-content { white-space: pre; }
-.char { transform-origin: 50% 65%; will-change: transform, filter; }
+.char { transform-origin: 50% 65%; will-change: auto; }
 .liquid-surface, .liquid-content {
   position: relative;
   width: 100%;
@@ -1456,3 +1456,8 @@ button:disabled {
     will-change: auto;
   }
 }
+
+.loading-screen { position: fixed; inset: 0; z-index: 99999; overflow: hidden; touch-action: none; }
+.loading-screen > svg, .loading-screen > canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.loading-counter { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-family: monospace; font-size: 15px; letter-spacing: .15em; color: #eee; }
+html[data-loading] .ribbon-cursor { visibility: hidden; }

@@ -33,10 +33,12 @@ export default function LiquidSurface({ children, className = '' }: { children: 
   const id = `liquid-${useId().replace(/:/g, '')}`;
   useEffect(() => {
     const element = root.current!;
+    const reelCard = element.closest<HTMLElement>('[data-video],[data-software]');
     const probes = Array.from(element.querySelectorAll<HTMLElement>('.lens-probe'));
     map.current?.setAttribute('href', getLensMap());
     let intensity = 0, vx = 0, vy = 0, cx = 0, cy = 0;
     return subscribeProximity((pointer) => {
+      if (reelCard?.style.visibility === 'hidden' && !intensity) return;
       const rect = element.getBoundingClientRect();
       const visible = element.checkVisibility({ visibilityProperty: true });
       const nearby = pointer.enabled && visible && pointer.x >= rect.left && pointer.x <= rect.right && pointer.y >= rect.top && pointer.y <= rect.bottom;
@@ -72,7 +74,7 @@ export default function LiquidSurface({ children, className = '' }: { children: 
         const wy = Math.max(-0.3, Math.min(0.3, -vy * 0.012));
         wake.current?.setAttribute('values', `1 0 0 0 ${wx} 0 1 0 0 ${wy} 0 0 1 0 0 0 0 0 1 0`);
         displacement.current?.setAttribute('scale', String(intensity * 36));
-        content.current!.style.filter = intensity > 0 ? `url(#${id})` : '';
+        content.current!.style.filter = intensity * 36 >= 0.5 ? `url(#${id})` : 'none';
         element.dataset.lensIntensity = intensity.toFixed(3);
         return intensity > 0;
       };

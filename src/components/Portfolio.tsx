@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
   Pause,
@@ -17,15 +17,19 @@ import WavyBackground from "./WavyBackground";
 import RibbonCursor from "./RibbonCursor";
 import WarpedText from "./WarpedText";
 import CrtBezel from "./CrtBezel";
+import LoadingScreen from "./LoadingScreen";
 import Overlay, { type Panel } from "./Overlay";
 
 export default function Portfolio() {
+  const pagination = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
+  const loaded = useCallback(() => setLoading(false), []);
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const { canvasRef, burst } = useParticles(reducedMotion);
   const { index, engine, select } = useProjectWheel(
     projects.length,
-    !!panel,
+    !!panel || loading,
     reducedMotion,
   );
   const { playing, toggle } = useAmbientAudio();
@@ -40,13 +44,18 @@ export default function Portfolio() {
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
+  useEffect(() => engine.subscribe(({ index: active }) => {
+    pagination.current?.querySelectorAll('button').forEach((button, i) => {
+      if (i === active) button.setAttribute('aria-current', 'true'); else button.removeAttribute('aria-current');
+    });
+  }), [engine]);
 
   return (
     <main
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
     >
-      <WavyBackground reducedMotion={reducedMotion} />
+      <WavyBackground reducedMotion={reducedMotion} paused={loading} />
       <div className="structural-grid" aria-hidden="true" />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
       <header className="hud-header">
@@ -105,7 +114,7 @@ export default function Portfolio() {
         engine={engine}
         reducedMotion={reducedMotion}
         select={select}
-        paused={reducedMotion || !!panel}
+        paused={reducedMotion || !!panel || loading}
       />
       <ProjectMetadata
         index={index}
@@ -114,7 +123,7 @@ export default function Portfolio() {
         onBurst={burst}
       />
       <div className="bottom-center">
-        <div className="pagination" aria-label="Choose a project">
+        <div ref={pagination} className="pagination" aria-label="Choose a project">
           {projects.map((p, i) => (
             <button
               key={p.id}
@@ -152,12 +161,13 @@ export default function Portfolio() {
       </footer>
       <Overlay
         panel={panel}
-        project={projects[index]}
+        project={projects[engine.read().index]}
         onClose={close}
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
       <CrtBezel />
+      {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor reducedMotion={reducedMotion} layerKey={panel} />
     </main>
   );

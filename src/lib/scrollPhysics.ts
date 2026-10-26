@@ -21,6 +21,8 @@ type Listener = (frame: ReelFrame) => void;
 
 /** One shared clock; subscribers mutate transforms before the same browser paint. */
 export class ScrollPhysics {
+  private dirty = true;
+  invalidate = () => { this.dirty = true; };
   currentScroll = 0;
   targetScroll = 0;
   private lastInput = -Infinity;
@@ -63,6 +65,8 @@ export class ScrollPhysics {
 
   advance(now: number, reducedMotion = false) {
     if (now - this.lastInput >= SNAP_IDLE_MS) this.targetScroll = Math.round(this.targetScroll);
+    const previousScroll = this.currentScroll;
+    const wasSettled = this.frame.settled;
     this.currentScroll = reducedMotion
       ? Math.round(this.targetScroll)
       : this.currentScroll + (this.targetScroll - this.currentScroll) * SCROLL_LERP;
@@ -85,7 +89,10 @@ export class ScrollPhysics {
       settled: Math.abs(velocity) < 0.00001 && Number.isInteger(this.targetScroll),
     };
     this.lastFrame = now;
-    this.listeners.forEach((listener) => listener(this.frame));
+    if (this.dirty || !wasSettled || !this.frame.settled || previousScroll !== this.currentScroll) {
+      this.dirty = false;
+      this.listeners.forEach((listener) => listener(this.frame));
+    }
     return this.frame;
   }
 }

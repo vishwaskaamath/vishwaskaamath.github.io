@@ -1,5 +1,5 @@
 "use client";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
 import { SoftwareIcon } from "./SoftwareIcon";
@@ -16,9 +16,10 @@ export default function ProjectWheels({
   paused: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const [expanded, setExpanded] = useState(false);
-  const options = useRef({ expanded, paused, reducedMotion });
-  options.current = { expanded, paused, reducedMotion };
+  const expanded = useRef(false);
+  const options = useRef({ expanded: false, paused, reducedMotion });
+  options.current.paused = paused; options.current.reducedMotion = reducedMotion;
+  useLayoutEffect(() => { engine.invalidate(); }, [engine, paused, reducedMotion]);
 
   useLayoutEffect(() => {
     const element = root.current!;
@@ -46,12 +47,24 @@ export default function ProjectWheels({
       if (lastIndex !== active) {
         options.current.expanded = false;
         enlargement = 0;
-        setExpanded(false);
+        expanded.current = false;
         playback(active);
         lastIndex = active;
+        element.querySelector('.software-wheel')?.setAttribute('aria-label', `Creative tools for ${projects[active].shortTitle}`);
+        cards.forEach((card, i) => {
+          const nearby = Math.abs(reelOffset(i, active, projects.length)) <= 1;
+          card.classList.toggle('is-active', i === active);
+          card.setAttribute('aria-hidden', String(!nearby));
+          const hit = card.querySelector('button')!;
+          hit.tabIndex = nearby ? 0 : -1;
+          hit.setAttribute('aria-label', i === active ? `Enlarge ${projects[i].shortTitle} preview` : `Select ${projects[i].shortTitle}`);
+          icons[i].setAttribute('aria-hidden', String(i !== active));
+          captions[i].setAttribute('aria-hidden', String(i !== active));
+        });
       } else if (lastPaused !== (options.current.paused || document.hidden)) playback(active);
       const desired = options.current.expanded ? 0.055 : 0;
       enlargement = options.current.reducedMotion ? desired : enlargement + (desired - enlargement) * 0.14;
+      if (Math.abs(desired - enlargement) > 0.0001) engine.invalidate();
       element.style.setProperty("--reel-glitch", `${Math.min(0.15, Math.abs(scrollVelocity) * 0.06)}`);
       // No layout reads, independent tweens, or React animation state in this loop.
       projects.forEach((_, i) => {
@@ -106,13 +119,17 @@ export default function ProjectWheels({
           return (
             <div key={project.id} className={`video-card ${active ? "is-active" : ""}`} data-video={i} aria-hidden={!nearby}>
               <button className="video-hit" tabIndex={nearby ? 0 : -1}
-                aria-label={active ? `${expanded ? "Reduce" : "Enlarge"} ${project.shortTitle} preview` : `Select ${project.shortTitle}`}
-                onClick={() => {
-                  if (i === engine.read().index) setExpanded((value) => !value);
-                  else { setExpanded(false); select(i); }
+                aria-label={active ? `${expanded.current ? "Reduce" : "Enlarge"} ${project.shortTitle} preview` : `Select ${project.shortTitle}`}
+                onClick={(event) => {
+                  if (i === engine.read().index) {
+                    expanded.current = !expanded.current;
+                    options.current.expanded = expanded.current;
+                    event.currentTarget.setAttribute('aria-label', `${expanded.current ? 'Reduce' : 'Enlarge'} ${project.shortTitle} preview`);
+                    engine.invalidate();
+                  } else { expanded.current = false; options.current.expanded = false; select(i); }
                 }}>
                 <LiquidSurface className="video-lens"><div className="video-surface">
-                  <video src={project.video} poster={project.poster} muted playsInline loop preload="auto" aria-label={`${project.shortTitle} preview`} />
+                  <video src={project.video} poster={project.poster} muted playsInline loop preload="metadata" aria-label={`${project.shortTitle} preview`} />
                   <div className="crt-shading" />
                   <div className="glitch-flash" />
                 </div></LiquidSurface>

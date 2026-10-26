@@ -25,6 +25,7 @@ export default function ProjectMetadata({
     let titleWidth = 0;
     let particleBudget = 0;
     let wasMoving = false;
+    let semanticIndex = -1;
     const measure = () => {
       const rect = element.getBoundingClientRect();
       centerX = rect.x + rect.width / 2;
@@ -36,6 +37,12 @@ export default function ProjectMetadata({
     resize.observe(element);
     window.addEventListener("resize", measure);
     const unsubscribe = engine.subscribe(({ currentScroll, scrollVelocity, deltaMs }) => {
+      const active = engine.read().index;
+      if (active !== semanticIndex) {
+        semanticIndex = active;
+        element.querySelector('h1')?.setAttribute('aria-label', projects[active].shortTitle);
+        element.querySelector('.metadata-reel')?.setAttribute('aria-label', `${projects[active].role}, ${projects[active].year}`);
+      }
       slots.forEach((slot, i) => {
         const d = reelOffset(slotIndices[i], currentScroll, projects.length);
         slot.style.transform = `translate3d(0, ${d * 100}%, 0)`;
@@ -80,7 +87,7 @@ export default function ProjectMetadata({
                 <span className="title-solid"><WarpedText>{project.title[line]}</WarpedText></span>
                 <span className="title-slices">
                   {["top", "middle", "bottom"].map((slice) => (
-                    <span className={`title-slice slice-${slice}`} key={slice}><WarpedText>{project.title[line]}</WarpedText></span>
+                    <span className={`title-slice slice-${slice}`} key={slice}>{project.title[line]}</span>
                   ))}
                 </span>
               </span>
