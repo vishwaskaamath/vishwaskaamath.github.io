@@ -1493,11 +1493,29 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 
 .video-card.is-active, .video-hit { pointer-events: auto; cursor: pointer; }
 .video-hit svg, .video-hit canvas, .video-hit .crt-shading, .video-hit .glitch-flash { pointer-events: none; }
-.video-card.video-is-fullscreen { opacity: 0 !important; pointer-events: none !important; }
-.fullscreen-video-root { position: fixed; inset: 0; z-index: 99990; isolation: isolate; touch-action: none; }
-.fullscreen-video-root::before { content: ''; position: absolute; inset: 0; background: #050505; opacity: 1; transition: opacity 800ms; @starting-style { opacity: 0; } }
-.fullscreen-video-root[data-phase="closing"]::before { opacity: 0; }
-.fullscreen-video-frame { position: absolute; overflow: hidden; background: #000; will-change: top,left,width,height; }
-.fullscreen-video-frame video { width: 100%; height: 100%; object-fit: contain; display: block; }
-.fullscreen-video-close { position: fixed; z-index: 99995; top: max(24px,env(safe-area-inset-top)); right: max(24px,env(safe-area-inset-right)); padding: 12px 18px; border: 1px solid #ffffff55; border-radius: 999px; background: #111b; color: #fff; font: 11px monospace; letter-spacing: 1.5px; cursor: pointer; }
-.fullscreen-video-close:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+/* In-place curved cinema expansion. The wheel owns the video at every size. */
+.video-card { transition: width 450ms cubic-bezier(.16,1,.3,1), height 450ms cubic-bezier(.16,1,.3,1), filter 450ms; }
+.video-rims, .video-rim-specks { transition: opacity 450ms cubic-bezier(.16,1,.3,1); }
+.project-metadata { transition: transform 450ms cubic-bezier(.16,1,.3,1),left 450ms cubic-bezier(.16,1,.3,1),width 450ms; }
+.project-title { transition: font-size 450ms cubic-bezier(.16,1,.3,1); }
+.portfolio[data-expanded="true"] .video-card.is-active { width:54vw; height:66vh; z-index:40 !important; transform:translateY(-50%) !important; opacity:1 !important; }
+.portfolio[data-expanded="true"] .video-card:not(.is-active) { opacity:.2 !important; filter:blur(2px); pointer-events:none; }
+.portfolio[data-expanded="true"] .video-card.is-active .video-rims,
+.portfolio[data-expanded="true"] .video-card.is-active .video-rim-specks { opacity:0; }
+.portfolio[data-expanded="true"] .video-card.is-active .video-glass { transform:none !important; filter:drop-shadow(0 12px 24px #0008); }
+.portfolio[data-expanded="true"] .video-card.is-active .liquid-content { filter:none !important; }
+.portfolio[data-expanded="true"] .project-metadata { left:61%; width:18%; transform:translate(-50%,-50%) translateX(7vw); }
+.portfolio[data-expanded="true"] .project-title { font-size:clamp(32px,4vw,82px); }
+.expansion-scanlines { position:absolute; inset:0; opacity:0; pointer-events:none; background:repeating-linear-gradient(0deg,#0009 0px,#0009 1px,#ffffff20 2px,transparent 4px); }
+@media(min-width:760px) { .video-wheel { left:4vw; width:32vw; top:50%; } .video-card { height:36vh; aspect-ratio:auto; } }
+@media(max-width:759px) {
+ .portfolio[data-expanded="true"] .video-card.is-active { width:90vw; height:48vh; }
+ .portfolio[data-expanded="true"] .project-metadata { left:50%; width:85%; transform:translate(-50%,-50%) translateY(7vh); }
+}
+@media(prefers-reduced-motion:reduce) { .video-card,.video-rims,.video-rim-specks,.project-metadata,.project-title { transition:none; } }
+@media(min-width:760px) {
+ .software-wheel { transition:left 450ms cubic-bezier(.16,1,.3,1),width 450ms cubic-bezier(.16,1,.3,1); }
+ .portfolio[data-expanded="true"] .software-wheel { left:90vw; width:14vw; }
+ .portfolio[data-expanded="true"] .software-wheel .adobe-symbol { font-size:clamp(64px,7vw,120px); }
+ .portfolio[data-expanded="true"] .tool-caption { top:calc(7vw + 24px); }
+}

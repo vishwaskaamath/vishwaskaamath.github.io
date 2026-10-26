@@ -42,7 +42,7 @@ export default function LiquidSurface({ children, className = '' }: { children: 
       const rect = element.getBoundingClientRect();
       const visible = element.checkVisibility({ visibilityProperty: true });
       const videoCard = reelCard?.hasAttribute('data-video');
-      const eligible = !videoCard || reelCard?.classList.contains('is-active');
+      const eligible = !videoCard || (reelCard?.classList.contains('is-active') && !reelCard.closest('[data-expanded="true"]'));
       const nearby = pointer.enabled && visible && eligible && pointer.x >= rect.left && pointer.x <= rect.right && pointer.y >= rect.top && pointer.y <= rect.bottom;
       if (!nearby && !intensity) return;
       const width = element.offsetWidth, height = element.offsetHeight;

@@ -26,10 +26,14 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
     const resize = () => {
       w = element.offsetWidth; h = element.offsetHeight;
       if (!w || !h) return;
-      const shape = bezelGeometry(w, h);
+      const template = bezelGeometry(1000, 600);
+      const curves = template.curves.map(c => c.map(p => ({x:p.x*w/1000,y:p.y*h/600}))) as typeof template.curves;
+      const pathOf = (cs: typeof curves) => `M ${cs[0][0].x} ${cs[0][0].y} ` + cs.map(c => `C ${c.slice(1).map(p => `${p.x} ${p.y}`).join(' ')}`).join(' ') + ' Z';
+      const shape = {curves,path:pathOf(curves)};
       project = createBoundaryProjector(shape.curves);
       screen.setAttribute('viewBox', `0 0 ${w} ${h}`);
       element.querySelectorAll('[data-card-path]').forEach(path => path.setAttribute('d', shape.path));
+      element.querySelector('[data-card-clip]')!.setAttribute('d', pathOf(template.curves.map(c => c.map(p => ({x:p.x/1000,y:p.y/600}))) as typeof curves));
       // 3px half-bevel + 3.5px air gap + 0.75px half-outline.
       element.querySelectorAll('[data-floating-rim]').forEach(path => path.setAttribute('transform', `translate(${w/2} ${h/2}) scale(${1+14.5/w} ${1+14.5/h}) translate(${-w/2} ${-h/2})`));
       canvas.width = w; canvas.height = h;
@@ -37,7 +41,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
     resize();
     const observer = new ResizeObserver(resize); observer.observe(element);
     const unsubscribe = subscribeProximity(pointer => {
-      const active = card.classList.contains('is-active') && pointer.enabled;
+      const active = card.classList.contains('is-active') && pointer.enabled && !card.closest('[data-expanded="true"]');
       if (!active && !glow && !tiltX && !tiltY && !specks.length) return;
       // Unwarped probes invert the carousel's rotation and scale, avoiding feedback.
       const [o, a, b] = probes.map(p => p.getBoundingClientRect());
@@ -88,7 +92,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
         <div className="video-aperture" style={{clipPath:`url(#${id}-clip)`}}>{children}</div>
         <svg className="video-rims" aria-hidden="true" preserveAspectRatio="none">
           <defs>
-            <clipPath id={`${id}-clip`} clipPathUnits="userSpaceOnUse"><path data-card-path /></clipPath>
+            <clipPath id={`${id}-clip`} clipPathUnits="objectBoundingBox"><path data-card-clip /></clipPath>
             <radialGradient id={`${id}-glow`} gradientUnits="userSpaceOnUse" r="95">
               <stop stopColor="#fff"/><stop offset=".22" stopColor="#e9fffc"/><stop offset=".55" stopColor="#a4fff6" stopOpacity=".65"/><stop offset="1" stopColor="#a4fff6" stopOpacity="0"/>
             </radialGradient>

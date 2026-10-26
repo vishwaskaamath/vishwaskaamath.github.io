@@ -5,23 +5,47 @@ import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhys
 import SoftwareTile from "./SoftwareTile";
 import WarpedText from "./WarpedText";
 import VideoBezel from "./VideoBezel";
-import type { FullscreenSource } from "./FullscreenVideo";
 
 export default function ProjectWheels({
-  index, engine, reducedMotion, select, paused, onExpand,
+  index, engine, reducedMotion, select, paused, expanded, onExpand, onCollapse,
 }: {
   index: number;
   engine: ScrollPhysics;
   reducedMotion: boolean;
   select: (i: number) => void;
   paused: boolean;
-  onExpand: (source: FullscreenSource) => void;
+  expanded: boolean;
+  onExpand: () => void;
+  onCollapse: () => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const expanded = useRef(false);
-  const options = useRef({ expanded: false, paused, reducedMotion });
+  const options = useRef({ paused, reducedMotion });
   options.current.paused = paused; options.current.reducedMotion = reducedMotion;
   useLayoutEffect(() => { engine.invalidate(); }, [engine, paused, reducedMotion]);
+  const wasExpanded = useRef(false);
+  useLayoutEffect(() => {
+    const card = root.current?.querySelector<HTMLElement>('.video-card.is-active');
+    const video = card?.querySelector('video');
+    if (!card || !video || wasExpanded.current === expanded) return;
+    const active = engine.read().index;
+    card.querySelector('button')!.setAttribute('aria-expanded', String(expanded));
+    if (!reducedMotion) {
+      card.querySelector('.video-hit')!.animate([
+        {filter:'none'},
+        {filter:'drop-shadow(-4px 0 0 rgba(255,0,80,.6)) drop-shadow(4px 0 0 rgba(0,230,255,.6))',offset:.2},
+        {filter:'none'}
+      ],{duration:180});
+      card.querySelector('.expansion-scanlines')!.animate([{opacity:0},{opacity:.42,offset:.2},{opacity:0}],{duration:180});
+    }
+    if (!expanded) {
+      video.muted = true;
+      video.src = projects[active].video;
+      video.currentTime = 0;
+      if (!paused) void video.play().catch(() => {});
+    }
+    wasExpanded.current = expanded;
+  }, [expanded, engine, paused, reducedMotion]);
+
 
   useLayoutEffect(() => {
     const element = root.current!;
@@ -32,7 +56,6 @@ export default function ProjectWheels({
     let mobile = false;
     let gap = 0;
     let width = 0;
-    let enlargement = 0;
     let lastIndex = -1;
     let lastPaused = true;
 
@@ -47,9 +70,6 @@ export default function ProjectWheels({
     const render = (frame: ReelFrame) => {
       const { currentScroll, scrollVelocity, index: active } = frame;
       if (lastIndex !== active) {
-        options.current.expanded = false;
-        enlargement = 0;
-        expanded.current = false;
         playback(active);
         lastIndex = active;
         element.querySelector('.software-wheel')?.setAttribute('aria-label', `Creative tools for ${projects[active].shortTitle}`);
@@ -59,14 +79,11 @@ export default function ProjectWheels({
           card.setAttribute('aria-hidden', String(!nearby));
           const hit = card.querySelector('button')!;
           hit.tabIndex = nearby ? 0 : -1;
-          hit.setAttribute('aria-label', i === active ? `Open ${projects[i].shortTitle} fullscreen` : `Select ${projects[i].shortTitle}`);
+          hit.setAttribute('aria-label', i === active ? `Expand ${projects[i].shortTitle} preview` : `Select ${projects[i].shortTitle}`);
           icons[i].setAttribute('aria-hidden', String(i !== active));
           captions[i].setAttribute('aria-hidden', String(i !== active));
         });
       } else if (lastPaused !== (options.current.paused || document.hidden)) playback(active);
-      const desired = options.current.expanded ? 0.055 : 0;
-      enlargement = options.current.reducedMotion ? desired : enlargement + (desired - enlargement) * 0.14;
-      if (Math.abs(desired - enlargement) > 0.0001) engine.invalidate();
       element.style.setProperty("--reel-glitch", `${Math.min(0.15, Math.abs(scrollVelocity) * 0.06)}`);
       // No layout reads, independent tweens, or React animation state in this loop.
       projects.forEach((_, i) => {
@@ -75,7 +92,7 @@ export default function ProjectWheels({
         const blend = Math.min(distance, 1);
         const visible = distance < 2;
         const fade = distance <= 1 ? 1 - distance * 0.64 : 0.36 * (2 - distance);
-        const scale = 1 - blend * 0.3 + enlargement * (1 - blend);
+        const scale = 1 - blend * 0.3;
         cards[i].style.transform = `translate3d(${mobile ? d * gap : -distance * width * 0.115}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) rotate(${d * (mobile ? 7 : -18)}deg) scale(${scale})`;
         cards[i].style.opacity = `${Math.max(0, fade)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
@@ -121,20 +138,22 @@ export default function ProjectWheels({
           return (
             <div key={project.id} className={`video-card ${active ? "is-active" : ""}`} data-video={i} aria-hidden={!nearby}>
               <button className="video-hit" tabIndex={nearby ? 0 : -1}
-                aria-label={active ? `Open ${project.shortTitle} fullscreen` : `Select ${project.shortTitle}`}
+                aria-label={active ? `${expanded ? "Collapse" : "Expand"} ${project.shortTitle} preview` : `Select ${project.shortTitle}`}
                 onClick={(event) => {
                   if (i === engine.read().index) {
-                    const trigger = event.currentTarget;
-                    const card = trigger.closest<HTMLElement>('[data-video]')!;
-                    const preview = card.querySelector('video')!;
-                    const rect = card.getBoundingClientRect();
-                    onExpand({rect:{top:rect.top,left:rect.left,width:rect.width,height:rect.height},card,preview,trigger,time:preview.currentTime,title:project.shortTitle});
-                  } else { expanded.current = false; options.current.expanded = false; select(i); }
+                    if (expanded) { onCollapse(); return; }
+                    const preview = event.currentTarget.querySelector('video')!;
+                    preview.src = project.video.replace('.mp4', '-full.mp4');
+                    preview.currentTime = 0; preview.muted = false; preview.volume = 1;
+                    void preview.play().catch(() => {});
+                    onExpand();
+                  } else { select(i); }
                 }}>
                 <VideoBezel><div className="video-surface">
                   <video src={project.video} poster={project.poster} muted playsInline loop preload="metadata" aria-label={`${project.shortTitle} preview`} />
                   <div className="crt-shading" />
                   <div className="glitch-flash" />
+                  <div className="expansion-scanlines" aria-hidden="true"/>
                 </div></VideoBezel>
               </button>
             </div>
