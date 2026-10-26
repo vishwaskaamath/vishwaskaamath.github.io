@@ -11,7 +11,7 @@ export function SoftwareIcon({ software }: { software: Software }) {
   return (
     <div className={`software-tile software-${software}`}>
       <div className="tile-rim" />
-      {software === "figma" ? (
+      <div className="tile-emblem">{software === "figma" ? (
         <svg viewBox="0 0 60 90" className="figma-symbol" aria-hidden="true">
           <path fill="#f24e1e" d="M15 0h15v30H15a15 15 0 010-30" />
           <path fill="#ff7262" d="M30 0h15a15 15 0 010 30H30" />
@@ -33,7 +33,8 @@ export function SoftwareIcon({ software }: { software: Software }) {
         <span className="adobe-symbol" aria-hidden="true">
           {software === "ae" ? "Ae" : software === "pr" ? "Pr" : "Ps"}
         </span>
-      )}
+      )}</div>
+      <div className="tile-spotlight" aria-hidden="true"/><div className="tile-hover-rim" aria-hidden="true"/>
       <span className="tile-brand">{labels[software]}</span>
       <span className="tile-screw screw-tl" />
       <span className="tile-screw screw-br" />

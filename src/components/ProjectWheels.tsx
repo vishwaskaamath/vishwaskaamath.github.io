@@ -2,8 +2,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
-import { SoftwareIcon } from "./SoftwareIcon";
-import LiquidSurface from "./LiquidSurface";
+import SoftwareTile from "./SoftwareTile";
 import WarpedText from "./WarpedText";
 import VideoBezel from "./VideoBezel";
 
@@ -142,7 +141,7 @@ export default function ProjectWheels({
       <div className="software-wheel" aria-label={`Creative tools for ${projects[index].shortTitle}`}>
         {projects.map((project, i) => (
           <div key={project.id} className="software-position" data-software={i} aria-hidden={i !== index}>
-            <LiquidSurface><SoftwareIcon software={project.software} /></LiquidSurface>
+            <SoftwareTile software={project.software} />
           </div>
         ))}
         <div className="tool-caption">
