@@ -66,7 +66,7 @@ export default function Portfolio() {
       data-expanded={expanded}
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
     >
-      <WavyBackground reducedMotion={reducedMotion} paused={loading || expanded} />
+      <WavyBackground dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded} />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
       <header className="hud-header">
         <button
