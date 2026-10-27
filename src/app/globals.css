@@ -56,6 +56,7 @@ button:disabled {
   color: var(--bg);
 }
 .portfolio {
+  height: 100vh;
   height: 100dvh;
   overflow: clip;
   isolation: isolate;
@@ -1507,3 +1508,14 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
  .software-wheel .tool-caption-slot > span:last-child { font-size:9px; }
  .software-perspective .orbit-emblem .adobe-symbol { font-size:clamp(28px,9vw,70px); }
 }
+
+/* A decorative loader must never obscure the phone layout, including before hydration. */
+@media(max-width:759px), (pointer:coarse) {
+ .loading-screen, .ribbon-cursor { display:none !important; }
+ .wavy-grain { display:none; }
+}
+@media(max-width:759px) {
+ .portfolio { min-height:0; }
+ .software-perspective .orbit-emblem .adobe-symbol { font-size:32px; }
+}
+@media(max-width:759px) { .portfolio[data-expanded="true"] .software-wheel { opacity:0; pointer-events:none; } }

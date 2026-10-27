@@ -6,6 +6,7 @@ export default function RibbonCursor({reducedMotion,layerKey}:{reducedMotion:boo
   const state=useRef({x:0,y:0,active:false,points:[] as RibbonPoint[],reducedMotion});
   state.current.reducedMotion=reducedMotion;
   useEffect(()=>{
+    if(!matchMedia('(any-pointer: fine)').matches)return;
     const canvas=canvasRef.current!,ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});if(!ctx)return;
     const s=state.current,fine=matchMedia('(any-pointer: fine)');let raf=0;
     const draw=()=>{
@@ -38,6 +39,6 @@ export default function RibbonCursor({reducedMotion,layerKey}:{reducedMotion:boo
     resize();window.addEventListener('pointermove',move,{passive:true});window.addEventListener('resize',resize);window.addEventListener('blur',hide);document.addEventListener('mouseleave',hide);document.addEventListener('visibilitychange',visibility);fine.addEventListener('change',preference);
     return()=>{hide();window.removeEventListener('pointermove',move);window.removeEventListener('resize',resize);window.removeEventListener('blur',hide);document.removeEventListener('mouseleave',hide);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',preference);};
   },[]);
-  useEffect(()=>{const c=canvasRef.current;if(!c||!c.showPopover)return;const f=requestAnimationFrame(()=>{if(c.matches(':popover-open'))c.hidePopover();c.showPopover();});return()=>cancelAnimationFrame(f);},[layerKey]);
+  useEffect(()=>{const c=canvasRef.current;if(!c||!c.showPopover||!matchMedia('(any-pointer: fine)').matches)return;const f=requestAnimationFrame(()=>{if(c.matches(':popover-open'))c.hidePopover();c.showPopover();});return()=>cancelAnimationFrame(f);},[layerKey]);
   return <canvas ref={canvasRef} className="ribbon-cursor" popover="manual" aria-hidden="true"/>;
 }

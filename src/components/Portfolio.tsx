@@ -21,7 +21,8 @@ import Overlay, { type Panel } from "./Overlay";
 export default function Portfolio() {
   const [expanded, setExpanded] = useState(false);
   const collapse = useCallback(() => setExpanded(false), []);
-  const [loading, setLoading] = useState(true);
+  // Server HTML stays visible even when scripts or decorative effects fail.
+  const [loading, setLoading] = useState(false);
   const loaded = useCallback(() => setLoading(false), []);
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -33,6 +34,13 @@ export default function Portfolio() {
   );
   const { playing, toggle } = useAmbientAudio();
   const close = useCallback(() => setPanel(null), []);
+
+  useEffect(() => {
+    if (matchMedia('(max-width: 759px), (pointer: coarse), (prefers-reduced-motion: reduce)').matches) return;
+    setLoading(true);
+    const fallback = window.setTimeout(() => setLoading(false), 4500);
+    return () => window.clearTimeout(fallback);
+  }, []);
 
   useEffect(() => {
     const query = matchMedia("(prefers-reduced-motion: reduce)");

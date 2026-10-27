@@ -9,12 +9,17 @@ export default function WavyBackground({ reducedMotion, paused = false }: { redu
   useEffect(() => {
     const canvas = canvasRef.current!;
     const gpu = gpuRef.current!;
-    let renderer = createWaveRenderer(gpu);
+    const touch = matchMedia('(pointer: coarse)').matches || innerWidth < 760;
+    const safeRenderer = () => {
+      if (touch) return null;
+      try { return createWaveRenderer(gpu); } catch { return null; }
+    };
+    let renderer = safeRenderer();
     const setMode = () => { gpu.style.display = renderer ? 'block' : 'none'; canvas.style.display = renderer ? 'none' : 'block'; gpu.parentElement!.dataset.renderer = renderer ? 'webgl' : 'canvas2d'; };
     setMode();
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
-    let width = 0, height = 0, time = 0, raf = 0;
+    let width = 0, height = 0, time = 0, raf = 0, previous = 0;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     const isStill = () => reducedMotion || paused || motion.matches;
 
@@ -70,10 +75,13 @@ export default function WavyBackground({ reducedMotion, paused = false }: { redu
       canvas.height = height;
       draw();
     };
-    const animate = () => {
+    const animate = (now: number) => {
       if (document.hidden || isStill()) return;
-      time += 0.012;
-      draw();
+      if (!touch || now - previous >= 1000 / 30) {
+        time += previous ? Math.min(now - previous, 50) * 0.00072 : 0.012;
+        previous = now;
+        draw();
+      }
       raf = requestAnimationFrame(animate);
     };
     const restart = () => {
@@ -82,7 +90,7 @@ export default function WavyBackground({ reducedMotion, paused = false }: { redu
       else draw();
     };
     const lost = (event: Event) => { event.preventDefault(); renderer = null; setMode(); draw(); };
-    const restored = () => { renderer = createWaveRenderer(gpu); setMode(); resize(); };
+    const restored = () => { renderer = safeRenderer(); setMode(); resize(); };
     gpu.addEventListener('webglcontextlost', lost); gpu.addEventListener('webglcontextrestored', restored);
     resize(); restart();
     window.addEventListener('resize', resize);

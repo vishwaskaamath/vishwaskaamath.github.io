@@ -8,6 +8,7 @@ export default function LoadingScreen({onComplete}:{onComplete:()=>void}) {
   const state=useRef({time:0,points:[] as TrailPoint[]});
   const id=`intro-${useId().replace(/:/g,'')}`;
   useEffect(()=>{
+    if(matchMedia('(max-width: 759px), (pointer: coarse)').matches){onComplete();return;}
     const element=root.current!,surface=canvas.current!,ctx=surface.getContext('2d',{alpha:true,desynchronized:true});
     if(!ctx){onComplete();return;}
     const reduce=matchMedia('(prefers-reduced-motion: reduce)');
