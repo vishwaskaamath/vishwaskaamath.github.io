@@ -1,4 +1,4 @@
-import type { Software, Tool } from "@/data/projects";
+import type { Software } from "@/data/projects";
 
 const labels: Record<Software, string> = {
   ae: "After Effects",
@@ -7,19 +7,13 @@ const labels: Record<Software, string> = {
   figma: "Figma",
   jitter: "Jitter",
 };
-export function SoftwareIcon({ software, tools }: { software: Software; tools?: Tool[] }) {
+export function SoftwareIcon({ software }: { software: Software }) {
   return (
     <div className={`software-tile software-${software}`}>
       <div className="tile-rim" />
-      {tools && tools.length > 1 ? <div className="tool-orbit" aria-hidden="true">
-        {tools.map((tool, i) => <div className="orbit-emblem" key={tool.id} data-orbit-logo={i} style={{color:tool.color}}>
-          <SoftwareEmblem software={tool.id}/>
-        </div>)}
-      </div> : <div className="tile-emblem"><SoftwareEmblem software={software}/></div>}
+      <div className="tile-emblem"><SoftwareEmblem software={software}/></div>
       <div className="tile-spotlight" aria-hidden="true"/><div className="tile-hover-rim" aria-hidden="true"/>
-      {tools && tools.length > 1 ? <span className="tile-brand orbit-labels" aria-hidden="true">
-        {tools.map((tool,i)=><span data-orbit-label={i} key={tool.id} style={{opacity:i===0?1:0}}>{tool.label}</span>)}
-      </span> : <span className="tile-brand">{labels[software]}</span>}
+      <span className="tile-brand">{labels[software]}</span>
       <span className="tile-screw screw-tl" />
       <span className="tile-screw screw-br" />
     </div>
