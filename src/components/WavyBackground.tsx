@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useRef, type RefObject } from 'react';
 import type { WheelDrag } from '@/hooks/useProjectWheel';
-import {spawnRipple,advanceRipples,displaceRipple,type BackgroundRipple} from '@/lib/backgroundRipples';
+import {spawnPulse,advancePulses,type ContourPulse} from '@/lib/contourPulse';
 import { createWaveRenderer } from '@/lib/waveRenderer';
 
 /** Sculpted contours and a separate translucent, intertwined silk ribbon. */
 export default function WavyBackground({ reducedMotion, paused = false, dragRef }: { reducedMotion: boolean; paused?: boolean; dragRef: RefObject<WheelDrag> }) {
-  const ripplesRef = useRef<BackgroundRipple[]>([]);
+  const phaseRef = useRef(0);
+  const pulsesRef = useRef<ContourPulse[]>([]);
   const gpuRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -22,12 +23,12 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
     setMode();
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
-    let width = 0, height = 0, time = 0, raf = 0, previous = 0;
+    let width = 0, height = 0, time = phaseRef.current, raf = 0, previous = 0;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
-    const isStill = () => reducedMotion || motion.matches || (paused && !ripplesRef.current.length);
+    const isStill = () => reducedMotion || motion.matches || (paused && !pulsesRef.current.length);
 
     const draw = () => {
-      if (renderer) { renderer.draw(time,ripplesRef.current); return; }
+      if (renderer) { renderer.draw(time,pulsesRef.current); return; }
       ctx.globalAlpha = 1;
       ctx.fillStyle = '#060606';
       ctx.fillRect(0, 0, width, height);
@@ -35,7 +36,7 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
       ctx.lineCap = 'butt';
       ctx.lineWidth = 3.5;
       // Four quantized lighting paths, plus one silk path: five stroke calls.
-      const highlights=Array.from({length:3},()=>new Path2D());
+
       const bands = Array.from({ length: 4 }, () => new Path2D());
       for (let baseY = -108; baseY <= height + 108; baseY += 12) {
         let px = 0, py = 0, previousBand = -1;
@@ -43,38 +44,46 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
           const phase = x * 0.006 - baseY * 0.004 + time * 0.25;
           const warp = Math.sin(x * 0.0025 + baseY * 0.006 + time * 0.4) * 55
             + Math.cos(phase) * 28 + Math.sin((x + baseY) * 0.004 + time * 0.3) * 18;
-          const point=displaceRipple(x,baseY+warp,ripplesRef.current);
-          const y=point.y;
+          const y=baseY+warp;
           if (x) {
             const bandIndex = Math.min(3, Math.floor((Math.cos(phase) + 1) * 2));
             const band = bands[bandIndex];
             if (bandIndex !== previousBand) band.moveTo(px, py);
-            band.lineTo(point.x, y);
-            if(point.highlight>.3){const shine=highlights[Math.min(2,Math.floor(point.highlight*3))];shine.moveTo(px,py);shine.lineTo(point.x,y);}
+            band.lineTo(x, y);
             previousBand = bandIndex;
           }
-          px = point.x; py = y;
+          px = x; py = y;
         }
       }
       bands.forEach((path, i) => {
         ctx.strokeStyle = `rgba(19,19,19,${0.35 + i / 3 * 0.5})`;
         ctx.stroke(path);
       });
-      highlights.forEach((path,i)=>{ctx.strokeStyle=`rgba(210,220,235,${.14*(i+1)/3})`;ctx.stroke(path);});
       ctx.lineWidth = 0.7;
       ctx.strokeStyle = 'rgba(190,200,215,0.028)';
-      ctx.beginPath();
+      const mesh=new Path2D();
       for (let i = 0; i < 75; i++) {
         const phase = i * 0.065;
         for (let x = 0; x <= width + 28; x += 28) {
           const spineY = height * 0.5 + Math.sin(x * 0.0022 + time * 0.35) * 110 - (x - width * 0.5) * 0.12;
           const twist = Math.sin(x * 0.0045 - time * 0.5 + phase) * 95 * Math.sin(x * 0.0018 + phase * 0.5)
             + Math.cos(x * 0.008 + time * 0.3 - phase * 1.2) * 35;
-          const point=displaceRipple(x,spineY+twist,ripplesRef.current);
-          if (!x) ctx.moveTo(point.x, point.y); else ctx.lineTo(point.x, point.y);
+          const y=spineY+twist;
+          if (!x) mesh.moveTo(x,y); else mesh.lineTo(x,y);
         }
       }
-      ctx.stroke();
+      ctx.stroke(mesh);
+      ctx.globalCompositeOperation='lighter';
+      for(const p of pulsesRef.current){
+        const outer=p.radius+70,inner=Math.max(0,p.radius-70);
+        const glow=ctx.createRadialGradient(p.x,p.y,inner,p.x,p.y,outer);
+        glow.addColorStop(0,'rgba(210,220,235,0)');
+        glow.addColorStop(Math.max(.001,(p.radius-inner)/(outer-inner)),`rgba(210,220,235,${.16*p.alpha})`);
+        glow.addColorStop(1,'rgba(210,220,235,0)');ctx.strokeStyle=glow;
+        ctx.lineWidth=3.5;bands.forEach(path=>ctx.stroke(path));
+        ctx.lineWidth=.7;ctx.stroke(mesh);
+      }
+      ctx.globalCompositeOperation='source-over';
     };
     const resize = () => {
       width = innerWidth; height = innerHeight;
@@ -87,8 +96,8 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
       if (document.hidden || isStill()) return;
       if (!touch || now - previous >= 1000 / 30) {
         const dt=previous?Math.min(now-previous,50):1000/60;
-        if(!paused) time += dt * 0.00072;
-        advanceRipples(ripplesRef.current,dt);
+        if(!paused) {time += dt * 0.00072;phaseRef.current=time;}
+        advancePulses(pulsesRef.current,dt);
         previous = now;
         draw();
       }
@@ -100,20 +109,21 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
       else draw();
     };
     let pointerId=-1,lastY=0,distance=0;
-    const pulse=(event:PointerEvent,small:boolean)=>{
+    const pulse=(event:PointerEvent)=>{
+      window.dispatchEvent(new CustomEvent("portfolio-clean-click",{detail:{x:event.clientX,y:event.clientY}}));
       if(reducedMotion||motion.matches)return;
-      spawnRipple(ripplesRef.current,event.clientX,event.clientY,width,height,small);
+      spawnPulse(pulsesRef.current,event.clientX,event.clientY);
       restart();
     };
     const down=(event:PointerEvent)=>{
       if(!event.isPrimary||event.button!==0)return;
-      pointerId=event.pointerId;lastY=event.clientY;distance=0;pulse(event,true);
+      pointerId=event.pointerId;lastY=event.clientY;distance=0;
     };
     const move=(event:PointerEvent)=>{if(event.pointerId===pointerId){distance+=Math.abs(event.clientY-lastY);lastY=event.clientY;}};
     const up=(event:PointerEvent)=>{
       if(event.pointerId!==pointerId)return;
       distance+=Math.abs(event.clientY-lastY);
-      if(distance<=6 && dragRef.current.distance<=6)pulse(event,false);
+      if(distance<=6 && dragRef.current.distance<=6)pulse(event);
       pointerId=-1;
     };
     const cancel=()=>{pointerId=-1;};

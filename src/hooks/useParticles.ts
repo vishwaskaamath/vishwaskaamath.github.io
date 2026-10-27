@@ -10,20 +10,11 @@ type Particle = {
   max: number;
   size: number;
 };
-type Ripple = {
-  x: number;
-  y: number;
-  started: number;
-  max: number;
-  dots: { angle: number; offset: number; size: number }[];
-};
-
 /** One capped, DPR-aware canvas; no React renders in the animation loop. */
 export function useParticles(reducedMotion: boolean) {
   const wakeRef = useRef<() => void>(() => {});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Particle[]>([]);
-  const ripples = useRef<Ripple[]>([]);
   const burst = useCallback(
     (x: number, y: number, count = 75) => {
       if (reducedMotion) return;
@@ -62,27 +53,6 @@ export function useParticles(reducedMotion: boolean) {
       canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    const click = (event: PointerEvent) => {
-      if (
-        (event.target as HTMLElement).closest(
-          "button,a,dialog,video,[data-interactive]",
-        )
-      )
-        return;
-      ripples.current.push({
-        x: event.clientX,
-        y: event.clientY,
-        started: performance.now(),
-        max: Math.hypot(width, height),
-        dots: Array.from({ length: 650 }, () => ({
-          angle: Math.random() * Math.PI * 2,
-          offset: (Math.random() - 0.5) * 25,
-          size: 0.4 + Math.random() * 1.1,
-        })),
-      });
-      ripples.current = ripples.current.slice(-3);
-      burst(event.clientX, event.clientY, 45);
-    };
     const draw = (now: number) => {
       raf = 0;
       const dt = Math.min((now - last) / 16.67 || 1, 2);
@@ -100,22 +70,7 @@ export function useParticles(reducedMotion: boolean) {
         ctx.fillStyle = `rgba(222,220,212,${(p.life / p.max) * 0.6})`;
         ctx.fillRect(p.x, p.y, p.size, p.size);
       }
-      ripples.current = ripples.current.filter((r) => now - r.started < 1700);
-      for (const r of ripples.current) {
-        const progress = (now - r.started) / 1700,
-          radius = (1 - Math.pow(1 - progress, 2)) * r.max;
-        ctx.fillStyle = `rgba(232,229,219,${(1 - progress) * 0.48})`;
-        for (const dot of r.dots) {
-          const rad = radius + dot.offset;
-          ctx.fillRect(
-            r.x + Math.cos(dot.angle) * rad,
-            r.y + Math.sin(dot.angle) * rad,
-            dot.size,
-            dot.size,
-          );
-        }
-      }
-      if (particles.current.length || ripples.current.length) raf = requestAnimationFrame(draw);
+      if (particles.current.length) raf = requestAnimationFrame(draw);
     };
     const wake = () => {
       if (!raf && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(draw); }
@@ -123,20 +78,17 @@ export function useParticles(reducedMotion: boolean) {
     wakeRef.current = wake;
     const visibility = () => {
       cancelAnimationFrame(raf); raf = 0;
-      if (!document.hidden && (particles.current.length || ripples.current.length)) wake();
+      if (!document.hidden && particles.current.length) wake();
     };
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("pointerdown", click);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       cancelAnimationFrame(raf);
       wakeRef.current = () => {};
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointerdown", click);
       document.removeEventListener("visibilitychange", visibility);
       particles.current = [];
-      ripples.current = [];
     };
   }, [reducedMotion, burst]);
   return { canvasRef, burst };

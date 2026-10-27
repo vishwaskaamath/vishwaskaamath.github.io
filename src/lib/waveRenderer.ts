@@ -1,4 +1,4 @@
-import type { BackgroundRipple } from './backgroundRipples';
+import type { ContourPulse } from './contourPulse';
 /** Static ribbon meshes: only time uniforms change per frame; DPR remains 1. */
 export function createWaveRenderer(canvas: HTMLCanvasElement) {
   const gl=canvas.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,powerPreference:'high-performance'});
@@ -11,27 +11,7 @@ uniform float uTime;
 uniform float uSilk;
 varying float vEdge;
 varying float vAlpha;
-varying float vGlow;
-uniform vec4 uRipple[5];
-uniform vec2 uRippleMeta[5];
-vec2 rippleAt(vec2 p){
- vGlow=0.0;
- for(int i=0;i<5;i++){
-  vec4 r=uRipple[i];vec2 meta=uRippleMeta[i];
-  if(r.w<0.5)continue;
-  vec2 d=p-r.xy;
-  if(abs(d.x)>=r.z+meta.x||abs(d.y)>=r.z+meta.x)continue;
-  float dist=max(length(d),1.0),norm=(dist-r.z)/meta.x;
-  if(abs(norm)<1.0){
-   float envelope=pow(cos(norm*1.570796327),2.0);
-   float offset=sin(norm*7.853981634)*envelope*r.w;
-   p+=vec2(d.x/dist*offset*.45,d.y/dist*offset*.85+offset*.35);
-   if(envelope>.3)vGlow=max(vGlow,envelope*meta.y);
-  }
- }
- return p;
-}
-
+varying vec2 vPosition;
 float heightAt(float x,float row){
  if(uSilk<0.5) return row+sin(x*.0025+row*.006+uTime*.4)*55.0+cos(x*.006-row*.004+uTime*.25)*28.0+sin((x+row)*.004+uTime*.3)*18.0;
  float phase=row*.065;
@@ -43,14 +23,29 @@ void main(){
  float slope=heightAt(x+1.0,aPoint.y)-y;
  vec2 normal=normalize(vec2(-slope,1.0));
  float halfWidth=mix(1.75,.35,uSilk);
- vec2 p=rippleAt(vec2(x,y))+normal*aPoint.z*(halfWidth+1.0);
+ vec2 p=vec2(x,y)+normal*aPoint.z*(halfWidth+1.0);
+ vPosition=p;
  gl_Position=vec4(p/uSize*vec2(2.0,-2.0)+vec2(-1.0,1.0),0,1);
  vEdge=aPoint.z*(halfWidth+1.0);
  vAlpha=mix(.35+(cos(x*.006-aPoint.y*.004+uTime*.25)+1.0)*.25,.028,uSilk);
 }`;
   const fragment=`precision highp float;
-uniform float uSilk;varying float vEdge;varying float vAlpha;varying float vGlow;
-void main(){float halfWidth=mix(1.75,.35,uSilk);float cover=1.0-smoothstep(max(0.0,halfWidth-.5),halfWidth+.5,abs(vEdge));vec3 base=mix(vec3(19.0/255.0),vec3(190.0,200.0,215.0)/255.0,uSilk);gl_FragColor=vec4(mix(base,vec3(210.0,220.0,235.0)/255.0,.14*vGlow),min(1.0,vAlpha+.14*vGlow)*cover);}`;
+uniform float uSilk;varying float vEdge;varying float vAlpha;varying vec2 vPosition;
+uniform vec4 uPulse[5];
+void main(){
+ float halfWidth=mix(1.75,.35,uSilk);
+ float cover=1.0-smoothstep(max(0.0,halfWidth-.5),halfWidth+.5,abs(vEdge));
+ vec3 base=mix(vec3(19.0/255.0),vec3(190.0,200.0,215.0)/255.0,uSilk);
+ float light=0.0;
+ for(int i=0;i<5;i++){
+  vec4 p=uPulse[i];
+  if(p.w<=0.0)continue;
+  float band=abs(length(vPosition-p.xy)-p.z)/70.0;
+  light+=.16*p.w*(1.0-smoothstep(0.0,1.0,band));
+ }
+ // Add illumination only where the existing contour geometry is drawn.
+ gl_FragColor=vec4((base*vAlpha+vec3(.82,.86,.92)*light)*cover,1.0);
+}`;
   const shaders:WebGLShader[]=[];
   const compile=(type:number,source:string)=>{const s=gl.createShader(type)!;shaders.push(s);gl.shaderSource(s,source);gl.compileShader(s);return s;};
   const program=gl.createProgram()!,buffer=gl.createBuffer()!;
@@ -60,9 +55,9 @@ void main(){float halfWidth=mix(1.75,.35,uSilk);float cover=1.0-smoothstep(max(0
   gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
   const attr=gl.getAttribLocation(program,'aPoint');gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,4,gl.FLOAT,false,0,0);
   const size=gl.getUniformLocation(program,'uSize'),time=gl.getUniformLocation(program,'uTime'),silk=gl.getUniformLocation(program,'uSilk');
-  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-  const rippleUniform=gl.getUniformLocation(program,'uRipple[0]'),metaUniform=gl.getUniformLocation(program,'uRippleMeta[0]');
-  const rippleData=new Float32Array(20),metaData=new Float32Array(10);
+  gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);
+  const pulseUniform=gl.getUniformLocation(program,'uPulse[0]');
+  const pulseData=new Float32Array(20);
   let ridges=0,total=0;
   const resize=(width:number,height:number)=>{
     canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height);gl.uniform2f(size,width,height);
@@ -73,10 +68,10 @@ void main(){float halfWidth=mix(1.75,.35,uSilk);float cover=1.0-smoothstep(max(0
     for(let i=0;i<75;i++)line(i);
     total=vertices.length/4;gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
   };
-  const draw=(elapsed:number,ripples:BackgroundRipple[]=[])=>{
-    rippleData.fill(0);metaData.fill(0);
-    ripples.slice(0,5).forEach((r,i)=>{rippleData.set([r.x,r.y,r.radius,r.strength],i*4);metaData.set([r.bandWidth,r.alpha],i*2);});
-    gl.uniform4fv(rippleUniform,rippleData);gl.uniform2fv(metaUniform,metaData);
+  const draw=(elapsed:number,pulses:ContourPulse[]=[])=>{
+    pulseData.fill(0);
+    pulses.slice(0,5).forEach((p,i)=>pulseData.set([p.x,p.y,p.radius,p.alpha],i*4));
+    gl.uniform4fv(pulseUniform,pulseData);
     gl.clearColor(6/255,6/255,6/255,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(time,elapsed);gl.uniform1f(silk,0);
     // Four contiguous ridge batches and one translucent filament batch.
     const group=Math.floor(ridges/24)*6;
