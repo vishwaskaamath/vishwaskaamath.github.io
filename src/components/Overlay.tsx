@@ -85,7 +85,7 @@ export default function Overlay({
                   <span>
                     {project.role} · {project.year}
                   </span>
-                  <span>{project.tools.join(" / ")}</span>
+                  <span>{project.tools.map(tool => tool.label).join(" / ")}</span>
                 </div>
               </div>
             </>

@@ -1,7 +1,6 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  ArrowUpRight,
   Pause,
   Play,
   Volume2,
@@ -20,7 +19,6 @@ import LoadingScreen from "./LoadingScreen";
 import Overlay, { type Panel } from "./Overlay";
 
 export default function Portfolio() {
-  const pagination = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
   const collapse = useCallback(() => setExpanded(false), []);
   const [loading, setLoading] = useState(true);
@@ -51,11 +49,7 @@ export default function Portfolio() {
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, [expanded, collapse]);
-  useEffect(() => engine.subscribe(({ index: active }) => {
-    pagination.current?.querySelectorAll('button').forEach((button, i) => {
-      if (i === active) button.setAttribute('aria-current', 'true'); else button.removeAttribute('aria-current');
-    });
-  }), [engine]);
+
 
   return (
     <main
@@ -114,9 +108,6 @@ export default function Portfolio() {
             {playing ? <Volume2 size={16} /> : <VolumeX size={16} />}
           </button>
         </nav>
-        <button className="header-contact" onClick={() => setPanel("contact")}>
-          <span className="status-led" /> <WarpedText>LET’S TALK</WarpedText> <ArrowUpRight size={14} />
-        </button>
       </header>
       <ProjectWheels
         index={index}
@@ -134,20 +125,6 @@ export default function Portfolio() {
         reducedMotion={reducedMotion}
         onBurst={burst}
       />
-      <div className="bottom-center">
-        <div ref={pagination} className="pagination" aria-label="Choose a project">
-          {projects.map((p, i) => (
-            <button
-              key={p.id}
-              onClick={() => select(i)}
-              aria-label={`Show project ${i + 1}: ${p.shortTitle}`}
-              aria-current={index === i ? "true" : undefined}
-            >
-              <span />
-            </button>
-          ))}
-        </div>
-      </div>
       <footer className="hud-footer">
         <button
           className={`audio-player ${playing ? "is-playing" : ""}`}

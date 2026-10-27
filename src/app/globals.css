@@ -1497,3 +1497,24 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
  .portfolio[data-expanded="true"] .software-wheel .adobe-symbol { font-size:clamp(64px,7vw,120px); }
  .portfolio[data-expanded="true"] .tool-caption { top:calc(7vw + 24px); }
 }
+
+/* Compact, depth-shaded emblems orbit within the existing slab footprint. */
+.tool-orbit { position:absolute; inset:0; transform-style:preserve-3d; pointer-events:none; }
+.orbit-emblem { position:absolute; left:30%; top:27%; width:40%; height:46%; display:flex; align-items:center; justify-content:center; will-change:transform; }
+.software-perspective .orbit-emblem .adobe-symbol { font-size:clamp(32px,7.2vw,110px); color:inherit; letter-spacing:-.045em; }
+.orbit-emblem .figma-symbol { height:85%; width:65%; }
+.orbit-emblem .jitter-symbol { width:90%; }
+.orbit-labels { left:5%; width:90%; height:12px; text-align:center; }
+.orbit-labels > span { position:absolute; inset:0; transition:opacity 220ms ease; }
+.project-metadata .metadata-slot { font-size:10px; }
+.project-metadata .role-badge { padding:6px 11px; }
+.software-wheel .tool-caption { width:280px; height:44px; }
+.software-wheel .tool-caption .micro-label { font-size:9px; }
+.software-wheel .tool-caption-slot > span:last-child { font-size:11px; }
+@media(max-width:759px) {
+ .project-metadata .metadata-slot { font-size:8px; }
+ .software-wheel .tool-caption { width:180px; }
+ .software-wheel .tool-caption .micro-label { font-size:7px; }
+ .software-wheel .tool-caption-slot > span:last-child { font-size:9px; }
+ .software-perspective .orbit-emblem .adobe-symbol { font-size:clamp(28px,9vw,70px); }
+}

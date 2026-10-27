@@ -163,14 +163,14 @@ export default function ProjectWheels({
       <div className="software-wheel" aria-label={`Creative tools for ${projects[index].shortTitle}`}>
         {projects.map((project, i) => (
           <div key={project.id} className="software-position" data-software={i} aria-hidden={i !== index}>
-            <SoftwareTile software={project.software} />
+            <SoftwareTile software={project.software} tools={project.tools} />
           </div>
         ))}
         <div className="tool-caption">
           {projects.map((project, i) => (
             <div key={project.id} className="tool-caption-slot" data-tool-caption={i} aria-hidden={i !== index}>
               <span className="micro-label"><WarpedText>THE TOOLKIT</WarpedText></span>
-              <span><WarpedText>{project.tools.join(" + ")}</WarpedText></span>
+              <span><WarpedText>{project.tools.map(tool => tool.label).join(" + ")}</WarpedText></span>
             </div>
           ))}
         </div>

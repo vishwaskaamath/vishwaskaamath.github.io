@@ -1,4 +1,12 @@
 export type Software = "ae" | "pr" | "figma" | "ps" | "jitter";
+export type Tool = { id: Software; short: string; label: string; color: string };
+export const toolCatalog: Record<Software, Tool> = {
+  ae: { id: 'ae', short: 'Ae', label: 'After Effects', color: '#d896ff' },
+  pr: { id: 'pr', short: 'Pr', label: 'Premiere Pro', color: '#a389ff' },
+  ps: { id: 'ps', short: 'Ps', label: 'Photoshop', color: '#53c6ff' },
+  figma: { id: 'figma', short: 'Figma', label: 'Figma', color: '#70efcd' },
+  jitter: { id: 'jitter', short: 'Jitter', label: 'Jitter', color: '#d3ef8a' },
+};
 export type Project = {
   id: string;
   title: string[];
@@ -6,7 +14,7 @@ export type Project = {
   role: string;
   year: string;
   software: Software;
-  tools: string[];
+  tools: Tool[];
   video: string;
   poster: string;
   color: string;
@@ -24,7 +32,7 @@ export const projects: Project[] = [
     role: "MOTION GRAPHICS",
     year: "2026",
     software: "ae",
-    tools: ["After Effects", "Figma"],
+    tools: [toolCatalog.ae, toolCatalog.figma],
     video: "/media/pocket.mp4",
     poster: "/media/pocket.jpg",
     color: "#b7adff",
@@ -39,7 +47,7 @@ export const projects: Project[] = [
     role: "VIDEO EDITING",
     year: "2026",
     software: "pr",
-    tools: ["Premiere Pro", "After Effects"],
+    tools: [toolCatalog.pr, toolCatalog.ae],
     video: "/media/nightcity.mp4",
     poster: "/media/nightcity.jpg",
     color: "#d5ef72",
@@ -54,7 +62,7 @@ export const projects: Project[] = [
     role: "VIDEO EDITING",
     year: "2026",
     software: "pr",
-    tools: ["Premiere Pro", "After Effects"],
+    tools: [toolCatalog.pr, toolCatalog.ae],
     video: "/media/dolce.mp4",
     poster: "/media/dolce.jpg",
     color: "#f6ad89",
@@ -69,7 +77,7 @@ export const projects: Project[] = [
     role: "VIDEO EDITING",
     year: "2026",
     software: "pr",
-    tools: ["Premiere Pro", "After Effects", "Photoshop"],
+    tools: [toolCatalog.pr, toolCatalog.ae, toolCatalog.ps],
     video: "/media/music.mp4",
     poster: "/media/music.jpg",
     color: "#8ebbd3",
@@ -84,7 +92,7 @@ export const projects: Project[] = [
     role: "VIDEO EDITING",
     year: "2026",
     software: "ps",
-    tools: ["Photoshop", "Premiere Pro"],
+    tools: [toolCatalog.ps, toolCatalog.pr],
     video: "/media/inmoe.mp4",
     poster: "/media/inmoe.jpg",
     color: "#e7a8ca",
