@@ -143,12 +143,13 @@ export default function Portfolio() {
             <span />
           </span>
           <span className="audio-track">
-            <b className="track-name"><WarpedText>A softer frequency</WarpedText></b>
+            <b className="track-name"><WarpedText>Unrequited</WarpedText></b>
             <span><WarpedText>{`ORIGINAL AMBIENT · ${playing ? "PLAYING" : "SOUND OFF"}`}</WarpedText></span>
           </span>
           <span className="equalizer" aria-hidden="true">
+            
             {[0, 1, 2, 3, 4].map((i) => (
-              <i key={i} style={{ animationDelay: `${i * -0.18}s` }} />
+              <i key={i} style={{ animationDelay: `${i * 0.18}s` }} />
             ))}
           </span>
           <span className="player-control">
