@@ -59,7 +59,6 @@ export default function Portfolio() {
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
     >
       <WavyBackground reducedMotion={reducedMotion} paused={loading || expanded} />
-      <div className="structural-grid" aria-hidden="true" />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
       <header className="hud-header">
         <button

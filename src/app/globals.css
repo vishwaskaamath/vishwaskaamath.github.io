@@ -81,17 +81,6 @@ button:disabled {
   pointer-events: none;
 }
 
-.structural-grid {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 25% 33.3333%;
-  background-position: -1px -1px;
-  pointer-events: none;
-}
 .wavy-grain {
   position: absolute;
   inset: 0;
