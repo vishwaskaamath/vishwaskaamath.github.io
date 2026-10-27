@@ -1544,3 +1544,6 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
  .software-cube .tile-emblem { transform:translateZ(8px); }
  .software-wheel .tool-caption { top:58px; }
 }
+
+.portfolio, .portfolio img, .portfolio video { user-select:none; -webkit-user-select:none; -webkit-user-drag:none; }
+html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-enabled[data-wheel-dragging="true"] *:active { cursor:none !important; }

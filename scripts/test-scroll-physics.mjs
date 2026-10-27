@@ -92,4 +92,25 @@ test("dot selection takes the nearest circular path and keyboard repeats queue f
   near(frame.scrollVelocity, 0);
 });
 
+test("holding a drag disables idle snapping until release", () => {
+  const reel = new ScrollPhysics(5);
+  reel.beginDrag(); reel.add(.63, 0);
+  near(reel.advance(5000).targetScroll, .63);
+  reel.endDrag(-30, 5001);
+  near(reel.targetScroll, 1);
+  for(let t=5016;t<7500;t+=16) reel.advance(t);
+  assert.equal(reel.read().index,1);
+  assert.equal(reel.read().settled,true);
+});
+test("drag reversal and negative throws retain continuous wrapping", () => {
+  const reel=new ScrollPhysics(5);
+  reel.beginDrag(); reel.add(-.9,0);
+  const held=reel.advance(500);
+  near(held.targetScroll,4.1);
+  reel.endDrag(30,501);
+  near(reel.targetScroll,4);
+  for(let t=520;t<3000;t+=16)reel.advance(t);
+  assert.equal(reel.read().index,4);
+});
+
 console.log(`${passed} scroll regression checks passed.`);

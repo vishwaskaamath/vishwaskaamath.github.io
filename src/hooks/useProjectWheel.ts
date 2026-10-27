@@ -2,9 +2,12 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ScrollPhysics } from "@/lib/scrollPhysics";
 
+export type WheelDrag = { isDragging: boolean; lastY: number; distance: number; velocity: number; wasDragged: boolean; pointerId: number };
+
 export function useProjectWheel(count: number, disabled: boolean, reducedMotion: boolean) {
   const engine = useMemo(() => new ScrollPhysics(count), [count]);
   const index = useRef(0);
+  const dragRef = useRef<WheelDrag>({isDragging:false,lastY:0,distance:0,velocity:0,wasDragged:false,pointerId:-1});
   const options = useRef({ disabled, reducedMotion });
   options.current = { disabled, reducedMotion };
 
@@ -16,9 +19,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
   useEffect(() => {
     let raf = 0;
 
-    let dragging = false;
-    let touchX = 0;
-    let touchY = 0;
+    const drag = dragRef.current;
     const blocked = (target: EventTarget | null) =>
       target instanceof Element && !!target.closest("dialog,input,textarea,select,[contenteditable='true']");
 
@@ -39,50 +40,67 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
         engine.step(["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1, performance.now());
       }
     };
-    const start = (event: TouchEvent) => {
-      if (options.current.disabled || blocked(event.target) || event.touches.length !== 1) return;
-      if (event.target instanceof Element && event.target.closest("button:not(.video-hit),a")) return;
-      dragging = true;
-      touchX = event.touches[0].clientX;
-      touchY = event.touches[0].clientY;
+    const start = (event: PointerEvent) => {
+      if (!event.isPrimary || event.button !== 0) return;
+      drag.wasDragged = false; drag.distance = 0;
+      if (options.current.disabled || blocked(event.target)) return;
+      if (event.target instanceof Element && event.target.closest("button:not(.video-hit),a,[role='button']:not(.video-hit)")) return;
+      drag.isDragging = true; drag.lastY = event.clientY; drag.velocity = 0; drag.pointerId = event.pointerId;
+      engine.beginDrag();
+      document.documentElement.dataset.wheelDragging = 'true';
     };
-    const move = (event: TouchEvent) => {
-      if (!dragging || options.current.disabled || event.touches.length !== 1) return;
-      const dx = touchX - event.touches[0].clientX;
-      const dy = touchY - event.touches[0].clientY;
-      const delta = Math.abs(dy) > Math.abs(dx) ? dy : dx;
-      touchX = event.touches[0].clientX;
-      touchY = event.touches[0].clientY;
-      if (delta) {
-        event.preventDefault();
-        engine.add(delta * 0.004, performance.now());
-      }
+    const end = (event?: PointerEvent) => {
+      if (!drag.isDragging || (event && event.pointerId !== drag.pointerId)) return;
+      drag.isDragging = false; drag.wasDragged = drag.distance > 6;
+      engine.endDrag(drag.wasDragged ? drag.velocity : 0, performance.now());
+      delete document.documentElement.dataset.wheelDragging;
     };
-    const end = () => { dragging = false; };
+    const move = (event: PointerEvent) => {
+      if (!drag.isDragging || event.pointerId !== drag.pointerId) return;
+      if (options.current.disabled) { drag.velocity = 0; end(); return; }
+      const deltaY = event.clientY - drag.lastY;
+      drag.lastY = event.clientY; drag.distance += Math.abs(deltaY); drag.velocity = deltaY;
+      drag.wasDragged = drag.distance > 6;
+      engine.add(-deltaY * 0.0045, performance.now());
+      if (drag.wasDragged && event.cancelable) event.preventDefault();
+    };
+    const click = (event: MouseEvent) => {
+      if (drag.wasDragged && event.detail !== 0) { event.preventDefault(); event.stopImmediatePropagation(); }
+    };
+    const ghost = (event: DragEvent) => { if ((event.target as Element)?.closest('.portfolio')) event.preventDefault(); };
+    const blur = () => { drag.velocity = 0; end(); };
     const visibility = () => {
       cancelAnimationFrame(raf);
+      if (document.hidden) blur();
       if (!document.hidden) raf = requestAnimationFrame(frame);
     };
 
     raf = requestAnimationFrame(frame);
     window.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("keydown", key);
-    window.addEventListener("touchstart", start, { passive: true });
-    window.addEventListener("touchmove", move, { passive: false });
-    window.addEventListener("touchend", end, { passive: true });
-    window.addEventListener("touchcancel", end, { passive: true });
+    window.addEventListener("pointerdown", start, true);
+    window.addEventListener("pointermove", move, {passive:false});
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+    window.addEventListener("click", click, true);
+    window.addEventListener("dragstart", ghost);
+    window.addEventListener("blur", blur);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("wheel", wheel);
       window.removeEventListener("keydown", key);
-      window.removeEventListener("touchstart", start);
-      window.removeEventListener("touchmove", move);
-      window.removeEventListener("touchend", end);
-      window.removeEventListener("touchcancel", end);
+      window.removeEventListener("pointerdown", start, true);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+      window.removeEventListener("click", click, true);
+      window.removeEventListener("dragstart", ghost);
+      window.removeEventListener("blur", blur);
+      blur();
       document.removeEventListener("visibilitychange", visibility);
     };
   }, [engine]);
 
-  return { index: index.current, engine, select };
+  return { index: index.current, engine, select, dragRef };
 }

@@ -27,7 +27,7 @@ export default function Portfolio() {
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const { canvasRef, burst } = useParticles(reducedMotion);
-  const { index, engine, select } = useProjectWheel(
+  const { index, engine, select, dragRef } = useProjectWheel(
     projects.length,
     !!panel || loading || expanded,
     reducedMotion,
@@ -117,6 +117,7 @@ export default function Portfolio() {
         </nav>
       </header>
       <ProjectWheels
+        dragRef={dragRef}
         index={index}
         engine={engine}
         reducedMotion={reducedMotion}
@@ -163,7 +164,7 @@ export default function Portfolio() {
         onBurst={burst}
       />
       {loading && <LoadingScreen onComplete={loaded} />}
-      <RibbonCursor reducedMotion={reducedMotion} layerKey={panel} />
+      <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>
   );
 }

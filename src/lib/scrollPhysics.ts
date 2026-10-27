@@ -21,6 +21,7 @@ type Listener = (frame: ReelFrame) => void;
 
 /** One shared clock; subscribers mutate transforms before the same browser paint. */
 export class ScrollPhysics {
+  private dragging = false;
   private dirty = true;
   invalidate = () => { this.dirty = true; };
   currentScroll = 0;
@@ -48,6 +49,14 @@ export class ScrollPhysics {
     this.lastInput = now;
   }
 
+  beginDrag() { this.dragging = true; }
+
+  endDrag(velocity: number, now: number) {
+    this.dragging = false;
+    this.targetScroll = Math.round(this.targetScroll - velocity * 0.018);
+    this.lastInput = now;
+  }
+
   wheel(deltaY: number, now: number) {
     // Every wheel event contributes, including input during snapping or reversal.
     this.add(deltaY * WHEEL_SENSITIVITY, now);
@@ -64,10 +73,10 @@ export class ScrollPhysics {
   }
 
   advance(now: number, reducedMotion = false) {
-    if (now - this.lastInput >= SNAP_IDLE_MS) this.targetScroll = Math.round(this.targetScroll);
+    if (!this.dragging && now - this.lastInput >= SNAP_IDLE_MS) this.targetScroll = Math.round(this.targetScroll);
     const previousScroll = this.currentScroll;
     const wasSettled = this.frame.settled;
-    this.currentScroll = reducedMotion
+    this.currentScroll = reducedMotion && !this.dragging
       ? Math.round(this.targetScroll)
       : this.currentScroll + (this.targetScroll - this.currentScroll) * SCROLL_LERP;
     if (Math.abs(this.targetScroll - this.currentScroll) < 0.00001) {

@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
+import type { WheelDrag } from '@/hooks/useProjectWheel';
 import { drawRibbon, type RibbonPoint } from '@/lib/taperedRibbon';
-export default function RibbonCursor({reducedMotion,layerKey}:{reducedMotion:boolean;layerKey:string|null}) {
+export default function RibbonCursor({reducedMotion,layerKey,dragRef}:{reducedMotion:boolean;layerKey:string|null;dragRef:RefObject<WheelDrag>}) {
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const state=useRef({x:0,y:0,active:false,points:[] as RibbonPoint[],reducedMotion});
   state.current.reducedMotion=reducedMotion;
@@ -13,7 +14,7 @@ export default function RibbonCursor({reducedMotion,layerKey}:{reducedMotion:boo
       raf=0;ctx.clearRect(0,0,innerWidth,innerHeight);if(!s.active||document.hidden)return;
       if(s.reducedMotion){
         s.points.forEach(p=>{p.x=s.x;p.y=s.y;});
-        ctx.filter='none';ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,3.2,0,Math.PI*2);ctx.fill();return;
+        ctx.filter='none';ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,dragRef.current.isDragging?4.5:3.2,0,Math.PI*2);ctx.fill();return;
       }
       s.points[0].x+=(s.x-s.points[0].x)*.55;
       s.points[0].y+=(s.y-s.points[0].y)*.55;
@@ -23,7 +24,7 @@ export default function RibbonCursor({reducedMotion,layerKey}:{reducedMotion:boo
       }
       const moving=s.points.some(p=>Math.hypot(p.x-s.x,p.y-s.y)>.03);
       if(!moving)s.points.forEach(p=>{p.x=s.x;p.y=s.y;});
-      drawRibbon(ctx,s.points);
+      drawRibbon(ctx,s.points,dragRef.current.isDragging?4.5:3.2,dragRef.current.isDragging?.65:.45);
       if(moving)raf=requestAnimationFrame(draw);
     };
     const wake=()=>{if(!raf)raf=requestAnimationFrame(draw);};
@@ -36,9 +37,9 @@ export default function RibbonCursor({reducedMotion,layerKey}:{reducedMotion:boo
     const resize=()=>{const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(innerWidth*dpr);canvas.height=Math.round(innerHeight*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(s.active)wake();};
     const visibility=()=>{if(document.hidden)hide();};
     const preference=()=>{if(!fine.matches)hide();};
-    resize();window.addEventListener('pointermove',move,{passive:true});window.addEventListener('resize',resize);window.addEventListener('blur',hide);document.addEventListener('mouseleave',hide);document.addEventListener('visibilitychange',visibility);fine.addEventListener('change',preference);
-    return()=>{hide();window.removeEventListener('pointermove',move);window.removeEventListener('resize',resize);window.removeEventListener('blur',hide);document.removeEventListener('mouseleave',hide);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',preference);};
-  },[]);
+    resize();window.addEventListener('pointermove',move,{passive:true,capture:true});window.addEventListener('pointerdown',wake);window.addEventListener('pointerup',wake);window.addEventListener('pointercancel',wake);window.addEventListener('resize',resize);window.addEventListener('blur',hide);document.addEventListener('mouseleave',hide);document.addEventListener('visibilitychange',visibility);fine.addEventListener('change',preference);
+    return()=>{hide();window.removeEventListener('pointermove',move,true);window.removeEventListener('pointerdown',wake);window.removeEventListener('pointerup',wake);window.removeEventListener('pointercancel',wake);window.removeEventListener('resize',resize);window.removeEventListener('blur',hide);document.removeEventListener('mouseleave',hide);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',preference);};
+  },[dragRef]);
   useEffect(()=>{const c=canvasRef.current;if(!c||!c.showPopover||!matchMedia('(any-pointer: fine)').matches)return;const f=requestAnimationFrame(()=>{if(c.matches(':popover-open'))c.hidePopover();c.showPopover();});return()=>cancelAnimationFrame(f);},[layerKey]);
   return <canvas ref={canvasRef} className="ribbon-cursor" popover="manual" aria-hidden="true"/>;
 }

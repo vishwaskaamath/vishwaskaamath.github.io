@@ -1,5 +1,6 @@
 "use client";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type RefObject } from "react";
+import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
 import SoftwareTile from "./SoftwareTile";
@@ -7,8 +8,9 @@ import WarpedText from "./WarpedText";
 import VideoBezel from "./VideoBezel";
 
 export default function ProjectWheels({
-  index, engine, reducedMotion, select, paused, expanded, onExpand, onCollapse,
+  index, engine, reducedMotion, select, paused, expanded, onExpand, onCollapse, dragRef,
 }: {
+  dragRef: RefObject<WheelDrag>;
   index: number;
   engine: ScrollPhysics;
   reducedMotion: boolean;
@@ -140,6 +142,7 @@ export default function ProjectWheels({
               <button className="video-hit" tabIndex={nearby ? 0 : -1}
                 aria-label={active ? `${expanded ? "Collapse" : "Expand"} ${project.shortTitle} preview` : `Select ${project.shortTitle}`}
                 onClick={(event) => {
+                  if (event.detail !== 0 && dragRef.current.wasDragged) return;
                   if (i === engine.read().index) {
                     if (expanded) { onCollapse(); return; }
                     const preview = event.currentTarget.querySelector('video')!;

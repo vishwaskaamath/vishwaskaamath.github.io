@@ -16,7 +16,7 @@ export function smoothRibbon(points: RibbonPoint[]) {
   return curve;
 }
 
-export function ribbonEdges(points: RibbonPoint[]) {
+export function ribbonEdges(points: RibbonPoint[], headRadius = 3.2) {
   const left: RibbonPoint[] = [], right: RibbonPoint[] = [];
   let tx = 1, ty = 0, headAngle = 0;
   for (let i = 0; i < points.length; i++) {
@@ -25,22 +25,22 @@ export function ribbonEdges(points: RibbonPoint[]) {
     // Coincident nodes occur naturally as the resting ribbon collapses.
     if (length > .00001) { tx=dx/length; ty=dy/length; }
     if (!i) headAngle=Math.atan2(ty,tx);
-    const radius=3.2*Math.pow(1-i/(points.length-1),1.65);
+    const radius=headRadius*Math.pow(1-i/(points.length-1),1.65);
     left.push({x:points[i].x-ty*radius,y:points[i].y+tx*radius});
     right.push({x:points[i].x+ty*radius,y:points[i].y-tx*radius});
   }
   return {left,right,headAngle};
 }
 
-export function drawRibbon(ctx: CanvasRenderingContext2D, points: RibbonPoint[]) {
-  const curve=smoothRibbon(points), {left,right,headAngle}=ribbonEdges(curve);
+export function drawRibbon(ctx: CanvasRenderingContext2D, points: RibbonPoint[], headRadius = 3.2, bloomOpacity = 0.45) {
+  const curve=smoothRibbon(points), {left,right,headAngle}=ribbonEdges(curve,headRadius);
   const head=points[0], path=new Path2D();
   path.moveTo(left[0].x,left[0].y);
   for(let i=1;i<left.length;i++)path.lineTo(left[i].x,left[i].y);
   for(let i=right.length-1;i>=0;i--)path.lineTo(right[i].x,right[i].y);
-  path.arc(head.x,head.y,3.2,headAngle-Math.PI/2,headAngle+Math.PI/2,true);
+  path.arc(head.x,head.y,headRadius,headAngle-Math.PI/2,headAngle+Math.PI/2,true);
   path.closePath();
-  ctx.filter='blur(6px)';ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fill(path);
+  ctx.filter='blur(6px)';ctx.fillStyle=`rgba(255,255,255,${bloomOpacity})`;ctx.fill(path);
   ctx.filter='none';ctx.fillStyle='#ffffff';ctx.fill(path);
-  ctx.beginPath();ctx.arc(head.x,head.y,3.2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(head.x,head.y,headRadius,0,Math.PI*2);ctx.fill();
 }
