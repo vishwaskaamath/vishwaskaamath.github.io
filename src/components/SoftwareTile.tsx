@@ -11,7 +11,6 @@ export default function SoftwareTile({software, tools = [toolCatalog[software]]}
     const stage=root.current!;
     const card=stage.closest<HTMLElement>('[data-software]')!;
     const cubes=Array.from(stage.querySelectorAll<HTMLElement>('[data-orbit-cube]'));
-    const lights=cubes.map(cube=>Array.from(cube.querySelectorAll<SVGFEPointLightElement>('[data-emblem-light]')));
     const probes=Array.from(stage.querySelectorAll<HTMLElement>('.software-probe'));
     const s=motion.current;
     let w=stage.offsetWidth,h=stage.offsetHeight,last=0;
@@ -25,11 +24,8 @@ export default function SoftwareTile({software, tools = [toolCatalog[software]]}
         const z=multiple?Math.cos(angle)*75*unit:0;
         cube.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateX(${-s.y*24}deg) rotateY(${s.x*24+(multiple?Math.sin(angle)*-15:0)}deg) scale(${.68+depth*.32})`;
         cube.style.zIndex=String(Math.round(depth*100));
-        cube.style.filter="none";
-        cube.style.opacity="1";
-        cube.style.setProperty("--depth-shade",String((1-depth)*.5));
-        cube.style.setProperty("--prism-angle",`${135+s.x*150-s.y*120}deg`);
-        lights[i].forEach((light,j)=>{light.setAttribute("x",String(j?220-s.x*190:95+s.x*190));light.setAttribute("y",String(j?240-s.y*190:95+s.y*190));});
+        cube.style.filter=`brightness(${.45+depth*.55}) blur(${(1-depth)*1.5}px)`;
+        cube.style.opacity=String(.4+depth*.6);
         cube.style.setProperty('--tile-light',String(s.glow));
         cube.style.setProperty('--light-x',`${(s.x+.5)*100}%`);
         cube.style.setProperty('--light-y',`${(s.y+.5)*100}%`);
