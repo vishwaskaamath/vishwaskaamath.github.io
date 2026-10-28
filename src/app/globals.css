@@ -1593,3 +1593,14 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 
 .project-title { transition:font-size 450ms cubic-bezier(.16,1,.3,1),color 350ms ease; }
 [data-theme="light"] .wavy-background { background:#f6f6f4; }
+
+/* Pally is scoped to the navigation and the project/toolkit captions. */
+.main-nav button,
+.metadata-slot,
+.tool-caption,
+.tool-caption .micro-label {
+  font-family: var(--font-pally), Arial, sans-serif;
+  font-synthesis: none;
+}
+.main-nav button.nav-active { font-weight: 700; }
+.role-badge, .project-year, .tool-caption .micro-label { font-weight: 500; }

@@ -12,6 +12,18 @@ const tanker = localFont({
   adjustFontFallback: false,
 });
 
+const pally = localFont({
+  src: [
+    { path: "./fonts/Pally-Regular.otf", weight: "400", style: "normal" },
+    { path: "./fonts/Pally-Medium.otf", weight: "500", style: "normal" },
+    { path: "./fonts/Pally-Bold.otf", weight: "700", style: "normal" },
+  ],
+  variable: "--font-pally",
+  display: "swap",
+  fallback: ["Arial", "sans-serif"],
+  adjustFontFallback: false,
+});
+
 export const metadata: Metadata = {
   title: "Vishwas Kamath — Motion, Film & Digital Experiences",
   description:
@@ -22,7 +34,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={tanker.variable}>
+    <html lang="en" className={`${tanker.variable} ${pally.variable}`}>
       <body>{children}</body>
     </html>
   );
