@@ -1,46 +1,40 @@
-export type RibbonPoint = { x: number; y: number };
-
-/** Preserve both endpoints while cutting each interior corner twice. */
-export function smoothRibbon(points: RibbonPoint[]) {
-  let curve = points;
-  for (let pass = 0; pass < 2; pass++) {
-    const next: RibbonPoint[] = [{ ...curve[0] }];
-    for (let i = 0; i < curve.length - 1; i++) {
-      const a = curve[i], b = curve[i + 1];
-      next.push({ x: .75*a.x+.25*b.x, y: .75*a.y+.25*b.y },
-        { x: .25*a.x+.75*b.x, y: .25*a.y+.75*b.y });
-    }
-    next.push({ ...curve[curve.length - 1] });
-    curve = next;
-  }
-  return curve;
+export type RibbonPoint = Readonly<{x:number;y:number;time:number}>;
+export const TRAIL_LIFETIME=175;
+export function recordPoint(history:RibbonPoint[],x:number,y:number,time:number){
+ const last=history[0];
+ if(!last||Math.hypot(x-last.x,y-last.y)>=1.5)history.unshift({x,y,time});
 }
-
-export function ribbonEdges(points: RibbonPoint[], headRadius = 3.2) {
-  const left: RibbonPoint[] = [], right: RibbonPoint[] = [];
-  let tx = 1, ty = 0, headAngle = 0;
-  for (let i = 0; i < points.length; i++) {
-    const before = points[Math.max(0, i - 1)], after = points[Math.min(points.length - 1, i + 1)];
-    const dx = after.x-before.x, dy = after.y-before.y, length = Math.hypot(dx,dy);
-    // Coincident nodes occur naturally as the resting ribbon collapses.
-    if (length > .00001) { tx=dx/length; ty=dy/length; }
-    if (!i) headAngle=Math.atan2(ty,tx);
-    const radius=headRadius*Math.pow(1-i/(points.length-1),1.65);
-    left.push({x:points[i].x-ty*radius,y:points[i].y+tx*radius});
-    right.push({x:points[i].x+ty*radius,y:points[i].y-tx*radius});
-  }
-  return {left,right,headAngle};
+export function expireHistory(history:RibbonPoint[],now:number){
+ while(history.length&&now-history[history.length-1].time>TRAIL_LIFETIME)history.pop();
 }
-
-export function drawRibbon(ctx: CanvasRenderingContext2D, points: RibbonPoint[], headRadius = 3.2, bloomOpacity = 0.45) {
-  const curve=smoothRibbon(points), {left,right,headAngle}=ribbonEdges(curve,headRadius);
-  const head=points[0], path=new Path2D();
-  path.moveTo(left[0].x,left[0].y);
-  for(let i=1;i<left.length;i++)path.lineTo(left[i].x,left[i].y);
-  for(let i=right.length-1;i>=0;i--)path.lineTo(right[i].x,right[i].y);
-  path.arc(head.x,head.y,headRadius,headAngle-Math.PI/2,headAngle+Math.PI/2,true);
-  path.closePath();
-  ctx.filter='blur(6px)';ctx.fillStyle=`rgba(255,255,255,${bloomOpacity})`;ctx.fill(path);
-  ctx.filter='none';ctx.fillStyle='#ffffff';ctx.fill(path);
-  ctx.beginPath();ctx.arc(head.x,head.y,headRadius,0,Math.PI*2);ctx.fill();
+/** Nonuniform, centripetal Catmull–Rom (alpha=.5), with reflected endpoints. */
+export function sampleCatmullRom(points:readonly RibbonPoint[],subdivisions=8):RibbonPoint[]{
+ const pts=points.filter((p,i)=>!i||Math.hypot(p.x-points[i-1].x,p.y-points[i-1].y)>1e-6);
+ if(pts.length<2)return [...pts];
+ const result:RibbonPoint[]=[];
+ const mix=(a:RibbonPoint,b:RibbonPoint,ta:number,tb:number,t:number):RibbonPoint=>({x:((tb-t)*a.x+(t-ta)*b.x)/(tb-ta),y:((tb-t)*a.y+(t-ta)*b.y)/(tb-ta),time:0});
+ const knot=(a:RibbonPoint,b:RibbonPoint)=>Math.sqrt(Math.hypot(b.x-a.x,b.y-a.y));
+ for(let i=0;i<pts.length-1;i++){
+  const p1=pts[i],p2=pts[i+1];
+  const p0=pts[i-1]??{x:2*p1.x-p2.x,y:2*p1.y-p2.y,time:p1.time};
+  const p3=pts[i+2]??{x:2*p2.x-p1.x,y:2*p2.y-p1.y,time:p2.time};
+  const t0=0,t1=knot(p0,p1),t2=t1+knot(p1,p2),t3=t2+knot(p2,p3);
+  for(let s=0;s<subdivisions;s++){
+   const u=s/subdivisions,t=t1+(t2-t1)*u;
+   const a=mix(p0,p1,t0,t1,t),b=mix(p1,p2,t1,t2,t),c=mix(p2,p3,t2,t3,t);
+   const point=mix(mix(a,b,t0,t2,t),mix(b,c,t1,t3,t),t1,t2,t);
+   result.push({x:point.x,y:point.y,time:p1.time+(p2.time-p1.time)*u});
+  }
+ }
+ result.push(pts[pts.length-1]);return result;
+}
+/** Overlapping round capsules; no extruded normals or self-crossing polygon. */
+export function drawCapsules(ctx:CanvasRenderingContext2D,pts:readonly RibbonPoint[],now:number,halo=false){
+ ctx.globalCompositeOperation='lighten';ctx.lineCap='round';ctx.lineJoin='round';
+ for(let i=0;i<pts.length-1;i++){
+  const life=Math.max(0,Math.min(1,1-(now-pts[i].time)/TRAIL_LIFETIME));
+  const width=5.2*life**1.5;if(width<.01)continue;
+  ctx.lineWidth=width*(halo?2.2:1);ctx.strokeStyle=`rgba(255,255,255,${life**1.3*(halo?.45:1)})`;
+  ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[i+1].x,pts[i+1].y);ctx.stroke();
+ }
 }

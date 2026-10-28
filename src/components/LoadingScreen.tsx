@@ -20,6 +20,7 @@ export default function LoadingScreen({onComplete}:{onComplete:()=>void}) {
     const s=state.current;s.time=0;s.points.length=0;
     const resize=()=>{w=innerWidth;h=innerHeight;surface.width=w;surface.height=h;element.querySelector('svg')!.setAttribute('viewBox',`0 0 ${w} ${h}`);hole.current!.setAttribute('cx',String(w/2));hole.current!.setAttribute('cy',String(h/2));const filter=element.querySelector('filter')!;filter.setAttribute('width',String(w));filter.setAttribute('height',String(h));};
     const tick=(now:number)=>{
+      if(!root.current||!counter.current||!hole.current||!displace.current)return;
       if(document.hidden){last=0;raf=requestAnimationFrame(tick);return;}
       s.time+=last?Math.min(now-last,50):0;last=now;
       const p=Math.min(1,s.time/2400),angle=p*Math.PI*8;
