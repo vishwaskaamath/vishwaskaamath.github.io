@@ -1547,3 +1547,17 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 
 .portfolio, .portfolio img, .portfolio video { user-select:none; -webkit-user-select:none; -webkit-user-drag:none; }
 html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-enabled[data-wheel-dragging="true"] *:active { cursor:none !important; }
+
+/* Solid metal slabs: grouping filters/opacity must not flatten this 3D tree. */
+.software-cube { border-radius:28px; }
+.software-cube .software-backplate { background:linear-gradient(135deg,#4a4e54 0%,#26292e 45%,#111215 100%); border:1px solid #9ba6ba33; box-shadow:inset 0 1px 0 #dce5f333,inset 0 -1px 0 #0009; }
+.metal-face,.chrome-lip,.prism-ring { position:absolute; inset:0; border-radius:inherit; pointer-events:none; }
+.metal-face { background:#050505; box-shadow:inset 0 0 0 4px #0a0a0c,0 18px 30px #000b; transform:translateZ(0); }
+.chrome-lip { padding:1.5px; background:linear-gradient(135deg,#ffffffe6,#ffffff26 50%,#ffffff80); mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; -webkit-mask-composite:xor; transform:translateZ(1px); }
+.prism-ring { inset:5px; border-radius:23px; padding:10px; background:conic-gradient(from var(--prism-angle,135deg),#00e5ff,#3b82f6,#ec4899,#f59e0b,#10b981,#00e5ff); mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; -webkit-mask-composite:xor; filter:blur(8px); opacity:calc(.26 + var(--tile-light,0)*.34); transform:translateZ(2px); }
+.chiseled-glyph { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+.glyph-side { fill:color-mix(in srgb,#181a24 70%,var(--brand-glow) 30%); }
+.glyph-side:first-of-type { filter:drop-shadow(0 16px 18px #000f); }
+.glyph-face { filter:brightness(calc(1 - var(--depth-shade,0))); }
+.metal-label { position:absolute; left:8%; width:84%; bottom:15%; text-align:center; font:6px Arial,sans-serif; letter-spacing:1.3px; color:#a8a9b1; text-transform:uppercase; transform:translateZ(3px); pointer-events:none; }
+@media(max-width:759px){.software-cube{border-radius:12px}.prism-ring{border-radius:9px;inset:3px;padding:5px;filter:blur(4px)}.metal-label{font-size:3px;letter-spacing:.2px}}
