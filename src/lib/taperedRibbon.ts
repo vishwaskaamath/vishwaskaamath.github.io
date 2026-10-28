@@ -33,7 +33,7 @@ export function buildSmoothRibbon(pts:readonly RibbonPoint[],now:number,maxAge=1
  span(mids[mids.length-1],pts[pts.length-1],pts[pts.length-1],true);
  return samples;
 }
-export function drawRibbon(ctx:CanvasRenderingContext2D,samples:readonly RibbonSample[]){
+export function drawRibbon(ctx:CanvasRenderingContext2D,samples:readonly RibbonSample[],light=false){
  if(!samples.length)return;
  const head=samples[0];ctx.beginPath();
  ctx.moveTo(head.x+head.nx*head.radius,head.y+head.ny*head.radius);
@@ -42,6 +42,6 @@ export function drawRibbon(ctx:CanvasRenderingContext2D,samples:readonly RibbonS
  const angle=Math.atan2(head.ny,head.nx);
  ctx.arc(head.x,head.y,head.radius,angle+Math.PI,angle);ctx.closePath();
  ctx.globalCompositeOperation='source-over';
- ctx.filter='blur(5px)';ctx.fillStyle='rgba(255,255,255,0.45)';ctx.fill();
- ctx.filter='none';ctx.fillStyle='#ffffff';ctx.fill();
+ ctx.filter='blur(5px)';ctx.fillStyle=light?'rgba(40,40,46,0.32)':'rgba(255,255,255,0.45)';ctx.fill();
+ ctx.filter='none';ctx.fillStyle=light?'#222226':'#ffffff';ctx.fill();
 }

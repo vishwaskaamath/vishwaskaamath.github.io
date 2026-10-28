@@ -1,4 +1,5 @@
 "use client";
+import { useThemeRef } from "@/lib/theme";
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { bezelGeometry, createBoundaryProjector } from '@/lib/bezelGeometry';
 import { damp, subscribeProximity } from '@/lib/proximity';
@@ -8,6 +9,7 @@ type Speck = { x: number; y: number; vx: number; vy: number; life: number; size:
 
 /** The clip, glass and two rims live in the same deformable card-local layer. */
 export default function VideoBezel({ children }: { children: ReactNode }) {
+  const themeRef = useThemeRef();
   const root = useRef<HTMLDivElement>(null);
   const glass = useRef<HTMLDivElement>(null);
   const id = `video-crt-${useId().replace(/:/g, '')}`;
@@ -65,7 +67,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
         flare.style.display = glow < .002 ? 'none' : '';
         element.dataset.glow = glow.toFixed(3);
         if (ctx) {
-          ctx.clearRect(0,0,w,h); ctx.globalCompositeOperation='lighter';
+          ctx.clearRect(0,0,w,h); ctx.globalCompositeOperation=themeRef.current==='light'?'source-over':'lighter';
           if (target>.5 && closest) {
             emission += dt*.035*glow;
             while(emission>=1 && specks.length<32) {
@@ -77,7 +79,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
           for(let i=specks.length-1;i>=0;i--) {
             const p=specks[i]; p.life-=dt/550; p.x+=p.vx*dt/1000; p.y+=p.vy*dt/1000;
             if(p.life<=0){specks.splice(i,1);continue;}
-            ctx.fillStyle=`rgba(190,255,246,${p.life*.65})`;
+            ctx.fillStyle=`rgba(${themeRef.current==='light'?'55,85,100':'190,255,246'},${p.life*.65})`;
             ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
           }
         }
@@ -85,7 +87,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
       };
     });
     return () => { observer.disconnect(); unsubscribe(); };
-  }, [id]);
+  }, [id, themeRef]);
   return <div className="video-bezel" ref={root}>
     <div className="video-glass" ref={glass}>
       <LiquidSurface className="video-lens">

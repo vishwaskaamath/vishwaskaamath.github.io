@@ -1,6 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef } from "react";
 
+import { THEME_EVENT, type ThemeRef } from "@/lib/theme";
+
 type Particle = {
   x: number;
   y: number;
@@ -11,7 +13,7 @@ type Particle = {
   size: number;
 };
 /** One capped, DPR-aware canvas; no React renders in the animation loop. */
-export function useParticles(reducedMotion: boolean) {
+export function useParticles(reducedMotion: boolean, themeRef: ThemeRef) {
   const wakeRef = useRef<() => void>(() => {});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Particle[]>([]);
@@ -67,7 +69,7 @@ export function useParticles(reducedMotion: boolean) {
           particles.current.splice(i, 1);
           continue;
         }
-        ctx.fillStyle = `rgba(222,220,212,${(p.life / p.max) * 0.6})`;
+        ctx.fillStyle = `rgba(${themeRef.current === "light" ? "40,40,46" : "222,220,212"},${(p.life / p.max) * 0.6})`;
         ctx.fillRect(p.x, p.y, p.size, p.size);
       }
       if (particles.current.length) raf = requestAnimationFrame(draw);
@@ -81,15 +83,17 @@ export function useParticles(reducedMotion: boolean) {
       if (!document.hidden && particles.current.length) wake();
     };
     resize();
+    window.addEventListener(THEME_EVENT, wake);
     window.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       cancelAnimationFrame(raf);
       wakeRef.current = () => {};
+      window.removeEventListener(THEME_EVENT, wake);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       particles.current = [];
     };
-  }, [reducedMotion, burst]);
+  }, [reducedMotion, burst, themeRef]);
   return { canvasRef, burst };
 }

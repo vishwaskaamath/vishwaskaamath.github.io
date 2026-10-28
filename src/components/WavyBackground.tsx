@@ -1,4 +1,5 @@
 "use client";
+import { useThemeRef, THEME_EVENT } from "@/lib/theme";
 import { useEffect, useRef, type RefObject } from 'react';
 import type { WheelDrag } from '@/hooks/useProjectWheel';
 import {spawnPulse,advancePulses,type ContourPulse} from '@/lib/contourPulse';
@@ -6,6 +7,7 @@ import { createWaveRenderer } from '@/lib/waveRenderer';
 
 /** Sculpted contours and a separate translucent, intertwined silk ribbon. */
 export default function WavyBackground({ reducedMotion, paused = false, dragRef }: { reducedMotion: boolean; paused?: boolean; dragRef: RefObject<WheelDrag> }) {
+  const themeRef = useThemeRef();
   const phaseRef = useRef(0);
   const pulsesRef = useRef<ContourPulse[]>([]);
   const gpuRef = useRef<HTMLCanvasElement>(null);
@@ -28,9 +30,10 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
     const isStill = () => reducedMotion || motion.matches || (paused && !pulsesRef.current.length);
 
     const draw = () => {
-      if (renderer) { renderer.draw(time,pulsesRef.current); return; }
+      if (renderer) { renderer.draw(time,pulsesRef.current,themeRef.current === 'light'); return; }
       ctx.globalAlpha = 1;
-      ctx.fillStyle = '#060606';
+      const light = themeRef.current === 'light';
+      ctx.fillStyle = light ? '#f6f6f4' : '#060606';
       ctx.fillRect(0, 0, width, height);
       ctx.lineJoin = 'round';
       ctx.lineCap = 'butt';
@@ -56,11 +59,12 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
         }
       }
       bands.forEach((path, i) => {
-        ctx.strokeStyle = `rgba(19,19,19,${0.35 + i / 3 * 0.5})`;
+        ctx.strokeStyle = light ? `rgba(20,20,24,${0.04 + i / 3 * 0.10})` : `rgba(19,19,19,${0.35 + i / 3 * 0.5})`;
         ctx.stroke(path);
       });
       ctx.lineWidth = 0.7;
-      ctx.strokeStyle = 'rgba(190,200,215,0.028)';
+      ctx.globalCompositeOperation = light ? 'multiply' : 'source-over';
+      ctx.strokeStyle = light ? 'rgba(12,12,15,0.045)' : 'rgba(190,200,215,0.028)';
       const mesh=new Path2D();
       for (let i = 0; i < 75; i++) {
         const phase = i * 0.065;
@@ -73,13 +77,14 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
         }
       }
       ctx.stroke(mesh);
-      ctx.globalCompositeOperation='lighter';
+      ctx.globalCompositeOperation=light ? 'multiply' : 'lighter';
+      const pulseColor=light ? '15,15,20' : '210,220,235';
       for(const p of pulsesRef.current){
         const outer=p.radius+70,inner=Math.max(0,p.radius-70);
         const glow=ctx.createRadialGradient(p.x,p.y,inner,p.x,p.y,outer);
-        glow.addColorStop(0,'rgba(210,220,235,0)');
-        glow.addColorStop(Math.max(.001,(p.radius-inner)/(outer-inner)),`rgba(210,220,235,${.16*p.alpha})`);
-        glow.addColorStop(1,'rgba(210,220,235,0)');ctx.strokeStyle=glow;
+        glow.addColorStop(0,`rgba(${pulseColor},0)`);
+        glow.addColorStop(Math.max(.001,(p.radius-inner)/(outer-inner)),`rgba(${pulseColor},${.16*p.alpha})`);
+        glow.addColorStop(1,`rgba(${pulseColor},0)`);ctx.strokeStyle=glow;
         ctx.lineWidth=3.5;bands.forEach(path=>ctx.stroke(path));
         ctx.lineWidth=.7;ctx.stroke(mesh);
       }
@@ -135,6 +140,7 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
     const restored = () => { renderer = safeRenderer(); setMode(); resize(); };
     gpu.addEventListener('webglcontextlost', lost); gpu.addEventListener('webglcontextrestored', restored);
     resize(); restart();
+    window.addEventListener(THEME_EVENT, draw);
     window.addEventListener('resize', resize);
     document.addEventListener('visibilitychange', restart);
     motion.addEventListener('change', restart);
@@ -145,11 +151,12 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
       window.removeEventListener('pointerup',up,true);
       window.removeEventListener('pointercancel',cancel,true);
       gpu.removeEventListener('webglcontextlost', lost); gpu.removeEventListener('webglcontextrestored', restored);
+      window.removeEventListener(THEME_EVENT, draw);
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', restart);
       motion.removeEventListener('change', restart);
     };
-  }, [reducedMotion, paused, dragRef]);
+  }, [reducedMotion, paused, dragRef, themeRef]);
   return <div className="wavy-background" aria-hidden="true" data-renderer="canvas2d">
     <canvas ref={gpuRef} className="wavy-canvas" /><canvas ref={canvasRef} className="wavy-canvas wavy-backup" />
     <div className="wavy-grain" />

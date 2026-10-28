@@ -1547,3 +1547,49 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 
 .portfolio, .portfolio img, .portfolio video { user-select:none; -webkit-user-select:none; -webkit-user-drag:none; }
 html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-enabled[data-wheel-dragging="true"] *:active { cursor:none !important; }
+/* Shared theme palette: canvas effects read the stable ThemeRef independently. */
+.main-nav button.theme-toggle { padding: 9px; display:flex; align-items:center; justify-content:center; color:inherit; }
+.main-nav button:focus-visible { outline:2px solid var(--coral); outline-offset:2px; }
+.identity, .identity-copy, .identity-copy > span, .project-title, .title-line-secondary,
+.role-badge, .project-year, .tool-caption, .tool-caption-slot > span,
+.audio-track, .audio-track > span, .track-name, .main-nav button {
+  transition:color 350ms ease,border-color 350ms ease;
+}
+[data-theme="light"] { --bg:#f6f6f4; --ink:#111113; --line:rgba(0,0,0,.12); color-scheme:light; }
+[data-theme="light"] .portfolio { background:#f6f6f4; color:#111113; }
+[data-theme="light"] .main-nav { background:rgba(255,255,255,.75); backdrop-filter:blur(12px); border:1px solid rgba(0,0,0,.08); box-shadow:0 5px 24px #00000008; }
+[data-theme="light"] .main-nav button { color:#0f0f12; }
+[data-theme="light"] .main-nav button:hover { background:#00000008; }
+[data-theme="light"] .main-nav button.nav-active { background:#111; color:#fff; }
+[data-theme="light"] .identity, [data-theme="light"] .monogram { color:#111113; border-color:#00000024; }
+[data-theme="light"] .identity-copy > span { color:#52525b; }
+[data-theme="light"] .project-title, [data-theme="light"] .title-line-secondary { color:#0b0b0d; }
+[data-theme="light"] .role-badge { color:#18181b; border:1px solid rgba(0,0,0,.18); background:rgba(0,0,0,.03); }
+[data-theme="light"] .project-year { color:#18181b; }
+[data-theme="light"] .tool-caption .micro-label { color:#52525b; }
+[data-theme="light"] .tool-caption-slot > span:last-child { color:#111113; }
+[data-theme="light"] .audio-player { background:rgba(255,255,255,.75); border-color:#00000018; color:#111113; }
+[data-theme="light"] .track-name { color:#111113; }
+[data-theme="light"] .audio-track > span, [data-theme="light"] .player-control { color:#52525b; }
+[data-theme="light"] .equalizer i { background:#52525b; }
+[data-theme="light"] .video-glass { filter:drop-shadow(0 24px 24px #0000002e) drop-shadow(0 8px 8px #0000001a); }
+[data-theme="light"] .software-cube .software-tile { box-shadow:inset 0 1px 2px #ffffff40,0 24px 48px #0000002e,0 8px 16px #0000001a; }
+[data-theme="light"] .video-rim-flare, [data-theme="light"] .video-rim-specks { mix-blend-mode:normal; }
+[data-theme="light"] .video-rims > path[data-floating-rim] { stroke:rgba(20,20,25,.45); stroke-opacity:1; }
+[data-theme="light"] .video-rims stop:nth-child(1) { stop-color:#343d49; }
+[data-theme="light"] .video-rims stop:nth-child(2) { stop-color:#358d9c; }
+[data-theme="light"] .video-rims stop:nth-child(3), [data-theme="light"] .video-rims stop:nth-child(4) { stop-color:#8170c4; }
+[data-theme="light"] .overlay { background:#f6f6f4; border-color:#00000020; box-shadow:0 24px 80px #0003; }
+[data-theme="light"] .overlay::backdrop { background:#dcdcd8a8; }
+[data-theme="light"] .overlay p, [data-theme="light"] .overlay h2 em,
+[data-theme="light"] .close-button, [data-theme="light"] .copy-link,
+[data-theme="light"] .contact-location, [data-theme="light"] .contact-location > span:last-child,
+[data-theme="light"] .service-list > div > span, [data-theme="light"] .service-list svg,
+[data-theme="light"] .project-summary > div { color:#52525b; }
+[data-theme="light"] .about-signature { color:#111113; }
+[data-theme="light"] .close-button, [data-theme="light"] .service-list > div { border-color:#00000020; }
+[data-theme="light"] .email-link { color:#111113; }
+@media(max-width:759px) { .main-nav button.theme-toggle { padding:7px; } }
+
+.project-title { transition:font-size 450ms cubic-bezier(.16,1,.3,1),color 350ms ease; }
+[data-theme="light"] .wavy-background { background:#f6f6f4; }

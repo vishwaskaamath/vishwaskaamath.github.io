@@ -32,6 +32,7 @@ void main(){
   const fragment=`precision highp float;
 uniform float uSilk;varying float vEdge;varying float vAlpha;varying vec2 vPosition;
 uniform vec4 uPulse[5];
+uniform float uLight;
 void main(){
  float halfWidth=mix(1.75,.35,uSilk);
  float cover=1.0-smoothstep(max(0.0,halfWidth-.5),halfWidth+.5,abs(vEdge));
@@ -44,7 +45,13 @@ void main(){
   light+=.16*p.w*(1.0-smoothstep(0.0,1.0,band));
  }
  // Add illumination only where the existing contour geometry is drawn.
- gl_FragColor=vec4((base*vAlpha+vec3(.82,.86,.92)*light)*cover,1.0);
+ if(uLight>0.5){
+  float opacity=mix(.04+(vAlpha-.35)*.2,.045,uSilk);
+  vec3 ink=mix(vec3(20.,20.,24.),vec3(12.,12.,15.),uSilk)/255.;
+  vec3 tint=mix(vec3(1.),ink,opacity*cover);
+  tint*=mix(vec3(1.),vec3(15.,15.,20.)/255.,light*cover);
+  gl_FragColor=vec4(tint,1.);
+ }else gl_FragColor=vec4((base*vAlpha+vec3(.82,.86,.92)*light)*cover,1.0);
 }`;
   const shaders:WebGLShader[]=[];
   const compile=(type:number,source:string)=>{const s=gl.createShader(type)!;shaders.push(s);gl.shaderSource(s,source);gl.compileShader(s);return s;};
@@ -56,6 +63,7 @@ void main(){
   const attr=gl.getAttribLocation(program,'aPoint');gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,4,gl.FLOAT,false,0,0);
   const size=gl.getUniformLocation(program,'uSize'),time=gl.getUniformLocation(program,'uTime'),silk=gl.getUniformLocation(program,'uSilk');
   gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);
+  const lightUniform=gl.getUniformLocation(program,'uLight');
   const pulseUniform=gl.getUniformLocation(program,'uPulse[0]');
   const pulseData=new Float32Array(20);
   let ridges=0,total=0;
@@ -68,11 +76,13 @@ void main(){
     for(let i=0;i<75;i++)line(i);
     total=vertices.length/4;gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
   };
-  const draw=(elapsed:number,pulses:ContourPulse[]=[])=>{
+  const draw=(elapsed:number,pulses:ContourPulse[]=[],light=false)=>{
     pulseData.fill(0);
     pulses.slice(0,5).forEach((p,i)=>pulseData.set([p.x,p.y,p.radius,p.alpha],i*4));
     gl.uniform4fv(pulseUniform,pulseData);
-    gl.clearColor(6/255,6/255,6/255,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(time,elapsed);gl.uniform1f(silk,0);
+    gl.uniform1f(lightUniform,light?1:0);
+    gl.blendFunc(light?gl.DST_COLOR:gl.ONE,light?gl.ZERO:gl.ONE);
+    gl.clearColor(light?246/255:6/255,light?246/255:6/255,light?244/255:6/255,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(time,elapsed);gl.uniform1f(silk,0);
     // Four contiguous ridge batches and one translucent filament batch.
     const group=Math.floor(ridges/24)*6;
     for(let i=0;i<4;i++){const start=i*group;gl.drawArrays(gl.TRIANGLES,start,i===3?ridges-start:group);}

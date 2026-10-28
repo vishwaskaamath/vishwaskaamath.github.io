@@ -1,8 +1,10 @@
 "use client";
+import { useThemeRef, THEME_EVENT } from "@/lib/theme";
 import { useEffect, useRef, type RefObject } from 'react';
 import type { WheelDrag } from '@/hooks/useProjectWheel';
 import { recordPoint, expireHistory, buildSmoothRibbon, drawRibbon, type RibbonPoint } from '@/lib/taperedRibbon';
 export default function RibbonCursor({reducedMotion,layerKey,dragRef}:{reducedMotion:boolean;layerKey:string|null;dragRef:RefObject<WheelDrag>}) {
+  const themeRef = useThemeRef();
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const state=useRef({x:0,y:0,active:false,reducedMotion});
   const historyRef=useRef<RibbonPoint[]>([]);
@@ -15,9 +17,10 @@ export default function RibbonCursor({reducedMotion,layerKey,dragRef}:{reducedMo
     const draw=(now:number)=>{
       const dt=Math.min(32,last?now-last:16.67);last=now;const step=dt/(1000/60);
       raf=0;ctx.clearRect(0,0,innerWidth,innerHeight);if(!s.active||document.hidden)return;
+      const light=themeRef.current==='light';
       if(s.reducedMotion){
         historyRef.current.length=0;
-        ctx.filter='none';ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,dragRef.current.isDragging?4.5:3.2,0,Math.PI*2);ctx.fill();return;
+        ctx.filter='none';ctx.fillStyle=light?'#141416':'#fff';ctx.beginPath();ctx.arc(s.x,s.y,dragRef.current.isDragging?4.5:3.2,0,Math.PI*2);ctx.fill();return;
       }
       expireHistory(historyRef.current,now);
       const history=historyRef.current;
@@ -26,18 +29,18 @@ export default function RibbonCursor({reducedMotion,layerKey,dragRef}:{reducedMo
       const samples=buildSmoothRibbon(pts,now);
       const flash=Math.max(0,1-(now-flashAt)/120);
       const baseRadius=dragRef.current.isDragging?4.5:3.2;
-      drawRibbon(ctx,samples);
+      drawRibbon(ctx,samples,light);
       const radius=baseRadius+(7-baseRadius)*flash;
-      ctx.filter='blur(5px)';ctx.fillStyle=`rgba(255,255,255,${flash>0?.65:.45})`;
+      ctx.filter='blur(5px)';ctx.fillStyle=light?`rgba(40,40,46,${flash>0?.48:.32})`:`rgba(255,255,255,${flash>0?.65:.45})`;
       ctx.beginPath();ctx.arc(s.x,s.y,radius*1.6,0,Math.PI*2);ctx.fill();
-      ctx.filter='none';ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,radius,0,Math.PI*2);ctx.fill();
-      ctx.globalCompositeOperation='lighter';
+      ctx.filter='none';ctx.fillStyle=light?'#141416':'#fff';ctx.beginPath();ctx.arc(s.x,s.y,radius,0,Math.PI*2);ctx.fill();
+      ctx.globalCompositeOperation=light?'source-over':'lighter';
       for(let i=dust.length-1;i>=0;i--){const p=dust[i];p.age+=dt;
         if(p.age>=600){dust.splice(i,1);continue;}
         const drag=Math.pow(.91,step);
         p.x+=p.vx*(1-drag)/(1-.91);p.y+=p.vy*(1-drag)/(1-.91);
         p.vx*=drag;p.vy*=drag;p.alpha*=Math.pow(.93,step);
-        ctx.fillStyle=`rgba(232,237,245,${p.alpha*Math.min(1,(600-p.age)/100)})`;
+        ctx.fillStyle=`rgba(${light?(i%2?'34,34,38':'85,85,94'):'232,237,245'},${p.alpha*Math.min(1,(600-p.age)/100)})`;
         ctx.beginPath();ctx.arc(p.x,p.y,p.size/2,0,Math.PI*2);ctx.fill();
       }
       ctx.globalCompositeOperation='source-over';
@@ -61,13 +64,14 @@ export default function RibbonCursor({reducedMotion,layerKey,dragRef}:{reducedMo
         dust.push({x,y,vx:Math.cos(theta)*speed,vy:Math.sin(theta)*speed,size:.8+Math.random(),alpha:1,age:0});}
       if(dust.length>160)dust.splice(0,dust.length-160);wake();
     };
+    window.addEventListener(THEME_EVENT,wake);
     window.addEventListener('portfolio-clean-click',click);
     const resize=()=>{const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(innerWidth*dpr);canvas.height=Math.round(innerHeight*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(s.active)wake();};
     const visibility=()=>{if(document.hidden)hide();};
     const preference=()=>{if(!fine.matches)hide();};
     resize();window.addEventListener('pointermove',move,{passive:true,capture:true});window.addEventListener('pointerdown',wake);window.addEventListener('pointerup',wake);window.addEventListener('pointercancel',wake);window.addEventListener('resize',resize);window.addEventListener('blur',hide);document.addEventListener('mouseleave',hide);document.addEventListener('visibilitychange',visibility);fine.addEventListener('change',preference);
-    return()=>{window.removeEventListener("portfolio-clean-click",click);hide();window.removeEventListener('pointermove',move,true);window.removeEventListener('pointerdown',wake);window.removeEventListener('pointerup',wake);window.removeEventListener('pointercancel',wake);window.removeEventListener('resize',resize);window.removeEventListener('blur',hide);document.removeEventListener('mouseleave',hide);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',preference);};
-  },[dragRef]);
+    return()=>{window.removeEventListener(THEME_EVENT,wake);window.removeEventListener("portfolio-clean-click",click);hide();window.removeEventListener('pointermove',move,true);window.removeEventListener('pointerdown',wake);window.removeEventListener('pointerup',wake);window.removeEventListener('pointercancel',wake);window.removeEventListener('resize',resize);window.removeEventListener('blur',hide);document.removeEventListener('mouseleave',hide);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',preference);};
+  },[dragRef,themeRef]);
   useEffect(()=>{const c=canvasRef.current;if(!c||!c.showPopover||!matchMedia('(any-pointer: fine)').matches)return;const f=requestAnimationFrame(()=>{if(c.matches(':popover-open'))c.hidePopover();c.showPopover();});return()=>cancelAnimationFrame(f);},[layerKey]);
   return <canvas ref={canvasRef} className="ribbon-cursor" popover="manual" aria-hidden="true"/>;
 }

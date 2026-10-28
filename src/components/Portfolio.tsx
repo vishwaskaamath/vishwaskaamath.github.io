@@ -1,11 +1,13 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import {
+  Sun, Moon,
   Pause,
   Play,
   Volume2,
   VolumeX,
 } from "lucide-react";
+import { ThemeContext, THEME_EVENT, type Theme } from "@/lib/theme";
 import { projects } from "@/data/projects";
 import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
@@ -19,6 +21,15 @@ import LoadingScreen from "./LoadingScreen";
 import Overlay, { type Panel } from "./Overlay";
 
 export default function Portfolio() {
+  const [isLightMode, setIsLightMode] = useState(false);
+  const themeRef = useRef<Theme>('dark');
+  const toggleTheme = () => {
+    const next = themeRef.current !== 'light';
+    themeRef.current = next ? 'light' : 'dark';
+    document.documentElement.dataset.theme = themeRef.current;
+    setIsLightMode(next);
+    window.dispatchEvent(new Event(THEME_EVENT));
+  };
   const [expanded, setExpanded] = useState(false);
   const collapse = useCallback(() => setExpanded(false), []);
   // Server HTML stays visible even when scripts or decorative effects fail.
@@ -26,7 +37,7 @@ export default function Portfolio() {
   const loaded = useCallback(() => setLoading(false), []);
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const { canvasRef, burst } = useParticles(reducedMotion);
+  const { canvasRef, burst } = useParticles(reducedMotion, themeRef);
   const { index, engine, select, dragRef } = useProjectWheel(
     projects.length,
     !!panel || loading || expanded,
@@ -60,6 +71,7 @@ export default function Portfolio() {
 
 
   return (
+    <ThemeContext.Provider value={themeRef}>
     <main
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
@@ -114,6 +126,12 @@ export default function Portfolio() {
           >
             {playing ? <Volume2 size={16} /> : <VolumeX size={16} />}
           </button>
+          <span className="nav-divider" />
+          <button className="theme-toggle" onClick={toggleTheme}
+            aria-label={isLightMode ? 'Switch to dark mode' : 'Switch to white mode'}
+            aria-pressed={isLightMode} title={isLightMode ? 'Dark mode' : 'White mode'}>
+            {isLightMode ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
         </nav>
       </header>
       <ProjectWheels
@@ -167,5 +185,6 @@ export default function Portfolio() {
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>
+    </ThemeContext.Provider>
   );
 }
