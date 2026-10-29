@@ -15,7 +15,9 @@ import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import AboutView from "./AboutView";
 import PolaroidTransition from "./PolaroidTransition";
 import PolaroidScene from "./PolaroidScene";
+import { viewFromPath,updateViewAddress } from "@/lib/viewNavigation";
 import { ABOUT_REVEAL_MS } from "@/lib/polaroidTransition";
+import { requestTick } from "@/lib/masterTicker";
 import { refreshGeometry } from "@/lib/geometryCache";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
@@ -25,7 +27,7 @@ import WarpedText from "./WarpedText";
 import LoadingScreen from "./LoadingScreen";
 import Overlay, { type Panel } from "./Overlay";
 
-export default function Portfolio() {
+export default function Portfolio({initialView="work"}:{initialView?:"work"|"about"}) {
   const [isLightMode, setIsLightMode] = useState(false);
   const themeRef = useRef<Theme>('dark');
   const toggleTheme = () => {
@@ -40,20 +42,36 @@ export default function Portfolio() {
   // Server HTML stays visible even when scripts or decorative effects fail.
   const [loading, setLoading] = useState(false);
   const loaded = useCallback(() => setLoading(false), []);
-  const [panel, setPanel] = useState<Panel>(null);
+  const [panel, setPanel] = useState<Panel>(initialView==="about"?"about":null);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [photo,setPhoto]=useState<{target:Panel;from:'work'|'about';startedAt:number;captured:boolean}|null>(null);
+  const [photo,setPhoto]=useState<{target:Panel;from:'work'|'about';startedAt:number;captured:boolean;retired:boolean;push:boolean}|null>(null);
   const photoBusy=useRef(false);
   const workScene=useRef<HTMLDivElement>(null),aboutScene=useRef<HTMLDivElement>(null);
   const [aboutRevealAt,setAboutRevealAt]=useState(0);
-  const navigate=(next:Panel)=>{
-    if(photoBusy.current||next===panel)return;
+  const pendingNavigation=useRef<{target:Panel;push:boolean}|null>(null);
+  const navigateRef=useRef<(next:Panel,push?:boolean)=>void>(()=>{});
+  const updateAddress=(next:Panel,push:boolean)=>updateViewAddress(next==='about'?'about':'work',push);
+  const navigate=(next:Panel,push=true)=>{
+    if(photoBusy.current){if(!push)pendingNavigation.current={target:next,push};return;}
+    if(next===panel){updateAddress(next,push);return;}
     if(!reducedMotion&&(next==='about'||panel==='about')){
       photoBusy.current=true;
-      setPhoto({target:next,from:panel==='about'?'about':'work',startedAt:performance.now(),captured:false});
-    }else {setExpanded(false);setPanel(next);setAboutRevealAt(0);}
+      setPhoto({target:next,from:panel==='about'?'about':'work',startedAt:performance.now(),captured:false,retired:false,push});
+    }else {setExpanded(false);setPanel(next);setAboutRevealAt(0);updateAddress(next,push);}
   };
-  const finishPhoto=()=>{photoBusy.current=false;setPhoto(null);refreshGeometry();};
+  navigateRef.current=navigate;
+  const finishPhoto=()=>{
+    photoBusy.current=false;setPhoto(null);refreshGeometry();
+    const pending=pendingNavigation.current;pendingNavigation.current=null;
+    if(pending)requestTick(()=>navigateRef.current(pending.target,pending.push));
+  };
+  useEffect(()=>{
+    const view=viewFromPath(location.pathname);
+    history.replaceState({...history.state,view},'',location.href);
+    document.title=view==='about'?'Vishwas Kamath — About':'Vishwas Kamath — Motion Portfolio';
+    const pop=()=>navigateRef.current(viewFromPath(location.pathname)==='about'?'about':null,false);
+    window.addEventListener('popstate',pop);return()=>window.removeEventListener('popstate',pop);
+  },[]);
   const { canvasRef, burst } = useParticles(reducedMotion, themeRef);
   const { index, engine, select, dragRef } = useProjectWheel(
     projects.length,
@@ -148,7 +166,7 @@ export default function Portfolio() {
           </button>
         </nav>
       </header>
-      <PolaroidScene sceneRef={workScene} label="WORK" visible={panel!=="about"} snapshot={!!photo?.captured&&photo.from==='work'}>
+      <PolaroidScene sceneRef={workScene} label="WORK" visible={panel!=="about"} snapshot={!!photo?.captured&&photo.from==='work'} retired={!!photo?.retired&&photo.from==='work'}>
       <div className="work-scene">
       <ProjectWheels
         dragRef={dragRef}
@@ -169,8 +187,8 @@ export default function Portfolio() {
       />
       </div>
       </PolaroidScene>
-      <PolaroidScene sceneRef={aboutScene} label="ABOUT" visible={panel==='about'} snapshot={!!photo?.captured&&photo.from==='about'}>
-      <AboutView revealAt={aboutRevealAt} active={panel === "about" || photo?.from==='about'} reducedMotion={reducedMotion} onBurst={burst} />
+      <PolaroidScene sceneRef={aboutScene} label="ABOUT" visible={panel==='about'} snapshot={!!photo?.captured&&photo.from==='about'} retired={!!photo?.retired&&photo.from==='about'}>
+      <AboutView revealAt={aboutRevealAt} active={panel === "about" || (photo?.from==='about'&&!photo.retired)} reducedMotion={reducedMotion} onBurst={burst} />
       </PolaroidScene>
       <footer className="hud-footer">
         <button
@@ -203,7 +221,7 @@ export default function Portfolio() {
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
-      {photo && <PolaroidTransition sceneRef={photo.from==='about'?aboutScene:workScene} startedAt={photo.startedAt} onSwap={()=>{setExpanded(false);if(photo.target==='about')setAboutRevealAt(photo.startedAt+ABOUT_REVEAL_MS);setPhoto({...photo,captured:true});setPanel(photo.target);}} onComplete={finishPhoto}/>}
+      {photo && <PolaroidTransition sceneRef={photo.from==='about'?aboutScene:workScene} incomingRef={photo.target==='about'?aboutScene:workScene} startedAt={photo.startedAt} onSwap={()=>{setExpanded(false);if(photo.target==='about')setAboutRevealAt(photo.startedAt+ABOUT_REVEAL_MS);setPhoto({...photo,captured:true});setPanel(photo.target);updateAddress(photo.target,photo.push);}} onHide={()=>setPhoto({...photo,retired:true})} onComplete={finishPhoto}/>}
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>
