@@ -29,5 +29,5 @@ export default function PageWipe({startedAt,destination,onSwap,onComplete}:{star
   });
   return()=>{stop();window.removeEventListener('resize',resize);events.forEach(name=>window.removeEventListener(name,block,true));};
  },[startedAt,theme]);
- return <><canvas ref={canvas} className="page-block-wipe" aria-hidden="true"/><div className="page-wipe-label" aria-hidden="true"><span ref={label}>{destination}</span></div></>;
+ return <><canvas ref={canvas} className="page-block-wipe" aria-hidden="true"/><div className="page-wipe-label" data-destination={destination} aria-hidden="true"><span ref={label}>{destination}</span></div></>;
 }

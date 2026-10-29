@@ -1631,5 +1631,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 
 /* The wipe never transforms or scales either page view. */
  .page-block-wipe { position:fixed; inset:0; width:100vw; height:100vh; z-index:99980; pointer-events:none; }
-.page-wipe-label { position:fixed; bottom:5.5vh; left:4.5vw; z-index:99985; pointer-events:none; overflow:hidden; font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,5.5vw,5rem); letter-spacing:.06em; line-height:1; text-transform:uppercase; }
+.page-wipe-label { position:fixed; bottom:5.5vh; left:4.5vw; z-index:99985; pointer-events:none; overflow:hidden; font-family:'Bebas Neue',sans-serif; font-size:min(38vw,72vh); letter-spacing:.015em; line-height:1; white-space:nowrap; text-transform:uppercase; }
 .page-wipe-label > span { display:block; opacity:0; transform:translateY(100%); will-change:transform,opacity; }
+
+.page-wipe-label[data-destination="WORK"] { font-size:min(42vw,72vh); }
