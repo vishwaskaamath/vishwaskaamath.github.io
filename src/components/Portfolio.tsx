@@ -13,8 +13,9 @@ import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import AboutView from "./AboutView";
-import PageWipe from "./PageWipe";
-import { ABOUT_REVEAL_MS } from "@/lib/pageWipe";
+import PolaroidTransition from "./PolaroidTransition";
+import PolaroidScene from "./PolaroidScene";
+import { ABOUT_REVEAL_MS } from "@/lib/polaroidTransition";
 import { refreshGeometry } from "@/lib/geometryCache";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
@@ -41,21 +42,22 @@ export default function Portfolio() {
   const loaded = useCallback(() => setLoading(false), []);
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [wipe,setWipe]=useState<{target:Panel;startedAt:number}|null>(null);
-  const wipeBusy=useRef(false);
+  const [photo,setPhoto]=useState<{target:Panel;from:'work'|'about';startedAt:number;captured:boolean}|null>(null);
+  const photoBusy=useRef(false);
+  const workScene=useRef<HTMLDivElement>(null),aboutScene=useRef<HTMLDivElement>(null);
   const [aboutRevealAt,setAboutRevealAt]=useState(0);
   const navigate=(next:Panel)=>{
-    if(wipeBusy.current||next===panel)return;
+    if(photoBusy.current||next===panel)return;
     if(!reducedMotion&&(next==='about'||panel==='about')){
-      wipeBusy.current=true;
-      setWipe({target:next,startedAt:performance.now()});
+      photoBusy.current=true;
+      setPhoto({target:next,from:panel==='about'?'about':'work',startedAt:performance.now(),captured:false});
     }else {setExpanded(false);setPanel(next);setAboutRevealAt(0);}
   };
-  const finishWipe=()=>{wipeBusy.current=false;setWipe(null);refreshGeometry();};
+  const finishPhoto=()=>{photoBusy.current=false;setPhoto(null);refreshGeometry();};
   const { canvasRef, burst } = useParticles(reducedMotion, themeRef);
   const { index, engine, select, dragRef } = useProjectWheel(
     projects.length,
-    !!panel || loading || expanded || !!wipe,
+    !!panel || loading || expanded || !!photo,
     reducedMotion,
   );
   const { playing, toggle } = useAmbientAudio();
@@ -85,8 +87,8 @@ export default function Portfolio() {
     <main
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
-      inert={!!wipe}
-      data-page-wiping={!!wipe}
+      inert={!!photo}
+      data-photo-changing={!!photo}
       data-expanded={expanded}
       data-view={panel === "about" ? "about" : "work"}
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
@@ -98,7 +100,7 @@ export default function Portfolio() {
           className="identity"
           onClick={() => {
             navigate(null);
-            if(!wipeBusy.current)select(0, true);
+            if(!photoBusy.current)select(0, true);
           }}
           aria-label="Vishwas Kamath, home"
         >
@@ -146,14 +148,15 @@ export default function Portfolio() {
           </button>
         </nav>
       </header>
-      <div className="work-scene" inert={panel === "about"} aria-hidden={panel === "about"}>
+      <PolaroidScene sceneRef={workScene} label="WORK" visible={panel!=="about"} snapshot={!!photo?.captured&&photo.from==='work'}>
+      <div className="work-scene">
       <ProjectWheels
         dragRef={dragRef}
         index={index}
         engine={engine}
         reducedMotion={reducedMotion}
         select={select}
-        paused={(!expanded && reducedMotion) || !!panel || loading}
+        paused={(!expanded && reducedMotion) || (!!panel && !(photo?.captured&&photo.from==='work')) || loading}
         expanded={expanded}
         onCollapse={collapse}
         onExpand={() => { if (playing) toggle(); setExpanded(true); }}
@@ -165,7 +168,10 @@ export default function Portfolio() {
         onBurst={burst}
       />
       </div>
-      <AboutView revealAt={aboutRevealAt} active={panel === "about"} reducedMotion={reducedMotion} onBurst={burst} />
+      </PolaroidScene>
+      <PolaroidScene sceneRef={aboutScene} label="ABOUT" visible={panel==='about'} snapshot={!!photo?.captured&&photo.from==='about'}>
+      <AboutView revealAt={aboutRevealAt} active={panel === "about" || photo?.from==='about'} reducedMotion={reducedMotion} onBurst={burst} />
+      </PolaroidScene>
       <footer className="hud-footer">
         <button
           className={`audio-player ${playing ? "is-playing" : ""}`}
@@ -197,7 +203,7 @@ export default function Portfolio() {
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
-      {wipe && <PageWipe startedAt={wipe.startedAt} onSwap={()=>{setExpanded(false);setAboutRevealAt(wipe.startedAt+ABOUT_REVEAL_MS);setPanel(wipe.target);}} onComplete={finishWipe}/>}
+      {photo && <PolaroidTransition sceneRef={photo.from==='about'?aboutScene:workScene} startedAt={photo.startedAt} onSwap={()=>{setExpanded(false);if(photo.target==='about')setAboutRevealAt(photo.startedAt+ABOUT_REVEAL_MS);setPhoto({...photo,captured:true});setPanel(photo.target);}} onComplete={finishPhoto}/>}
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>
