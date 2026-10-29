@@ -1476,7 +1476,12 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 .portfolio[data-expanded="true"] .project-metadata { left:61%; width:18%; transform:translate(-50%,-50%) translateX(7vw); }
 .portfolio[data-expanded="true"] .project-title { font-size:clamp(32px,4vw,82px); }
 .expansion-scanlines { position:absolute; inset:0; opacity:0; pointer-events:none; background:repeating-linear-gradient(0deg,#0009 0px,#0009 1px,#ffffff20 2px,transparent 4px); }
-@media(min-width:760px) { .video-wheel { left:4vw; width:32vw; top:50%; } .video-card { height:36vh; aspect-ratio:auto; } }
+@media(min-width:760px) {
+ .video-wheel { left:2.2vw; width:clamp(310px,24vw,420px); top:50%; }
+ .video-card { height:auto; aspect-ratio:16 / 10; }
+ .software-wheel { left:78vw; }
+ .portfolio[data-expanded="false"] .project-metadata { left:50%; transform:translate(-50%,-50%); }
+}
 @media(max-width:759px) {
  .portfolio[data-expanded="true"] .video-card.is-active { width:90vw; height:48vh; }
  .portfolio[data-expanded="true"] .project-metadata { left:50%; width:85%; transform:translate(-50%,-50%) translateY(7vh); }
