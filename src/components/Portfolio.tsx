@@ -12,6 +12,7 @@ import { projects } from "@/data/projects";
 import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
+import AboutView from "./AboutView";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
 import WavyBackground from "./WavyBackground";
@@ -76,6 +77,7 @@ export default function Portfolio() {
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
       data-expanded={expanded}
+      data-view={panel === "about" ? "about" : "work"}
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
     >
       <WavyBackground dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded} />
@@ -107,11 +109,11 @@ export default function Portfolio() {
                     ? "nav-active"
                     : ""
                 }
-                onClick={() =>
-                  label === "Work"
-                    ? setPanel(null)
-                    : setPanel(label.toLowerCase() as Panel)
-                }
+                onClick={() => {
+                  if (label === "About") setExpanded(false);
+                  setPanel(label === "Work" ? null : label.toLowerCase() as Panel);
+                }}
+                aria-current={(label === "Work" && !panel) || panel === label.toLowerCase() ? "page" : undefined}
               >
                 <WarpedText>{label}</WarpedText>
               </button>
@@ -134,6 +136,7 @@ export default function Portfolio() {
           </button>
         </nav>
       </header>
+      <div className="work-scene" inert={panel === "about"} aria-hidden={panel === "about"}>
       <ProjectWheels
         dragRef={dragRef}
         index={index}
@@ -151,6 +154,8 @@ export default function Portfolio() {
         reducedMotion={reducedMotion}
         onBurst={burst}
       />
+      </div>
+      <AboutView active={panel === "about"} reducedMotion={reducedMotion} onBurst={burst} />
       <footer className="hud-footer">
         <button
           className={`audio-player ${playing ? "is-playing" : ""}`}
@@ -176,7 +181,7 @@ export default function Portfolio() {
         </button>
       </footer>
       <Overlay
-        panel={panel}
+        panel={panel === "about" ? null : panel}
         project={projects[engine.read().index]}
         onClose={close}
         onSelect={(i) => select(i, true)}
