@@ -1,0 +1,82 @@
+[
+  {
+    "url": "/media/dolce-full.mp4",
+    "bytes": 7575656,
+    "kind": "video"
+  },
+  {
+    "url": "/media/dolce.jpg",
+    "bytes": 51313,
+    "kind": "image"
+  },
+  {
+    "url": "/media/dolce.mp4",
+    "bytes": 2281159,
+    "kind": "video"
+  },
+  {
+    "url": "/media/inmoe-full.mp4",
+    "bytes": 1562913,
+    "kind": "video"
+  },
+  {
+    "url": "/media/inmoe.jpg",
+    "bytes": 62578,
+    "kind": "image"
+  },
+  {
+    "url": "/media/inmoe.mp4",
+    "bytes": 2331629,
+    "kind": "video"
+  },
+  {
+    "url": "/media/music-full.mp4",
+    "bytes": 10112412,
+    "kind": "video"
+  },
+  {
+    "url": "/media/music.jpg",
+    "bytes": 36014,
+    "kind": "image"
+  },
+  {
+    "url": "/media/music.mp4",
+    "bytes": 3649544,
+    "kind": "video"
+  },
+  {
+    "url": "/media/nightcity-full.mp4",
+    "bytes": 14428689,
+    "kind": "video"
+  },
+  {
+    "url": "/media/nightcity.jpg",
+    "bytes": 55592,
+    "kind": "image"
+  },
+  {
+    "url": "/media/nightcity.mp4",
+    "bytes": 5559834,
+    "kind": "video"
+  },
+  {
+    "url": "/media/pocket-full.mp4",
+    "bytes": 317701,
+    "kind": "video"
+  },
+  {
+    "url": "/media/pocket.jpg",
+    "bytes": 13518,
+    "kind": "image"
+  },
+  {
+    "url": "/media/pocket.mp4",
+    "bytes": 108995,
+    "kind": "video"
+  },
+  {
+    "url": "/media/unrequited.mp3",
+    "bytes": 2065727,
+    "kind": "audio"
+  }
+]

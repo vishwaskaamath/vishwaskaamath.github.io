@@ -1,4 +1,6 @@
 "use client";
+import { cachedBox,observeGeometry,geometryRevision } from "@/lib/geometryCache";
+import { getFrameDt } from "@/lib/masterTicker";
 import { useEffect, useRef } from 'react';
 import { toolCatalog, type Software, type Tool } from '@/data/projects';
 import { damp, subscribeProximity } from '@/lib/proximity';
@@ -9,6 +11,7 @@ export default function SoftwareTile({software, tools = [toolCatalog[software]]}
   const motion = useRef({x:0,y:0,glow:0,angle:.35,velocity:0});
   useEffect(()=>{
     const stage=root.current!;
+    const releaseGeometry=observeGeometry(stage);
     const card=stage.closest<HTMLElement>('[data-software]')!;
     const cubes=Array.from(stage.querySelectorAll<HTMLElement>('[data-orbit-cube]'));
     const probes=Array.from(stage.querySelectorAll<HTMLElement>('.software-probe'));
@@ -36,7 +39,7 @@ export default function SoftwareTile({software, tools = [toolCatalog[software]]}
     const unsubscribe=subscribeProximity(pointer=>{
       const active=pointer.enabled && card.getAttribute('aria-hidden')==='false';
       if(!active && s.x===0 && s.y===0 && s.glow===0 && s.angle===.35)return;
-      const [o,a,b]=probes.map(p=>p.getBoundingClientRect());
+      const [o,a,b]=probes.map(p=>cachedBox(p));
       const ax=(a.x-o.x)/w,ay=(a.y-o.y)/w,bx=(b.x-o.x)/h,by=(b.y-o.y)/h;
       const det=ax*by-ay*bx;if(Math.abs(det)<.001)return;
       const px=pointer.x-o.x,py=pointer.y-o.y;
@@ -44,21 +47,21 @@ export default function SoftwareTile({software, tools = [toolCatalog[software]]}
       const hover=active && x>=0 && x<=w && y>=0 && y<=h;
       const nx=hover?Math.max(-.5,Math.min(.5,x/w-.5)):0,ny=hover?Math.max(-.5,Math.min(.5,y/h-.5)):0;
       return ()=>{
-        const now=performance.now(),dt=last?Math.min(2,(now-last)/(1000/60)):1;last=now;
+        const now=performance.now(),dt=getFrameDt()*60;last=now;
         s.x=damp(s.x,nx,.12);s.y=damp(s.y,ny,.12);s.glow=damp(s.glow,hover?1:0,.12);
         const orbiting=hover && cubes.length>1;
-        if(orbiting){s.velocity=damp(s.velocity,.025,1-Math.pow(.88,dt));s.angle+=s.velocity*dt;}
+        if(orbiting){s.velocity=damp(s.velocity,.025,.12);s.angle+=s.velocity*dt;}
         else {
           s.velocity=0;
           const target=Math.round(s.angle/(Math.PI*2))*Math.PI*2+.35;
-          s.angle=damp(s.angle,target,1-Math.pow(.91,dt));
+          s.angle=damp(s.angle,target,.09);
           if(s.angle===target)s.angle=.35;
         }
         render();stage.dataset.hover=String(hover);
         return orbiting || s.angle!==.35 || Math.abs(s.x-nx)>.001 || Math.abs(s.y-ny)>.001 || Math.abs(s.glow-(hover?1:0))>.001;
       };
     });
-    return ()=>{unsubscribe();resize.disconnect();};
+    return ()=>{releaseGeometry();unsubscribe();resize.disconnect();};
   },[tools]);
   return <div ref={root} className="software-orbit-stage">
     {tools.map(tool=><SoftwareCube3D key={tool.id} tool={tool}/>)}

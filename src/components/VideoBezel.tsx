@@ -1,4 +1,6 @@
 "use client";
+import { cachedBox,observeGeometry,geometryRevision } from "@/lib/geometryCache";
+import { getFrameDt } from "@/lib/masterTicker";
 import { useThemeRef } from "@/lib/theme";
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { bezelGeometry, createBoundaryProjector } from '@/lib/bezelGeometry';
@@ -15,6 +17,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
   const id = `video-crt-${useId().replace(/:/g, '')}`;
   useEffect(() => {
     const element = root.current!, layer = glass.current!;
+    const releaseGeometry=observeGeometry(element);
     const card = element.closest<HTMLElement>('[data-video]')!;
     const screen = element.querySelector<SVGSVGElement>('.video-rims')!;
     const gradient = screen.querySelector('radialGradient')!;
@@ -46,7 +49,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
       const active = card.classList.contains('is-active') && pointer.enabled && !card.closest('[data-expanded="true"]');
       if (!active && !glow && !tiltX && !tiltY && !specks.length) return;
       // Unwarped probes invert the carousel's rotation and scale, avoiding feedback.
-      const [o, a, b] = probes.map(p => p.getBoundingClientRect());
+      const [o, a, b] = probes.map(p => cachedBox(p));
       const ax = (a.x-o.x)/w, ay = (a.y-o.y)/w, bx = (b.x-o.x)/h, by = (b.y-o.y)/h;
       const det = ax*by-ay*bx;
       if (Math.abs(det)<0.001) return;
@@ -56,7 +59,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
       const closest = near ? project({x,y}) : null;
       const target = closest ? Math.max(0,1-closest.distance/100)**2 : 0;
       const inside = active && x>=0 && x<=w && y>=0 && y<=h;
-      const now = performance.now(), dt = Math.min(32,now-last || 16.67); last=now;
+      const now = performance.now(), dt = getFrameDt()*1000; last=now;
       return () => {
         glow = damp(glow,target,0.14);
         tiltX = damp(tiltX,inside ? -(y/h-.5)*4 : 0,0.1);
@@ -86,7 +89,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
         return glow>0 || tiltX!==0 || tiltY!==0 || specks.length>0;
       };
     });
-    return () => { observer.disconnect(); unsubscribe(); };
+    return () => { releaseGeometry(); observer.disconnect(); unsubscribe(); };
   }, [id, themeRef]);
   return <div className="video-bezel" ref={root}>
     <div className="video-glass" ref={glass}>

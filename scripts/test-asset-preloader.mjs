@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import ts from 'typescript';
+const source=(await readFile('src/lib/assetPreloader.ts','utf8')).replace(/import manifest[^;]+;/,`const manifest=[{url:'/v.mp4',bytes:4,kind:'video'},{url:'/a.mp3',bytes:2,kind:'audio'}];`).replace(/import \{ requestTick \}[^;]+;/,'const requestTick=cb=>queueMicrotask(cb);');
+const code=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText;
+globalThis.document={documentElement:{dataset:{}},fonts:{load:async()=>[],ready:Promise.resolve()},querySelectorAll:()=>[],querySelector:()=>null};globalThis.getComputedStyle=()=>({getPropertyValue:()=>''});globalThis.window={dispatchEvent(){},addEventListener(){}};
+let requests=0,fail=true;
+globalThis.fetch=async url=>{requests++;if(url==='/v.mp4'&&fail)throw Error('offline');return new Response(new Uint8Array(url==='/v.mp4'?4:2),{headers:{'content-type':'application/octet-stream'}})};
+const api=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+await api.preloadAssets();assert.equal(api.assetsReady(),false);assert.equal(api.assetStatus.phase,'error');assert.equal(api.assetStatus.errors.length,1);assert.ok(api.cachedAsset('/a.mp3').startsWith('blob:'));
+fail=false;await api.preloadAssets();assert.equal(requests,3);assert.equal(api.actualProgressRef.current,100);assert.equal(api.assetStatus.loadedBytes,6);assert.equal(api.assetsReady(),true);assert.ok(api.assetUrl('/v.mp4').startsWith('blob:'));await api.preloadAssets();assert.equal(requests,3);
+console.log('PASS streamed byte totals, blob cache, partial failure, retry skips cached files, ready only after warmup');

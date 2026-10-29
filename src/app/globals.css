@@ -1512,7 +1512,7 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 
 /* A decorative loader must never obscure the phone layout, including before hydration. */
 @media(max-width:759px), (pointer:coarse) {
- .loading-screen, .ribbon-cursor { display:none !important; }
+ .ribbon-cursor { display:none !important; }
  .wavy-grain { display:none; }
 }
 @media(max-width:759px) {
@@ -1628,3 +1628,12 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 [data-theme="light"] .about-bio { color:rgba(17,17,19,.72); }
 @media(max-width:759px) { .about-headline { font-size:clamp(3rem,11.5vw,6.5rem); } .about-bio { font-size:13px; bottom:15vh; } }
 @media(prefers-reduced-motion:reduce) { .about-tunnel { display:none; } .about-view,.video-wheel,.software-wheel,.project-metadata { transition:none; } }
+
+/* Paint containment has room for the floating bezel; preserve-3d bodies must not flatten. */
+.video-card { contain:layout style paint; overflow-clip-margin:36px; will-change:transform; }
+.title-stage { contain:layout style paint; will-change:transform; overflow-clip-margin:40px; }
+.software-cube { contain:layout style; will-change:transform; }
+.software-cube .software-tile { contain:layout style paint; }
+.loading-details { position:absolute; top:calc(50% + 95px); left:50%; transform:translateX(-50%); width:min(90vw,430px); text-align:center; color:#c3c3bd; font:12px var(--font-pally),sans-serif; }
+.loading-details button { margin:15px 6px; border:1px solid #ffffff40; padding:10px 14px; border-radius:8px; color:#fff; cursor:pointer; }
+[data-warming="true"] .software-position { opacity:.001 !important; visibility:visible !important; }

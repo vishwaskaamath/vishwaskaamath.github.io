@@ -1,17 +1,21 @@
 "use client";
+import { requestTick, cancelTick, getFrameDt } from '@/lib/masterTicker';
+
 import { useEffect, useId, useRef } from 'react';
+import { cachedBox, observeGeometry,refreshGeometry } from "@/lib/geometryCache";
 import WarpedText from './WarpedText';
 
 export default function AboutView({active,reducedMotion,onBurst}:{active:boolean;reducedMotion:boolean;onBurst:(x:number,y:number,count?:number)=>void}) {
   const root=useRef<HTMLElement>(null);
   const displacement=useRef<SVGFEDisplacementMapElement>(null);
   const id=`about-glitch-${useId().replace(/:/g,'')}`;
+  useEffect(()=>observeGeometry(root.current!),[]);
   useEffect(()=>{
     const el=root.current!;
     const title=el.querySelector<HTMLElement>('.about-unfold')!;
     if(!active || reducedMotion) { title.style.filter='none'; el.dataset.warpDisabled='false'; return; }
     el.dataset.warpDisabled='true';
-    const unlock=window.setTimeout(()=>{el.dataset.warpDisabled='false';},1800);
+    const unlock=window.setTimeout(()=>{el.dataset.warpDisabled='false';refreshGeometry();},1800);
     const animations:Animation[]=[];
     const ease='cubic-bezier(.16,1,.3,1)';
     el.querySelectorAll<SVGGElement>('.about-ring').forEach((ring,i)=>{
@@ -38,14 +42,14 @@ export default function AboutView({active,reducedMotion,onBurst}:{active:boolean
     const tick=(now:number)=>{
       const elapsed=now-start;
       if(elapsed>=900 && elapsed<1200){
-        if(!burst){const box=title.getBoundingClientRect();onBurst(box.x+box.width/2,box.y+box.height/2,65);burst=true;}
+        if(!burst){const box=cachedBox(el);onBurst(box.x+box.width/2,box.y+box.height/2,65);burst=true;}
         title.style.filter=`url(#${id})`;
         displacement.current?.setAttribute('scale',String(45*(1-(elapsed-900)/300)));
       }else title.style.filter='none';
-      if(elapsed<1200)raf=requestAnimationFrame(tick);
+      if(elapsed<1200)raf=requestTick(tick);
     };
-    raf=requestAnimationFrame(tick);
-    return()=>{clearTimeout(unlock);el.dataset.warpDisabled='false';cancelAnimationFrame(raf);animations.forEach(a=>a.cancel());title.style.filter='none';displacement.current?.setAttribute('scale','0');};
+    raf=requestTick(tick);
+    return()=>{clearTimeout(unlock);el.dataset.warpDisabled='false';cancelTick(raf);animations.forEach(a=>a.cancel());title.style.filter='none';displacement.current?.setAttribute('scale','0');};
   },[active,reducedMotion,id,onBurst]);
   return <section ref={root} className="about-view" data-active={active} aria-hidden={!active} inert={!active} aria-label="About Vishwas Kamath">
     <svg className="about-tunnel" viewBox="-800 -450 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">

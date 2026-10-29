@@ -1,4 +1,5 @@
 "use client";
+import { cachedBox,observeGeometry,geometryRevision } from "@/lib/geometryCache";
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { damp, subscribeProximity } from '@/lib/proximity';
 
@@ -33,21 +34,22 @@ export default function LiquidSurface({ children, className = '' }: { children: 
   const id = `liquid-${useId().replace(/:/g, '')}`;
   useEffect(() => {
     const element = root.current!;
+    const releaseGeometry=observeGeometry(element);
     const reelCard = element.closest<HTMLElement>('[data-video],[data-software]');
     const probes = Array.from(element.querySelectorAll<HTMLElement>('.lens-probe'));
     map.current?.setAttribute('href', getLensMap());
     let intensity = 0, vx = 0, vy = 0, cx = 0, cy = 0;
-    return subscribeProximity((pointer) => {
+    const unsubscribe=subscribeProximity((pointer) => {
       if (reelCard?.style.visibility === 'hidden' && !intensity) return;
-      const rect = element.getBoundingClientRect();
-      const visible = element.checkVisibility({ visibilityProperty: true });
+      const rect = cachedBox(element);
+      const visible = !element.closest('[inert]');
       const videoCard = reelCard?.hasAttribute('data-video');
       const eligible = !videoCard || (reelCard?.classList.contains('is-active') && !reelCard.closest('[data-expanded="true"]'));
       const nearby = pointer.enabled && visible && eligible && pointer.x >= rect.left && pointer.x <= rect.right && pointer.y >= rect.top && pointer.y <= rect.bottom;
       if (!nearby && !intensity) return;
-      const width = element.offsetWidth, height = element.offsetHeight;
+      const width = rect.layoutWidth, height = rect.layoutHeight;
       // Basis probes account for wheel rotation/scale without feeding deformation back into coordinates.
-      const [o, a, b] = probes.map((probe) => probe.getBoundingClientRect());
+      const [o, a, b] = probes.map((probe) => cachedBox(probe));
       const ax = (a.x - o.x) / width, ay = (a.y - o.y) / width;
       const bx = (b.x - o.x) / height, by = (b.y - o.y) / height;
       const det = ax * by - ay * bx;
@@ -81,6 +83,7 @@ export default function LiquidSurface({ children, className = '' }: { children: 
         return intensity > 0;
       };
     });
+    return()=>{releaseGeometry();unsubscribe();};
   }, [id]);
   return <div className={`liquid-surface ${className}`} ref={root}>
     <svg className="warp-definitions" aria-hidden="true"><defs>

@@ -27,7 +27,7 @@ export class ScrollPhysics {
   currentScroll = 0;
   targetScroll = 0;
   private lastInput = -Infinity;
-  private lastFrame = 0;
+  private lastFrame: number | null = null;
   private listeners = new Set<Listener>();
   private frame: ReelFrame = {
     currentScroll: 0, targetScroll: 0, scrollVelocity: 0,
@@ -72,13 +72,14 @@ export class ScrollPhysics {
     this.lastInput = now;
   }
 
-  advance(now: number, reducedMotion = false) {
+  advance(now: number, reducedMotion = false, frameDt?: number) {
+    const dt = frameDt ?? (this.lastFrame !== null ? Math.min((now-this.lastFrame)/1000,.05) : 1/60);
     if (!this.dragging && now - this.lastInput >= SNAP_IDLE_MS) this.targetScroll = Math.round(this.targetScroll);
     const previousScroll = this.currentScroll;
     const wasSettled = this.frame.settled;
     this.currentScroll = reducedMotion && !this.dragging
       ? Math.round(this.targetScroll)
-      : this.currentScroll + (this.targetScroll - this.currentScroll) * SCROLL_LERP;
+      : this.currentScroll + (this.targetScroll - this.currentScroll) * (1-Math.exp(-6.321630939469577*dt));
     if (Math.abs(this.targetScroll - this.currentScroll) < 0.00001) {
       this.currentScroll = this.targetScroll;
     }
@@ -94,7 +95,7 @@ export class ScrollPhysics {
       targetScroll: this.targetScroll,
       scrollVelocity: reducedMotion ? 0 : velocity,
       index: modulo(Math.round(this.currentScroll), this.count),
-      deltaMs: this.lastFrame ? Math.min(now - this.lastFrame, 50) : 1000 / 60,
+      deltaMs: dt * 1000,
       settled: Math.abs(velocity) < 0.00001 && Number.isInteger(this.targetScroll),
     };
     this.lastFrame = now;

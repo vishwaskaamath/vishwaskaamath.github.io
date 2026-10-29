@@ -1,4 +1,5 @@
 "use client";
+import { cachedBox,observeGeometry,geometryRevision } from "@/lib/geometryCache";
 import { useEffect, useId, useRef } from 'react';
 import { damp, falloff, subscribeProximity } from '@/lib/proximity';
 
@@ -8,6 +9,7 @@ export default function WarpedText({ children, className = '', radius = 95, smoo
   const id = `text-warp-${useId().replace(/:/g, '')}`;
   useEffect(() => {
     const element = root.current!;
+    const releaseGeometry=observeGeometry(element);
     const reelSlot = element.closest<HTMLElement>('[data-title-slot],[data-meta-slot],[data-tool-caption]');
     const titleSection = element.closest<HTMLElement>('.project-metadata');
     const isTitle = !!element.closest('.title-solid');
@@ -15,15 +17,17 @@ export default function WarpedText({ children, className = '', radius = 95, smoo
     const chars = cells.map((cell) => cell.firstElementChild as HTMLElement);
     const state = chars.map(() => ({ strength: 0, x: 0, y: 0, skew: 0 }));
     let scale = 0, active = false;
+    let revision=-1;
     let geometry: { x: number; y: number }[] | null = null;
     let measuredWidth = 0, measuredHeight = 0;
     let filterEnabled = false, appliedScale = 0;
-    return subscribeProximity((pointer) => {
+    const unsubscribe=subscribeProximity((pointer) => {
       const hidden = !!element.closest('[inert],[data-warp-disabled="true"]') || reelSlot?.style.visibility === 'hidden' || (isTitle && titleSection?.dataset.distorting === 'true');
       if (hidden && !active) return;
-      const visible = !hidden && element.checkVisibility({ visibilityProperty: true });
+      const visible = !hidden && true;
       if (!visible && !active) return;
-      const rect = element.getBoundingClientRect();
+      if(revision!==geometryRevision()){geometry=null;revision=geometryRevision();}
+      const rect = cachedBox(element);
       const nearby = pointer.enabled && visible && pointer.x > rect.left - radius && pointer.x < rect.right + radius && pointer.y > rect.top - radius && pointer.y < rect.bottom + radius;
       if (!nearby && !active) return;
       const speed = Math.hypot(pointer.vx, pointer.vy);
@@ -34,7 +38,7 @@ export default function WarpedText({ children, className = '', radius = 95, smoo
       if (nearby && (!geometry || Math.abs(rect.width - measuredWidth) > 0.5 || Math.abs(rect.height - measuredHeight) > 0.5)) {
         measuredWidth = rect.width; measuredHeight = rect.height;
         geometry = cells.map(cell => {
-          const box = cell.getBoundingClientRect();
+          const box = cachedBox(cell);
           return { x: box.x + box.width / 2 - rect.x, y: box.y + box.height / 2 - rect.y };
         });
       }
@@ -65,6 +69,7 @@ export default function WarpedText({ children, className = '', radius = 95, smoo
         return settling || scale > 0;
       };
     });
+    return()=>{releaseGeometry();unsubscribe();};
   }, [children, id, radius, smoothing]);
   return <span className={`warped-text ${className}`} aria-label={children}>
     <svg className="warp-definitions" aria-hidden="true"><defs>

@@ -1,4 +1,5 @@
 "use client";
+import { assetUrl } from "@/lib/assetPreloader";
 import { useEffect, useRef, useState } from "react";
 import { ArrowDownToLine, ArrowUpRight, Check, Copy, X } from "lucide-react";
 import { profile, projects, type Project } from "@/data/projects";
@@ -73,8 +74,8 @@ export default function Overlay({
               <video
                 key={project.id}
                 className="full-film"
-                src={project.video}
-                poster={project.poster}
+                src={assetUrl(project.video)}
+                poster={assetUrl(project.poster)}
                 controls
                 autoPlay
                 playsInline

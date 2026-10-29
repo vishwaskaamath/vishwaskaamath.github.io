@@ -1,4 +1,6 @@
 "use client";
+import { requestTick, cancelTick, getFrameDt } from '@/lib/masterTicker';
+
 import { useThemeRef, THEME_EVENT } from "@/lib/theme";
 import { useEffect, useRef, type RefObject } from 'react';
 import type { WheelDrag } from '@/hooks/useProjectWheel';
@@ -15,7 +17,7 @@ export default function RibbonCursor({reducedMotion,layerKey,dragRef}:{reducedMo
     const s=state.current,fine=matchMedia('(any-pointer: fine)');let raf=0,last=0,flashAt=-1000;
     const dust:{x:number;y:number;vx:number;vy:number;size:number;alpha:number;age:number}[]=[];
     const draw=(now:number)=>{
-      const dt=Math.min(32,last?now-last:16.67);last=now;const step=dt/(1000/60);
+      const dt=getFrameDt()*1000;last=now;const step=dt/(1000/60);
       raf=0;ctx.clearRect(0,0,innerWidth,innerHeight);if(!s.active||document.hidden)return;
       const light=themeRef.current==='light';
       if(s.reducedMotion){
@@ -44,10 +46,10 @@ export default function RibbonCursor({reducedMotion,layerKey,dragRef}:{reducedMo
         ctx.beginPath();ctx.arc(p.x,p.y,p.size/2,0,Math.PI*2);ctx.fill();
       }
       ctx.globalCompositeOperation='source-over';
-      if(historyRef.current.length||dust.length||flash>0)raf=requestAnimationFrame(draw);
+      if(historyRef.current.length||dust.length||flash>0)raf=requestTick(draw);
     };
-    const wake=()=>{if(!raf)raf=requestAnimationFrame(draw);};
-    const hide=()=>{s.active=false;historyRef.current.length=0;cancelAnimationFrame(raf);raf=0;ctx.clearRect(0,0,innerWidth,innerHeight);document.documentElement.classList.remove('ribbon-cursor-enabled');};
+    const wake=()=>{if(!raf)raf=requestTick(draw);};
+    const hide=()=>{s.active=false;historyRef.current.length=0;cancelTick(raf);raf=0;ctx.clearRect(0,0,innerWidth,innerHeight);document.documentElement.classList.remove('ribbon-cursor-enabled');};
     const move=(e:PointerEvent)=>{
       if(e.pointerType==='touch'||!fine.matches){hide();return;}
       const now=performance.now();expireHistory(historyRef.current,now);
@@ -72,6 +74,6 @@ export default function RibbonCursor({reducedMotion,layerKey,dragRef}:{reducedMo
     resize();window.addEventListener('pointermove',move,{passive:true,capture:true});window.addEventListener('pointerdown',wake);window.addEventListener('pointerup',wake);window.addEventListener('pointercancel',wake);window.addEventListener('resize',resize);window.addEventListener('blur',hide);document.addEventListener('mouseleave',hide);document.addEventListener('visibilitychange',visibility);fine.addEventListener('change',preference);
     return()=>{window.removeEventListener(THEME_EVENT,wake);window.removeEventListener("portfolio-clean-click",click);hide();window.removeEventListener('pointermove',move,true);window.removeEventListener('pointerdown',wake);window.removeEventListener('pointerup',wake);window.removeEventListener('pointercancel',wake);window.removeEventListener('resize',resize);window.removeEventListener('blur',hide);document.removeEventListener('mouseleave',hide);document.removeEventListener('visibilitychange',visibility);fine.removeEventListener('change',preference);};
   },[dragRef,themeRef]);
-  useEffect(()=>{const c=canvasRef.current;if(!c||!c.showPopover||!matchMedia('(any-pointer: fine)').matches)return;const f=requestAnimationFrame(()=>{if(c.matches(':popover-open'))c.hidePopover();c.showPopover();});return()=>cancelAnimationFrame(f);},[layerKey]);
+  useEffect(()=>{const c=canvasRef.current;if(!c||!c.showPopover||!matchMedia('(any-pointer: fine)').matches)return;const f=requestTick(()=>{if(c.matches(':popover-open'))c.hidePopover();c.showPopover();});return()=>cancelTick(f);},[layerKey]);
   return <canvas ref={canvasRef} className="ribbon-cursor" popover="manual" aria-hidden="true"/>;
 }

@@ -1,4 +1,5 @@
 "use client";
+import { assetUrl,cachedAsset,assetsReady } from "@/lib/assetPreloader";
 import { useLayoutEffect, useRef, type RefObject } from "react";
 import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
@@ -23,7 +24,7 @@ export default function ProjectWheels({
   const root = useRef<HTMLDivElement>(null);
   const options = useRef({ paused, reducedMotion });
   options.current.paused = paused; options.current.reducedMotion = reducedMotion;
-  useLayoutEffect(() => { engine.invalidate(); }, [engine, paused, reducedMotion]);
+  useLayoutEffect(() => { if(paused)root.current?.querySelectorAll("video").forEach(video=>video.pause()); engine.invalidate(); }, [engine, paused, reducedMotion]);
   const wasExpanded = useRef(false);
   useLayoutEffect(() => {
     const card = root.current?.querySelector<HTMLElement>('.video-card.is-active');
@@ -41,7 +42,7 @@ export default function ProjectWheels({
     }
     if (!expanded) {
       video.muted = true;
-      video.src = projects[active].video;
+      video.src = assetUrl(projects[active].video);
       video.currentTime = 0;
       if (!paused) void video.play().catch(() => {});
     }
@@ -62,7 +63,8 @@ export default function ProjectWheels({
     let lastPaused = true;
 
     const playback = (active: number) => {
-      const isPaused = options.current.paused || document.hidden;
+      const isPaused = options.current.paused || document.hidden || !assetsReady();
+      videos.forEach(video=>video.pause());
       videos.forEach((video, i) => {
         if (i === active && !isPaused) void video.play().catch(() => {});
         else video.pause();
@@ -117,11 +119,15 @@ export default function ProjectWheels({
       render(engine.read());
     };
     const visibility = () => playback(engine.read().index);
+    const hydrate = () => {videos.forEach((video,i)=>{video.src=assetUrl(projects[i].video);video.poster=assetUrl(projects[i].poster);});engine.invalidate();};
+    window.addEventListener('portfolio-assets-ready',hydrate);
+    if(assetsReady())hydrate();
     resize();
     const unsubscribe = engine.subscribe(render);
     window.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", visibility);
     return () => {
+      window.removeEventListener("portfolio-assets-ready",hydrate);
       unsubscribe();
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
@@ -146,14 +152,14 @@ export default function ProjectWheels({
                   if (i === engine.read().index) {
                     if (expanded) { onCollapse(); return; }
                     const preview = event.currentTarget.querySelector('video')!;
-                    preview.src = project.video.replace('.mp4', '-full.mp4');
+                    preview.src = assetUrl(project.video.replace('.mp4', '-full.mp4'));
                     preview.currentTime = 0; preview.muted = false; preview.volume = 1;
                     void preview.play().catch(() => {});
                     onExpand();
                   } else { select(i); }
                 }}>
                 <VideoBezel><div className="video-surface">
-                  <video src={project.video} poster={project.poster} muted playsInline loop preload="metadata" aria-label={`${project.shortTitle} preview`} />
+                  <video src={cachedAsset(project.video)} poster={cachedAsset(project.poster)} muted playsInline loop preload="none" aria-label={`${project.shortTitle} preview`} />
                   <div className="crt-shading" />
                   <div className="glitch-flash" />
                   <div className="expansion-scanlines" aria-hidden="true"/>

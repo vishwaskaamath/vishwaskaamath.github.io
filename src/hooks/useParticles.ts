@@ -1,4 +1,6 @@
 "use client";
+import { requestTick, cancelTick, getFrameDt } from '@/lib/masterTicker';
+
 import { useCallback, useEffect, useRef } from "react";
 
 import { THEME_EVENT, type ThemeRef } from "@/lib/theme";
@@ -57,7 +59,7 @@ export function useParticles(reducedMotion: boolean, themeRef: ThemeRef) {
     };
     const draw = (now: number) => {
       raf = 0;
-      const dt = Math.min((now - last) / 16.67 || 1, 2);
+      const dt = getFrameDt()*60;
       last = now;
       ctx.clearRect(0, 0, width, height);
       for (let i = particles.current.length - 1; i >= 0; i--) {
@@ -72,14 +74,14 @@ export function useParticles(reducedMotion: boolean, themeRef: ThemeRef) {
         ctx.fillStyle = `rgba(${themeRef.current === "light" ? "40,40,46" : "222,220,212"},${(p.life / p.max) * 0.6})`;
         ctx.fillRect(p.x, p.y, p.size, p.size);
       }
-      if (particles.current.length) raf = requestAnimationFrame(draw);
+      if (particles.current.length) raf = requestTick(draw);
     };
     const wake = () => {
-      if (!raf && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(draw); }
+      if (!raf && !document.hidden) { last = performance.now(); raf = requestTick(draw); }
     };
     wakeRef.current = wake;
     const visibility = () => {
-      cancelAnimationFrame(raf); raf = 0;
+      cancelTick(raf); raf = 0;
       if (!document.hidden && particles.current.length) wake();
     };
     resize();
@@ -87,7 +89,7 @@ export function useParticles(reducedMotion: boolean, themeRef: ThemeRef) {
     window.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", visibility);
     return () => {
-      cancelAnimationFrame(raf);
+      cancelTick(raf);
       wakeRef.current = () => {};
       window.removeEventListener(THEME_EVENT, wake);
       window.removeEventListener("resize", resize);

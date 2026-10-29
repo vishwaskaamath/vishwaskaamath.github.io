@@ -1,5 +1,8 @@
 "use client";
+import { useMasterTicker } from './useMasterTicker';
+
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { setGeometryMoving } from "@/lib/geometryCache";
 import { ScrollPhysics } from "@/lib/scrollPhysics";
 
 export type WheelDrag = { isDragging: boolean; lastY: number; distance: number; velocity: number; wasDragged: boolean; pointerId: number };
@@ -16,18 +19,18 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
     engine.select(next, performance.now());
   }, [engine]);
 
+  useMasterTicker((now, dt) => {
+    const current = options.current.disabled ? engine.read() : engine.advance(now, options.current.reducedMotion, dt);
+    setGeometryMoving(!options.current.disabled && !current.settled);
+    index.current = current.index;
+  });
+
   useEffect(() => {
-    let raf = 0;
 
     const drag = dragRef.current;
     const blocked = (target: EventTarget | null) =>
       target instanceof Element && !!target.closest("dialog,input,textarea,select,[contenteditable='true']");
 
-    const frame = (now: number) => {
-      const current = options.current.disabled ? engine.read() : engine.advance(now, options.current.reducedMotion);
-      index.current = current.index;
-      raf = requestAnimationFrame(frame);
-    };
     const wheel = (event: WheelEvent) => {
       if (options.current.disabled || event.ctrlKey || blocked(event.target)) return;
       event.preventDefault();
@@ -70,12 +73,9 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
     const ghost = (event: DragEvent) => { if ((event.target as Element)?.closest('.portfolio')) event.preventDefault(); };
     const blur = () => { drag.velocity = 0; end(); };
     const visibility = () => {
-      cancelAnimationFrame(raf);
       if (document.hidden) blur();
-      if (!document.hidden) raf = requestAnimationFrame(frame);
     };
 
-    raf = requestAnimationFrame(frame);
     window.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("keydown", key);
     window.addEventListener("pointerdown", start, true);
@@ -87,7 +87,6 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
     window.addEventListener("blur", blur);
     document.addEventListener("visibilitychange", visibility);
     return () => {
-      cancelAnimationFrame(raf);
       window.removeEventListener("wheel", wheel);
       window.removeEventListener("keydown", key);
       window.removeEventListener("pointerdown", start, true);

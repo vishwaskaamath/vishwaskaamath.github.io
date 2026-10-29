@@ -1,4 +1,6 @@
 "use client";
+import { requestTick, cancelTick, getFrameDt } from '@/lib/masterTicker';
+
 import { useThemeRef, THEME_EVENT } from "@/lib/theme";
 import { useEffect, useRef, type RefObject } from 'react';
 import type { WheelDrag } from '@/hooks/useProjectWheel';
@@ -23,7 +25,7 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
     let renderer = safeRenderer();
     const setMode = () => { gpu.style.display = renderer ? 'block' : 'none'; canvas.style.display = renderer ? 'none' : 'block'; gpu.parentElement!.dataset.renderer = renderer ? 'webgl' : 'canvas2d'; };
     setMode();
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
     if (!ctx) return;
     let width = 0, height = 0, time = phaseRef.current, raf = 0, previous = 0;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -99,18 +101,18 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
     };
     const animate = (now: number) => {
       if (document.hidden || isStill()) return;
-      if (!touch || now - previous >= 1000 / 30) {
-        const dt=previous?Math.min(now-previous,50):1000/60;
+      {
+        const dt=getFrameDt()*1000;
         if(!paused) {time += dt * 0.00072;phaseRef.current=time;}
         advancePulses(pulsesRef.current,dt);
         previous = now;
         draw();
       }
-      raf = requestAnimationFrame(animate);
+      raf = requestTick(animate);
     };
     const restart = () => {
-      cancelAnimationFrame(raf);previous=0;
-      if (!document.hidden && !isStill()) raf = requestAnimationFrame(animate);
+      cancelTick(raf);previous=0;
+      if (!document.hidden && !isStill()) raf = requestTick(animate);
       else draw();
     };
     let pointerId=-1,lastY=0,distance=0;
@@ -140,17 +142,19 @@ export default function WavyBackground({ reducedMotion, paused = false, dragRef 
     const restored = () => { renderer = safeRenderer(); setMode(); resize(); };
     gpu.addEventListener('webglcontextlost', lost); gpu.addEventListener('webglcontextrestored', restored);
     resize(); restart();
+    window.addEventListener('portfolio-warmup',draw);
     window.addEventListener(THEME_EVENT, draw);
     window.addEventListener('resize', resize);
     document.addEventListener('visibilitychange', restart);
     motion.addEventListener('change', restart);
     return () => {
-      cancelAnimationFrame(raf); renderer?.dispose();
+      cancelTick(raf); renderer?.dispose();
       window.removeEventListener('pointerdown',down,true);
       window.removeEventListener('pointermove',move,true);
       window.removeEventListener('pointerup',up,true);
       window.removeEventListener('pointercancel',cancel,true);
       gpu.removeEventListener('webglcontextlost', lost); gpu.removeEventListener('webglcontextrestored', restored);
+      window.removeEventListener('portfolio-warmup',draw);
       window.removeEventListener(THEME_EVENT, draw);
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', restart);

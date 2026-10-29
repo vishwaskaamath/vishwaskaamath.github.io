@@ -47,12 +47,7 @@ export default function Portfolio() {
   const { playing, toggle } = useAmbientAudio();
   const close = useCallback(() => setPanel(null), []);
 
-  useEffect(() => {
-    if (matchMedia('(max-width: 759px), (pointer: coarse), (prefers-reduced-motion: reduce)').matches) return;
-    setLoading(true);
-    const fallback = window.setTimeout(() => setLoading(false), 4500);
-    return () => window.clearTimeout(fallback);
-  }, []);
+  useEffect(() => { setLoading(true); }, []);
 
   useEffect(() => {
     const query = matchMedia("(prefers-reduced-motion: reduce)");
