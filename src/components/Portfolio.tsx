@@ -216,7 +216,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
-      {transition && <PageWipe startedAt={transition.startedAt} onSwap={()=>{setExpanded(false);if(transition.target==='about')setAboutRevealAt(transition.startedAt+ABOUT_REVEAL_MS);setPanel(transition.target);updateAddress(transition.target,transition.push);}} onComplete={finishTransition}/>}
+      {transition && <PageWipe destination={transition.target === 'about' ? 'ABOUT' : 'WORK'} startedAt={transition.startedAt} onSwap={()=>{setExpanded(false);if(transition.target==='about')setAboutRevealAt(transition.startedAt+ABOUT_REVEAL_MS);setPanel(transition.target);updateAddress(transition.target,transition.push);}} onComplete={finishTransition}/>}
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>

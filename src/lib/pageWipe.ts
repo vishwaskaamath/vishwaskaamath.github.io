@@ -1,7 +1,19 @@
-export const WIPE_SWAP_MS=620;
-export const WIPE_REVEAL_MS=720;
-export const WIPE_END_MS=1350;
-export const ABOUT_REVEAL_MS=880;
-export const tileDelay=(col:number,row:number)=>((col+(9-row))/24*.86+(((col*7+row*13)%5)/5)*.14)*480;
-export const wipeTiles=Array.from({length:160},(_,i)=>({col:i%16,row:Math.floor(i/16),delay:tileDelay(i%16,Math.floor(i/16))}));
-export const tileCovered=(elapsed:number,delay:number)=>elapsed>=delay&&elapsed<WIPE_REVEAL_MS+delay;
+export const WIPE_SWAP_MS = 680;
+export const WIPE_REVEAL_MS = 780;
+export const WIPE_END_MS = 1380;
+export const ABOUT_REVEAL_MS = 920;
+export const clamp = (v:number) => Math.max(0, Math.min(1, v));
+export const easeOutCubic = (v:number) => 1 - Math.pow(1 - clamp(v), 3);
+export const wipeTiles = Array.from({length:160}, (_,i) => {
+ const col=i%16, row=Math.floor(i/16);
+ return {col,row,threshold:(col/15)*0.42+((9-row)/9)*0.48+((col*3)%4)*0.035};
+});
+// Include the final tile's growth interval so the hold is completely opaque.
+export const WAVE_EXTENT = Math.max(...wipeTiles.map(t=>t.threshold)) + 0.14;
+export function tileFill(elapsed:number, threshold:number) {
+ const uncover=elapsed>=WIPE_REVEAL_MS;
+ const phaseTime=uncover?elapsed-WIPE_REVEAL_MS:elapsed;
+ const waveProgress=clamp(phaseTime/600)*WAVE_EXTENT;
+ const eased=easeOutCubic((waveProgress-threshold)/0.14);
+ return uncover?1-eased:eased;
+}
