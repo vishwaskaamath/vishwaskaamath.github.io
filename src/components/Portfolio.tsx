@@ -13,6 +13,9 @@ import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import AboutView from "./AboutView";
+import PageWipe from "./PageWipe";
+import { ABOUT_REVEAL_MS } from "@/lib/pageWipe";
+import { refreshGeometry } from "@/lib/geometryCache";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
 import WavyBackground from "./WavyBackground";
@@ -38,10 +41,21 @@ export default function Portfolio() {
   const loaded = useCallback(() => setLoading(false), []);
   const [panel, setPanel] = useState<Panel>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [wipe,setWipe]=useState<{target:Panel;startedAt:number}|null>(null);
+  const wipeBusy=useRef(false);
+  const [aboutRevealAt,setAboutRevealAt]=useState(0);
+  const navigate=(next:Panel)=>{
+    if(wipeBusy.current||next===panel)return;
+    if(!reducedMotion&&(next==='about'||panel==='about')){
+      wipeBusy.current=true;
+      setWipe({target:next,startedAt:performance.now()});
+    }else {setExpanded(false);setPanel(next);setAboutRevealAt(0);}
+  };
+  const finishWipe=()=>{wipeBusy.current=false;setWipe(null);refreshGeometry();};
   const { canvasRef, burst } = useParticles(reducedMotion, themeRef);
   const { index, engine, select, dragRef } = useProjectWheel(
     projects.length,
-    !!panel || loading || expanded,
+    !!panel || loading || expanded || !!wipe,
     reducedMotion,
   );
   const { playing, toggle } = useAmbientAudio();
@@ -71,6 +85,8 @@ export default function Portfolio() {
     <main
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
+      inert={!!wipe}
+      data-page-wiping={!!wipe}
       data-expanded={expanded}
       data-view={panel === "about" ? "about" : "work"}
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
@@ -81,8 +97,8 @@ export default function Portfolio() {
         <button
           className="identity"
           onClick={() => {
-            setPanel(null);
-            select(0, true);
+            navigate(null);
+            if(!wipeBusy.current)select(0, true);
           }}
           aria-label="Vishwas Kamath, home"
         >
@@ -105,8 +121,7 @@ export default function Portfolio() {
                     : ""
                 }
                 onClick={() => {
-                  if (label === "About") setExpanded(false);
-                  setPanel(label === "Work" ? null : label.toLowerCase() as Panel);
+                  navigate(label === "Work" ? null : label.toLowerCase() as Panel);
                 }}
                 aria-current={(label === "Work" && !panel) || panel === label.toLowerCase() ? "page" : undefined}
               >
@@ -150,7 +165,7 @@ export default function Portfolio() {
         onBurst={burst}
       />
       </div>
-      <AboutView active={panel === "about"} reducedMotion={reducedMotion} onBurst={burst} />
+      <AboutView revealAt={aboutRevealAt} active={panel === "about"} reducedMotion={reducedMotion} onBurst={burst} />
       <footer className="hud-footer">
         <button
           className={`audio-player ${playing ? "is-playing" : ""}`}
@@ -182,6 +197,7 @@ export default function Portfolio() {
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
+      {wipe && <PageWipe startedAt={wipe.startedAt} onSwap={()=>{setExpanded(false);setAboutRevealAt(wipe.startedAt+ABOUT_REVEAL_MS);setPanel(wipe.target);}} onComplete={finishWipe}/>}
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>
