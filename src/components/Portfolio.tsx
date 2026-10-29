@@ -13,10 +13,10 @@ import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import AboutView from "./AboutView";
-import PolaroidTransition from "./PolaroidTransition";
-import PolaroidScene from "./PolaroidScene";
+import CameraCaptureTransition from "./CameraCaptureTransition";
+import CaptureScene from "./CaptureScene";
 import { viewFromPath,updateViewAddress } from "@/lib/viewNavigation";
-import { ABOUT_REVEAL_MS } from "@/lib/polaroidTransition";
+import { ABOUT_REVEAL_MS } from "@/lib/cameraCapture";
 import { requestTick } from "@/lib/masterTicker";
 import { refreshGeometry } from "@/lib/geometryCache";
 import ProjectWheels from "./ProjectWheels";
@@ -44,24 +44,24 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
   const loaded = useCallback(() => setLoading(false), []);
   const [panel, setPanel] = useState<Panel>(initialView==="about"?"about":null);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [photo,setPhoto]=useState<{target:Panel;from:'work'|'about';startedAt:number;captured:boolean;retired:boolean;push:boolean}|null>(null);
-  const photoBusy=useRef(false);
+  const [transition,setTransition]=useState<{target:Panel;from:'work'|'about';startedAt:number;captured:boolean;retired:boolean;push:boolean}|null>(null);
+  const transitionPhaseRef=useRef<typeof transition>(null);
+  const updateTransition=(next:typeof transition)=>{transitionPhaseRef.current=next;setTransition(next);};
   const workScene=useRef<HTMLDivElement>(null),aboutScene=useRef<HTMLDivElement>(null);
   const [aboutRevealAt,setAboutRevealAt]=useState(0);
   const pendingNavigation=useRef<{target:Panel;push:boolean}|null>(null);
   const navigateRef=useRef<(next:Panel,push?:boolean)=>void>(()=>{});
   const updateAddress=(next:Panel,push:boolean)=>updateViewAddress(next==='about'?'about':'work',push);
   const navigate=(next:Panel,push=true)=>{
-    if(photoBusy.current){if(!push)pendingNavigation.current={target:next,push};return;}
+    if(transitionPhaseRef.current){if(!push)pendingNavigation.current={target:next,push};return;}
     if(next===panel){updateAddress(next,push);return;}
     if(!reducedMotion&&(next==='about'||panel==='about')){
-      photoBusy.current=true;
-      setPhoto({target:next,from:panel==='about'?'about':'work',startedAt:performance.now(),captured:false,retired:false,push});
+      updateTransition({target:next,from:panel==='about'?'about':'work',startedAt:performance.now(),captured:false,retired:false,push});
     }else {setExpanded(false);setPanel(next);setAboutRevealAt(0);updateAddress(next,push);}
   };
   navigateRef.current=navigate;
-  const finishPhoto=()=>{
-    photoBusy.current=false;setPhoto(null);refreshGeometry();
+  const finishTransition=()=>{
+    updateTransition(null);refreshGeometry();
     const pending=pendingNavigation.current;pendingNavigation.current=null;
     if(pending)requestTick(()=>navigateRef.current(pending.target,pending.push));
   };
@@ -75,7 +75,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
   const { canvasRef, burst } = useParticles(reducedMotion, themeRef);
   const { index, engine, select, dragRef } = useProjectWheel(
     projects.length,
-    !!panel || loading || expanded || !!photo,
+    !!panel || loading || expanded || !!transition,
     reducedMotion,
   );
   const { playing, toggle } = useAmbientAudio();
@@ -105,8 +105,8 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     <main
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
-      inert={!!photo}
-      data-photo-changing={!!photo}
+      inert={!!transition}
+      data-capture-changing={!!transition}
       data-expanded={expanded}
       data-view={panel === "about" ? "about" : "work"}
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
@@ -118,7 +118,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
           className="identity"
           onClick={() => {
             navigate(null);
-            if(!photoBusy.current)select(0, true);
+            if(!transitionPhaseRef.current)select(0, true);
           }}
           aria-label="Vishwas Kamath, home"
         >
@@ -166,7 +166,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
           </button>
         </nav>
       </header>
-      <PolaroidScene sceneRef={workScene} label="WORK" visible={panel!=="about"} snapshot={!!photo?.captured&&photo.from==='work'} retired={!!photo?.retired&&photo.from==='work'}>
+      {(panel!=='about'||(transition?.from==='work'&&!transition.retired))&&<CaptureScene sceneRef={workScene} label="WORK" captured={!!transition?.captured&&transition.from==='work'}>
       <div className="work-scene">
       <ProjectWheels
         dragRef={dragRef}
@@ -174,7 +174,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         engine={engine}
         reducedMotion={reducedMotion}
         select={select}
-        paused={(!expanded && reducedMotion) || (!!panel && !(photo?.captured&&photo.from==='work')) || loading}
+        paused={(!expanded && reducedMotion) || (!!panel && !(transition?.captured&&transition.from==='work')) || loading}
         expanded={expanded}
         onCollapse={collapse}
         onExpand={() => { if (playing) toggle(); setExpanded(true); }}
@@ -186,10 +186,10 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         onBurst={burst}
       />
       </div>
-      </PolaroidScene>
-      <PolaroidScene sceneRef={aboutScene} label="ABOUT" visible={panel==='about'} snapshot={!!photo?.captured&&photo.from==='about'} retired={!!photo?.retired&&photo.from==='about'}>
-      <AboutView revealAt={aboutRevealAt} active={panel === "about" || (photo?.from==='about'&&!photo.retired)} reducedMotion={reducedMotion} onBurst={burst} />
-      </PolaroidScene>
+      </CaptureScene>}
+      {(panel==='about'||(transition?.from==='about'&&!transition.retired))&&<CaptureScene sceneRef={aboutScene} label="ABOUT" captured={!!transition?.captured&&transition.from==='about'}>
+      <AboutView revealAt={aboutRevealAt} active={panel === "about" || (transition?.from==='about'&&!transition.retired)} reducedMotion={reducedMotion} onBurst={burst} />
+      </CaptureScene>}
       <footer className="hud-footer">
         <button
           className={`audio-player ${playing ? "is-playing" : ""}`}
@@ -221,7 +221,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
-      {photo && <PolaroidTransition sceneRef={photo.from==='about'?aboutScene:workScene} incomingRef={photo.target==='about'?aboutScene:workScene} startedAt={photo.startedAt} onSwap={()=>{setExpanded(false);if(photo.target==='about')setAboutRevealAt(photo.startedAt+ABOUT_REVEAL_MS);setPhoto({...photo,captured:true});setPanel(photo.target);updateAddress(photo.target,photo.push);}} onHide={()=>setPhoto({...photo,retired:true})} onComplete={finishPhoto}/>}
+      {transition && <CameraCaptureTransition sceneRef={transition.from==='about'?aboutScene:workScene} startedAt={transition.startedAt} onCapture={()=>{setExpanded(false);if(transition.target==='about')setAboutRevealAt(transition.startedAt+ABOUT_REVEAL_MS);updateTransition({...transition,captured:true});setPanel(transition.target);updateAddress(transition.target,transition.push);}} onRetire={()=>updateTransition({...transition,retired:true})} onComplete={finishTransition}/>}
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>
