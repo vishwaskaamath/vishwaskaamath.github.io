@@ -37,7 +37,7 @@ export default function SoftwareTile({software, tools = [toolCatalog[software]]}
     render();
     const resize=new ResizeObserver(()=>{w=stage.offsetWidth;h=stage.offsetHeight;render();});resize.observe(stage);
     const unsubscribe=subscribeProximity(pointer=>{
-      const active=pointer.enabled && card.getAttribute('aria-hidden')==='false';
+      const active=pointer.enabled && !stage.closest('[inert]') && card.getAttribute('aria-hidden')==='false';
       if(!active && s.x===0 && s.y===0 && s.glow===0 && s.angle===.35)return;
       const [o,a,b]=probes.map(p=>cachedBox(p));
       const ax=(a.x-o.x)/w,ay=(a.y-o.y)/w,bx=(b.x-o.x)/h,by=(b.y-o.y)/h;

@@ -15,7 +15,6 @@ import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import AboutView from "./AboutView";
 import PageWipe from "./PageWipe";
 import { viewFromPath,updateViewAddress } from "@/lib/viewNavigation";
-import { ABOUT_REVEAL_MS } from "@/lib/pageWipe";
 import { requestTick } from "@/lib/masterTicker";
 import { refreshGeometry } from "@/lib/geometryCache";
 import ProjectWheels from "./ProjectWheels";
@@ -210,8 +209,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
           </button>
         </nav>
       </header>
-      {panel!=='about'&&<>
-      <div className="work-scene">
+      <div className="work-scene" data-active={panel!=='about'} aria-hidden={panel==='about'} inert={panel==='about'}>
       <ProjectWheels
         dragRef={dragRef}
         index={index}
@@ -231,8 +229,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         onBurst={burst}
       />
       </div>
-      </>}
-      {panel==='about'&&<AboutView revealAt={aboutRevealAt} active reducedMotion={reducedMotion} onBurst={burst}/>}
+      <AboutView revealAt={aboutRevealAt} active={panel==='about'} reducedMotion={reducedMotion} onBurst={burst}/>
       <footer className="hud-footer">
         <button
           className={`audio-player ${playing ? "is-playing" : ""}`}
@@ -264,7 +261,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
-      {transition && <PageWipe destination={transition.target === 'about' ? 'ABOUT' : 'WORK'} startedAt={transition.startedAt} onSwap={()=>{setExpanded(false);if(transition.target==='about')setAboutRevealAt(transition.startedAt+ABOUT_REVEAL_MS);setPanel(transition.target);updateAddress(transition.target,transition.push);}} onComplete={finishTransition}/>}
+      {transition && <PageWipe destination={transition.target === 'about' ? 'ABOUT' : 'WORK'} startedAt={transition.startedAt} onSwap={()=>{setExpanded(false);if(transition.target==='about')setAboutRevealAt(-1);setPanel(transition.target);updateAddress(transition.target,transition.push);}} onReveal={()=>{if(transition.target==='about')setAboutRevealAt(performance.now());}} onComplete={finishTransition}/>}
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>

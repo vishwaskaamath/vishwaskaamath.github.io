@@ -46,7 +46,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
     resize();
     const observer = new ResizeObserver(resize); observer.observe(element);
     const unsubscribe = subscribeProximity(pointer => {
-      const active = card.classList.contains('is-active') && pointer.enabled && !card.closest('[data-expanded="true"]');
+      const active = card.classList.contains('is-active') && pointer.enabled && !card.closest('[data-expanded="true"],[inert]');
       if (!active && !glow && !tiltX && !tiltY && !specks.length) return;
       // Unwarped probes invert the carousel's rotation and scale, avoiding feedback.
       const [o, a, b] = probes.map(p => cachedBox(p));

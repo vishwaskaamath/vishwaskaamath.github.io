@@ -13,7 +13,10 @@ export default function AboutView({active,reducedMotion,onBurst,revealAt}:{activ
   useLayoutEffect(()=>{
     const el=root.current!;
     const title=el.querySelector<HTMLElement>('.about-unfold')!;
-    if(!active || reducedMotion) { title.style.filter='none'; el.dataset.warpDisabled='false'; return; }
+    const bio=el.querySelector<HTMLElement>('.about-bio')!;
+    const waiting=active&&revealAt<0;
+    title.style.visibility=waiting?'hidden':'';bio.style.visibility=waiting?'hidden':'';
+    if(!active || waiting || reducedMotion) { title.style.filter='none'; el.dataset.warpDisabled='false'; return; }
     el.dataset.warpDisabled='true';
     const delay=Math.max(0,revealAt-performance.now());
     const unlock=window.setTimeout(()=>{el.dataset.warpDisabled='false';refreshGeometry();},delay+550+18*14);
