@@ -13,10 +13,9 @@ import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
 import AboutView from "./AboutView";
-import CameraCaptureTransition from "./CameraCaptureTransition";
-import CaptureScene from "./CaptureScene";
+import PageWipe from "./PageWipe";
 import { viewFromPath,updateViewAddress } from "@/lib/viewNavigation";
-import { ABOUT_REVEAL_MS } from "@/lib/cameraCapture";
+import { ABOUT_REVEAL_MS } from "@/lib/pageWipe";
 import { requestTick } from "@/lib/masterTicker";
 import { refreshGeometry } from "@/lib/geometryCache";
 import ProjectWheels from "./ProjectWheels";
@@ -44,10 +43,9 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
   const loaded = useCallback(() => setLoading(false), []);
   const [panel, setPanel] = useState<Panel>(initialView==="about"?"about":null);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [transition,setTransition]=useState<{target:Panel;from:'work'|'about';startedAt:number;captured:boolean;retired:boolean;push:boolean}|null>(null);
+  const [transition,setTransition]=useState<{target:Panel;startedAt:number;push:boolean}|null>(null);
   const transitionPhaseRef=useRef<typeof transition>(null);
   const updateTransition=(next:typeof transition)=>{transitionPhaseRef.current=next;setTransition(next);};
-  const workScene=useRef<HTMLDivElement>(null),aboutScene=useRef<HTMLDivElement>(null);
   const [aboutRevealAt,setAboutRevealAt]=useState(0);
   const pendingNavigation=useRef<{target:Panel;push:boolean}|null>(null);
   const navigateRef=useRef<(next:Panel,push?:boolean)=>void>(()=>{});
@@ -56,7 +54,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     if(transitionPhaseRef.current){if(!push)pendingNavigation.current={target:next,push};return;}
     if(next===panel){updateAddress(next,push);return;}
     if(!reducedMotion&&(next==='about'||panel==='about')){
-      updateTransition({target:next,from:panel==='about'?'about':'work',startedAt:performance.now(),captured:false,retired:false,push});
+      updateTransition({target:next,startedAt:performance.now(),push});
     }else {setExpanded(false);setPanel(next);setAboutRevealAt(0);updateAddress(next,push);}
   };
   navigateRef.current=navigate;
@@ -106,7 +104,6 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
       inert={!!transition}
-      data-capture-changing={!!transition}
       data-expanded={expanded}
       data-view={panel === "about" ? "about" : "work"}
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
@@ -166,7 +163,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
           </button>
         </nav>
       </header>
-      {(panel!=='about'||(transition?.from==='work'&&!transition.retired))&&<CaptureScene sceneRef={workScene} label="WORK" captured={!!transition?.captured&&transition.from==='work'}>
+      {panel!=='about'&&<>
       <div className="work-scene">
       <ProjectWheels
         dragRef={dragRef}
@@ -174,7 +171,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         engine={engine}
         reducedMotion={reducedMotion}
         select={select}
-        paused={(!expanded && reducedMotion) || (!!panel && !(transition?.captured&&transition.from==='work')) || loading}
+        paused={(!expanded && reducedMotion) || !!panel || loading}
         expanded={expanded}
         onCollapse={collapse}
         onExpand={() => { if (playing) toggle(); setExpanded(true); }}
@@ -186,10 +183,8 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         onBurst={burst}
       />
       </div>
-      </CaptureScene>}
-      {(panel==='about'||(transition?.from==='about'&&!transition.retired))&&<CaptureScene sceneRef={aboutScene} label="ABOUT" captured={!!transition?.captured&&transition.from==='about'}>
-      <AboutView revealAt={aboutRevealAt} active={panel === "about" || (transition?.from==='about'&&!transition.retired)} reducedMotion={reducedMotion} onBurst={burst} />
-      </CaptureScene>}
+      </>}
+      {panel==='about'&&<AboutView revealAt={aboutRevealAt} active reducedMotion={reducedMotion} onBurst={burst}/>}
       <footer className="hud-footer">
         <button
           className={`audio-player ${playing ? "is-playing" : ""}`}
@@ -221,7 +216,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         onSelect={(i) => select(i, true)}
         onBurst={burst}
       />
-      {transition && <CameraCaptureTransition sceneRef={transition.from==='about'?aboutScene:workScene} startedAt={transition.startedAt} onCapture={()=>{setExpanded(false);if(transition.target==='about')setAboutRevealAt(transition.startedAt+ABOUT_REVEAL_MS);updateTransition({...transition,captured:true});setPanel(transition.target);updateAddress(transition.target,transition.push);}} onRetire={()=>updateTransition({...transition,retired:true})} onComplete={finishTransition}/>}
+      {transition && <PageWipe startedAt={transition.startedAt} onSwap={()=>{setExpanded(false);if(transition.target==='about')setAboutRevealAt(transition.startedAt+ABOUT_REVEAL_MS);setPanel(transition.target);updateAddress(transition.target,transition.push);}} onComplete={finishTransition}/>}
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>
