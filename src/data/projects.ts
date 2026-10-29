@@ -9,6 +9,7 @@ export const toolCatalog: Record<Software, Tool> = {
 };
 export type Project = {
   id: string;
+  slug: string;
   title: string[];
   shortTitle: string;
   role: string;
@@ -27,6 +28,7 @@ export type Project = {
 export const projects: Project[] = [
   {
     id: "pocket",
+    slug: "saas-in-motion",
     title: ["SaaS", "in Motion"],
     shortTitle: "SaaS in Motion",
     role: "MOTION GRAPHICS",
@@ -42,6 +44,7 @@ export const projects: Project[] = [
   },
   {
     id: "nightcity",
+    slug: "cyberpunk-2077",
     title: ["Cyberpunk", "2077"],
     shortTitle: "Cyberpunk 2077",
     role: "VIDEO EDITING",
@@ -57,6 +60,7 @@ export const projects: Project[] = [
   },
   {
     id: "dolce",
+    slug: "spartan-protocol",
     title: ["Spartan", "Protocol"],
     shortTitle: "Spartan Protocol",
     role: "VIDEO EDITING",
@@ -72,6 +76,7 @@ export const projects: Project[] = [
   },
   {
     id: "music",
+    slug: "art-that-is-music",
     title: ["Art that", "is Music"],
     shortTitle: "Art that is Music",
     role: "VIDEO EDITING",
@@ -87,6 +92,7 @@ export const projects: Project[] = [
   },
   {
     id: "inmoe",
+    slug: "urban-rhythm",
     title: ["Urban", "Rhythm"],
     shortTitle: "Urban Rhythm",
     role: "VIDEO EDITING",

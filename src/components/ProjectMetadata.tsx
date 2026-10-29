@@ -5,8 +5,9 @@ import WarpedText from "./WarpedText";
 import { reelOffset, type ScrollPhysics } from "@/lib/scrollPhysics";
 
 export default function ProjectMetadata({
-  index, engine, reducedMotion, onBurst,
+  index, engine, reducedMotion, onBurst, onView,
 }: {
+  onView: () => void;
   index: number;
   engine: ScrollPhysics;
   reducedMotion: boolean;
@@ -42,7 +43,7 @@ export default function ProjectMetadata({
       const active = engine.read().index;
       if (active !== semanticIndex) {
         semanticIndex = active;
-        element.querySelector('h1')?.setAttribute('aria-label', projects[active].shortTitle);
+        element.querySelectorAll<HTMLElement>('[data-title-slot]').forEach((slot,i)=>{slot.setAttribute('aria-hidden',String(i!==active));const button=slot.querySelector('button')!;button.disabled=i!==active;button.tabIndex=i===active?0:-1;});
         element.querySelector('.metadata-reel')?.setAttribute('aria-label', `${projects[active].role}, ${projects[active].year}`);
       }
       const speed = Math.abs(scrollVelocity);
@@ -89,23 +90,12 @@ export default function ProjectMetadata({
           <feDisplacementMap ref={displacement} in="SourceGraphic" in2="horizontalNoise" scale="0" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </defs></svg>
-      <h1 className="project-title title-stage" aria-label={projects[index].shortTitle}>
-        {projects.map((project, i) => (
-          <span className="title-slot" data-title-slot={i} key={project.id} aria-hidden="true"
-            style={{ visibility: i === index ? "visible" : "hidden" }}>
-            {project.title.map((line, lineIndex) => (
-              <span className={`title-solid ${lineIndex === 1 ? "title-line-secondary" : ""}`} key={lineIndex}>
-                <WarpedText>{line}</WarpedText>
-              </span>
-            ))}
-          </span>
-        ))}
-      </h1>
-      <div className="metadata-reel" aria-label={`${projects[index].role}, ${projects[index].year}`}>
-        {projects.map((project, i) => (
-          <div className="metadata-slot" data-meta-slot={i} key={project.id} aria-hidden="true">
-            <span className="role-badge"><WarpedText>{project.role}</WarpedText></span>
-            <span className="project-year"><WarpedText>{String(project.year)}</WarpedText></span>
+      <div className="project-title title-stage cinema-title-stage">
+        {projects.map((project,i)=>(
+          <div className="title-slot cinema-title-slot" data-title-slot={i} key={project.id} aria-hidden={i!==index} style={{visibility:i===index?'visible':'hidden'}}>
+            <h1 className="project-title">{project.title.map((line,j)=><span className={`title-solid ${j===1?'title-line-secondary':''}`} key={j}><WarpedText>{line}</WarpedText></span>)}</h1>
+            <div className="metadata-slot cinema-metadata-row"><span className="role-badge"><WarpedText>{project.role}</WarpedText></span><span className="project-year">{project.year}</span></div>
+            <button className="view-project-button" onClick={onView} disabled={i!==index} tabIndex={i===index?0:-1}>View project</button>
           </div>
         ))}
       </div>

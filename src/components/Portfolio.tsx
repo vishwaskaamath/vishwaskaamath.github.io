@@ -20,6 +20,7 @@ import { requestTick } from "@/lib/masterTicker";
 import { refreshGeometry } from "@/lib/geometryCache";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
+import CinemaPlayer, {type CinemaSession} from "./CinemaPlayer";
 import WavyBackground from "./WavyBackground";
 import RibbonCursor from "./RibbonCursor";
 import WarpedText from "./WarpedText";
@@ -36,6 +37,10 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     setIsLightMode(next);
     window.dispatchEvent(new Event(THEME_EVENT));
   };
+  const [cinema,setCinema]=useState<CinemaSession|null>(null);
+  const cinemaRef=useRef<CinemaSession|null>(null);
+  const openCinemaRef=useRef<(i?:number,push?:boolean)=>void>(()=>{});
+  const closeCinemaRef=useRef<(historyChange?:boolean)=>void>(()=>{});
   const [expanded, setExpanded] = useState(false);
   const collapse = useCallback(() => setExpanded(false), []);
   // Server HTML stays visible even when scripts or decorative effects fail.
@@ -67,17 +72,58 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     const view=viewFromPath(location.pathname);
     history.replaceState({...history.state,view},'',location.href);
     document.title=view==='about'?'Vishwas Kamath — About':'Vishwas Kamath — Motion Portfolio';
-    const pop=()=>navigateRef.current(viewFromPath(location.pathname)==='about'?'about':null,false);
+    const pop=()=>{
+      const slug=new URLSearchParams(location.search).get('project');
+      const projectIndex=projects.findIndex(p=>p.slug===slug);
+      if(projectIndex>=0){openCinemaRef.current(projectIndex,false);return;}
+      if(cinemaRef.current){closeCinemaRef.current(false);return;}
+      navigateRef.current(viewFromPath(location.pathname)==='about'?'about':null,false);
+    };
     window.addEventListener('popstate',pop);return()=>window.removeEventListener('popstate',pop);
   },[]);
   const { canvasRef, burst } = useParticles(reducedMotion, themeRef);
   const { index, engine, select, dragRef } = useProjectWheel(
     projects.length,
-    !!panel || loading || expanded || !!transition,
+    !!panel || loading || expanded || !!transition || !!cinema,
     reducedMotion,
   );
   const { playing, toggle } = useAmbientAudio();
   const close = useCallback(() => setPanel(null), []);
+  const openCinema=(requested=engine.read().index,push=true)=>{
+    if(cinemaRef.current||transitionPhaseRef.current||(push&&dragRef.current.wasDragged)||loading)return;
+    if(requested!==engine.read().index){engine.select(requested,performance.now());engine.advance(performance.now(),true);}
+    if(panel)setPanel(null);
+    const card=document.querySelector<HTMLElement>(`[data-video="${requested}"]`);
+    const preview=card?.querySelector('video');
+    const box=card?.getBoundingClientRect();
+    const rect=box?{left:box.left,top:box.top,width:box.width,height:box.height}:{left:innerWidth*.04,top:innerHeight*.32,width:innerWidth*.32,height:innerHeight*.36};
+    const next={project:projects[requested],rect,time:preview?.currentTime||0,closing:false};
+    preview?.pause();if(preview)preview.muted=true;
+    if(playing)toggle();
+    setExpanded(false);cinemaRef.current=next;setCinema(next);
+    if(push)history.pushState({view:'work',project:next.project.id,cinema:true},'',`/?project=${next.project.slug}`);
+  };
+  openCinemaRef.current=openCinema;
+  const closeCinema=(historyChange=true)=>{
+    const current=cinemaRef.current;if(!current||current.closing)return;
+    const returnBox=document.querySelector<HTMLElement>(`[data-video="${projects.indexOf(current.project)}"]`)?.getBoundingClientRect();
+    const rect=returnBox?{left:returnBox.left,top:returnBox.top,width:returnBox.width,height:returnBox.height}:current.rect;
+    const next={...current,rect,closing:true};cinemaRef.current=next;setCinema(next);
+    if(historyChange){if(history.state?.cinema)history.back();else history.replaceState({view:'work'},'','/');}
+  };
+  closeCinemaRef.current=closeCinema;
+  const finishCinema=(time:number)=>{
+    const preview=document.querySelector<HTMLVideoElement>('.video-card.is-active video');
+    if(preview){preview.muted=true;if(Number.isFinite(preview.duration))preview.currentTime=Math.min(time,Math.max(0,preview.duration-.1));}
+    cinemaRef.current=null;setCinema(null);refreshGeometry();
+    const view=viewFromPath(location.pathname);
+    const slug=new URLSearchParams(location.search).get('project');
+    const nextProject=projects.findIndex(p=>p.slug===slug);
+    if(nextProject>=0)requestTick(()=>openCinemaRef.current(nextProject,false));
+    else if(view==='about')navigateRef.current('about',false);
+    requestTick(()=>document.querySelector<HTMLButtonElement>('.title-slot[aria-hidden="false"] .view-project-button')?.focus({preventScroll:true}));
+  };
+
 
   useEffect(() => { setLoading(true); }, []);
 
@@ -103,12 +149,13 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     <main
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
-      inert={!!transition}
+      inert={!!transition || !!cinema}
       data-expanded={expanded}
+      data-cinema={cinema ? (cinema.closing ? "closing" : "open") : "closed"}
       data-view={panel === "about" ? "about" : "work"}
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
     >
-      <WavyBackground dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded} />
+      <WavyBackground dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded || !!cinema} />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
       <header className="hud-header">
         <button
@@ -171,12 +218,13 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         engine={engine}
         reducedMotion={reducedMotion}
         select={select}
-        paused={(!expanded && reducedMotion) || !!panel || loading}
+        paused={(!expanded && reducedMotion) || !!panel || loading || !!cinema}
         expanded={expanded}
         onCollapse={collapse}
         onExpand={() => { if (playing) toggle(); setExpanded(true); }}
       />
       <ProjectMetadata
+        onView={()=>openCinema()}
         index={index}
         engine={engine}
         reducedMotion={reducedMotion}
@@ -220,6 +268,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
     </main>
+    {cinema && <CinemaPlayer session={cinema} reducedMotion={reducedMotion} onClose={()=>closeCinema()} onDone={finishCinema}/>}
     </ThemeContext.Provider>
   );
 }
