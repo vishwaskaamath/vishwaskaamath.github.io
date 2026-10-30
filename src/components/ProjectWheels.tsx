@@ -70,7 +70,6 @@ export default function ProjectWheels({
     let mobile = false;
     let gap = 0;
     let width = 0;
-    let leftRadiusX = 0;
     let rightGap = 0;
     let lastIndex = -1;
     let lastPaused = true;
@@ -108,16 +107,15 @@ export default function ProjectWheels({
         const distance = Math.abs(d);
         const blend = Math.min(distance, 1);
         const visible = distance < 2;
-        const fade = distance <= 1 ? 1 - distance * 0.64 : 0.36 * (2 - distance);
-        const scale = 1 - blend * (mobile ? 0.3 : 0.44);
+        const fade = distance <= 1 ? 1 - distance * 0.62 : 0.38 * (2 - distance);
+        const scale = 1 - blend * (mobile ? 0.3 : 0.32);
         const angle = d * Math.PI / 2;
-        cards[i].style.transform = `translate3d(${mobile ? d * gap : (Math.cos(angle) - 1) * leftRadiusX}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) perspective(1100px) rotate(${d * (mobile ? 7 : 32)}deg) rotateY(${mobile ? 0 : 12 * (1-blend)}deg) scale(${scale})`;
+        cards[i].style.transform = `translate3d(${mobile ? d * gap : (Math.cos(angle) - 1) * width * .065}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) rotate(${d * (mobile ? 7 : -18)}deg) scale(${scale})`;
         cards[i].style.opacity = `${Math.max(0, fade)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
         cards[i].style.zIndex = `${Math.round(10 - distance * 3)}`;
-        const iconFade = mobile ? Math.max(0, 1 - distance) : Math.max(0, distance <= 1 ? 1 - distance * 0.67 : 0.33 * (2 - distance));
-        const rightAngle = d * Math.acos(1 - .205 / .38);
-        icons[i].style.transform = `translate3d(${mobile ? d * 90 : (1 - Math.cos(rightAngle)) * width * .38}px, ${mobile ? 0 : d * rightGap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 38)}deg) rotateY(${(mobile ? -12 * (1 - blend) : 0) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
+        const iconFade = mobile ? Math.max(0, 1 - distance) : Math.max(0, distance <= 1 ? 1 - distance * 0.65 : 0.35 * (2 - distance));
+        icons[i].style.transform = `translate3d(${mobile ? d * 90 : (1 - Math.cos(angle)) * width * .12}px, ${mobile ? 0 : d * rightGap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 20)}deg) rotateY(${(mobile ? -12 * (1 - blend) : 0) + d * 9 * blend}deg) scale(${1 - blend * 0.25})`;
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
         captions[i].style.transform = `translate3d(0, ${d * 100}%, 0)`;
@@ -127,14 +125,15 @@ export default function ProjectWheels({
     const resize = () => {
       width = innerWidth;
       mobile = width < 760;
-      const angle = 32 * Math.PI / 180;
-      const cardW=cards[0].offsetWidth,cardH=cards[0].offsetHeight;
-      const cornerW=.56*(cardW*Math.cos(angle)+cardH*Math.sin(angle));
-      const cornerH=.56*(cardH*Math.cos(angle)+cardW*Math.sin(angle));
-      leftRadiusX=width*.03+(cardW-cornerW)/2;
-      gap = mobile ? width * .94 : innerHeight*.44-cornerH/2;
-      const cubeW=Math.max(165,Math.min(215,width*.11));
-      rightGap=innerHeight*.41-cubeW*.76*(Math.cos(38*Math.PI/180)+Math.sin(38*Math.PI/180))/2;
+      gap = mobile ? width * .94 : innerHeight*.42;
+      rightGap=innerHeight*.39;
+      // Reserve the actual HUD rectangles; measurement occurs only on resize/mount.
+      const brand=document.querySelector('.identity')?.getBoundingClientRect();
+      const audio=document.querySelector('.audio-player')?.getBoundingClientRect();
+      element.style.setProperty('--brand-clear-x',`${(brand?.right??280)+12}px`);
+      element.style.setProperty('--brand-clear-y',`${(brand?.bottom??90)+12}px`);
+      element.style.setProperty('--audio-clear-x',`${(audio?.right??300)+12}px`);
+      element.style.setProperty('--audio-clear-y',`${(audio?.top??innerHeight-100)-12}px`);
       render(engine.read());
       refreshGeometry();
     };
@@ -159,7 +158,7 @@ export default function ProjectWheels({
     <div className="project-wheels" ref={root}>
       <div className="arc arc-left" aria-hidden="true" />
       <div className="arc arc-right" aria-hidden="true" />
-      <div className="video-wheel">
+      <div className="video-wheel-viewport"><div className="video-wheel">
         {projects.map((project, i) => {
           const active = i === index;
           const nearby = Math.abs(reelOffset(i, index, projects.length)) <= 1;
@@ -196,7 +195,7 @@ export default function ProjectWheels({
             </div>
           );
         })}
-      </div>
+      </div></div>
       <div className="software-wheel" aria-label={`Creative tools for ${projects[index].shortTitle}`}>
         {projects.map((project, i) => (
           <div key={project.id} className="software-position" data-software={i} aria-hidden={i !== index}>

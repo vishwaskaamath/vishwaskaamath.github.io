@@ -12,18 +12,18 @@ const test = (label, run) => { run(); console.log(`PASS ${label}`); passed++; };
 test("a rapid burst retains every event and starts moving on the first frame", () => {
   const reel = new ScrollPhysics(5);
   for (let i = 0; i < 100; i++) reel.wheel(100, i / 10);
-  near(reel.targetScroll, 25);
+  near(reel.targetScroll, -18);
   const frame = reel.advance(16);
-  near(frame.currentScroll, 2.5);
-  near(frame.scrollVelocity, 22.5);
+  near(frame.currentScroll, 3.2);
+  near(frame.scrollVelocity, -16.2);
 });
 
 test("snapping begins at 120ms, with no input lock during the snap", () => {
   const reel = new ScrollPhysics(5);
-  reel.wheel(300, 0);
+  reel.wheel(-0.75 / .0018, 0);
   near(reel.advance(119).targetScroll, 0.75);
   near(reel.advance(120).targetScroll, 1);
-  reel.wheel(-200, 121);
+  reel.wheel(0.5 / .0018, 121);
   near(reel.targetScroll, 0.5);
   near(reel.advance(122).targetScroll, 0.5);
   near(reel.advance(240).targetScroll, 0.5);
@@ -32,10 +32,10 @@ test("snapping begins at 120ms, with no input lock during the snap", () => {
 
 test("rapid reversal changes direction immediately, including across zero", () => {
   const reel = new ScrollPhysics(5);
-  reel.wheel(800, 0);
+  reel.wheel(-2 / .0018, 0);
   reel.advance(16);
-  reel.wheel(-1600, 17);
-  const reverse = reel.advance(32);
+  reel.wheel(4 / .0018, 17);
+  const reverse = reel.advance(32, false, 1/60);
   assert.ok(reverse.scrollVelocity < 0);
   near(reverse.currentScroll, 4.98);
   near(reverse.targetScroll, 3);
@@ -53,7 +53,7 @@ test("large positive and negative flings preserve turns and settle correctly", (
       priorVelocity = Math.abs(frame.scrollVelocity);
     }
     assert.equal(reel.read().settled, true);
-    near(reel.read().index, modulo(Math.round(delta * 0.0025), 5));
+    near(reel.read().index, modulo(Math.round(-delta * 0.0018), 5));
   }
 });
 
@@ -113,4 +113,17 @@ test("drag reversal and negative throws retain continuous wrapping", () => {
   assert.equal(reel.read().index,4);
 });
 
+test("scrolling down brings the top preview downward into center in all reels", () => {
+  const reel=new ScrollPhysics(5);
+  const positions=[[],[],[]];
+  positions.forEach(samples=>reel.subscribe(f=>samples.push(reelOffset(4,f.currentScroll,5))));
+  reel.wheel(1/.0018,0);
+  for(let t=16;t<3000;t+=16)reel.advance(t);
+  positions.forEach(samples=>{
+    near(samples[0],-1);
+    assert.ok(samples[1]>samples[0]);
+    near(samples.at(-1),0);
+  });
+  near(reelOffset(0,reel.currentScroll,5),1);
+});
 console.log(`${passed} scroll regression checks passed.`);

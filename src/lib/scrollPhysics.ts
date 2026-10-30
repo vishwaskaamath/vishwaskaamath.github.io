@@ -1,4 +1,4 @@
-export const WHEEL_SENSITIVITY = 0.0025;
+export const WHEEL_SENSITIVITY = 0.0018;
 export const SCROLL_LERP = 0.1;
 export const SNAP_IDLE_MS = 120;
 
@@ -59,7 +59,7 @@ export class ScrollPhysics {
 
   wheel(deltaY: number, now: number) {
     // Every wheel event contributes, including input during snapping or reversal.
-    this.add(deltaY * WHEEL_SENSITIVITY, now);
+    this.add(-deltaY * WHEEL_SENSITIVITY, now);
   }
 
   select(index: number, now: number) {
