@@ -114,8 +114,12 @@ export default function ProjectWheels({
       width = innerWidth;
       mobile = width < 760;
       const angle = (18 * Math.PI) / 180;
-      const minimumGap = cards[0].offsetHeight * 1.055 / 2 +
-        0.7 * (cards[0].offsetHeight * Math.cos(angle) + cards[0].offsetWidth * Math.sin(angle)) / 2 + 40;
+      // Keep the existing orbital spacing based on the original 32vw × 36vh
+      // footprint; only the rendered desktop cards are now five percent smaller.
+      const spacingWidth = mobile ? cards[0].offsetWidth : Math.round(width * .32);
+      const spacingHeight = mobile ? cards[0].offsetHeight : Math.round(innerHeight * .36);
+      const minimumGap = spacingHeight * 1.055 / 2 +
+        0.7 * (spacingHeight * Math.cos(angle) + spacingWidth * Math.sin(angle)) / 2 + 40;
       gap = mobile ? width * 0.94 : Math.max(225, innerHeight * (innerHeight < 650 ? 0.42 : 0.445), minimumGap);
       render(engine.read());
       refreshGeometry();
