@@ -1433,6 +1433,16 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 
 /* Card-local CRT glass: one shared clip and deformable nested rim. */
 .video-hit { overflow: visible; border-radius: 0; background: transparent; box-shadow: none; }
+/* Keep browser focus/click decoration off the rectangular outer wrappers.
+   The existing curved SVG paths remain the only bezel and rim highlights. */
+.video-card, .video-hit, .video-bezel, .video-card video,
+.video-card:is(:focus,:focus-visible,:active),
+.video-hit:is(:focus,:focus-visible,:active),
+.video-bezel:is(:focus,:focus-visible,:active),
+.video-card video:is(:focus,:focus-visible,:active) {
+ outline:none !important; border:none !important; box-shadow:none !important;
+ -webkit-tap-highlight-color:transparent;
+}
 .video-bezel, .video-glass, .video-aperture { position: absolute; inset: 0; }
 .video-glass { transform-origin: center; }
 .video-aperture { overflow: hidden; }
@@ -1653,8 +1663,8 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .portfolio[data-cinema="open"] .video-card.is-active,.portfolio[data-cinema="closing"] .video-card.is-active { visibility:hidden !important; }
 .cinema-player { position:fixed; inset:0; z-index:99985; color:#f3efe6; --cinema-progress:0; }
 .cinema-backdrop { position:absolute; inset:0; background:rgba(5,5,7,.94); backdrop-filter:blur(20px); opacity:0; }
-.cinema-frame { position:absolute; left:0; top:0; transform-origin:0 0; overflow:hidden; background:#000; will-change:transform; box-shadow:0 24px 70px #0008; }
-.cinema-frame video { width:100%; height:100%; object-fit:contain; display:block; }
+.cinema-frame { position:absolute; left:0; top:0; transform-origin:0 0; overflow:hidden; background:transparent !important; padding:0 !important; border:0; outline:0; will-change:transform; box-shadow:none; }
+.cinema-frame video { width:100% !important; height:100% !important; object-fit:cover !important; display:block; padding:0 !important; margin:0; border:0; outline:0; background:transparent; }
 .cinema-hud { opacity:var(--cinema-progress); transition:opacity 250ms; }
 .cinema-player[data-hud="false"] .cinema-hud { opacity:0; pointer-events:none; }
 .cinema-top { position:absolute; top:2vh; left:4vw; width:92vw; display:flex; align-items:center; justify-content:space-between; gap:16px; font:12px var(--font-pally),sans-serif; letter-spacing:.05em; text-transform:uppercase; }
@@ -1676,6 +1686,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .cinema-shutter { position:absolute; left:0; right:0; height:15%; background:#000; pointer-events:none; transform:scaleY(var(--shutter,1)); }
 .cinema-shutter-top { top:0; transform-origin:top; }
 .cinema-shutter-bottom { bottom:0; transform-origin:bottom; }
+.cinema-player[data-closing="true"] .cinema-shutter { display:none; }
 
 /* Restore the original headline center without letting the new CTA shift it. */
 @media(min-width:760px) {

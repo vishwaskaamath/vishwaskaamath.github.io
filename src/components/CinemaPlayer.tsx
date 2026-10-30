@@ -49,7 +49,7 @@ export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{ses
   });return()=>{stop();window.removeEventListener('resize',resize);};
  },[session.closing,session.rect,reducedMotion]);
  const togglePlay=()=>{const v=video.current!;if(v.paused)void v.play().catch(()=>setError('Playback is unavailable. Please try again.'));else v.pause();};
- return createPortal(<div ref={root} className="cinema-player" role="dialog" aria-modal="true" aria-label={`${session.project.shortTitle} cinema player`} onFocusCapture={()=>{motion.current.lastInput=performance.now();}} onPointerMove={()=>{motion.current.lastInput=performance.now();}} onPointerDown={()=>{motion.current.lastInput=performance.now();}}>
+ return createPortal(<div ref={root} className="cinema-player" data-closing={session.closing} role="dialog" aria-modal="true" aria-label={`${session.project.shortTitle} cinema player`} onFocusCapture={()=>{motion.current.lastInput=performance.now();}} onPointerMove={()=>{motion.current.lastInput=performance.now();}} onPointerDown={()=>{motion.current.lastInput=performance.now();}}>
   <div ref={backdrop} className="cinema-backdrop" onClick={()=>callbacks.current.onClose()}/>
   <svg width="0" height="0" aria-hidden="true"><defs><clipPath id={clipId} clipPathUnits="objectBoundingBox"><path ref={clip}/></clipPath></defs></svg>
   <div ref={frame} className="cinema-frame" style={{clipPath:`url(#${clipId})`}}>
