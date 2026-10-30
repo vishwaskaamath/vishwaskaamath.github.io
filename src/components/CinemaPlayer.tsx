@@ -5,7 +5,8 @@ import {assetUrl} from '@/lib/assetPreloader';
 import {subscribeTicker} from '@/lib/masterTicker';
 import type {Project} from '@/data/projects';
 export type CinemaSession={project:Project;rect:{left:number;top:number;width:number;height:number};time:number;closing:boolean};
-import {clamp01 as clamp,cinemaEase,cinemaClip,closeMix} from '@/lib/cinemaMotion';
+const clamp=(x:number)=>Math.max(0,Math.min(1,x));
+const ease=(p:number)=>{if(p<=0)return 0;if(p>=1)return 1;let lo=0,hi=1;for(let i=0;i<12;i++){const t=(lo+hi)/2,u=1-t;if(3*u*u*t*.16+3*u*t*t*.3+t*t*t<p)lo=t;else hi=t;}return 1-Math.pow(1-(lo+hi)/2,3);};
 const timecode=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{session:CinemaSession;onClose:()=>void;onDone:(time:number)=>void;reducedMotion:boolean}){
  const root=useRef<HTMLDivElement>(null),frame=useRef<HTMLDivElement>(null),video=useRef<HTMLVideoElement>(null),backdrop=useRef<HTMLDivElement>(null),clip=useRef<SVGPathElement>(null),range=useRef<HTMLInputElement>(null),clock=useRef<HTMLOutputElement>(null),closeButton=useRef<HTMLButtonElement>(null);
@@ -25,31 +26,20 @@ export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{ses
   return()=>{v.removeEventListener('loadedmetadata',ready);v.pause();v.muted=true;};
  },[session.project,session.time]);
  useLayoutEffect(()=>{
-  const start=performance.now(),from=motion.current.progress,to=session.closing?0:1,duration=reducedMotion?1:session.closing?550:650;
-  const el=frame.current!,main=document.querySelector<HTMLElement>('.portfolio');
-  const returnVideo=main?.querySelector<HTMLVideoElement>('.video-card.is-active video');
-  // Read the visible clone once, before writes, so even a mid-open reversal is continuous.
-  const live=session.closing?el.getBoundingClientRect():session.rect;
-  const origin={left:live.left,top:live.top,width:live.width,height:live.height};
-  let target=session.closing?session.rect:{left:innerWidth*.04,top:innerHeight*.08,width:innerWidth*.92,height:innerHeight*.84},done=false;
-  const resize=()=>{done=false;if(!session.closing)target={left:innerWidth*.04,top:innerHeight*.08,width:innerWidth*.92,height:innerHeight*.84};};window.addEventListener('resize',resize);
-  main?.style.setProperty('--cinema-card-opacity','0');
-  if(session.closing){
-   video.current?.pause();if(video.current)video.current.muted=true;
-   if(returnVideo){returnVideo.pause();returnVideo.muted=true;if(Number.isFinite(returnVideo.duration))returnVideo.currentTime=Math.min(video.current?.currentTime||0,Math.max(0,returnVideo.duration-.1));}
-  }
+  const start=performance.now(),from=motion.current.progress,to=session.closing?0:1,duration=reducedMotion?1:650;
+  let target={left:innerWidth*.04,top:innerHeight*.08,width:innerWidth*.92,height:innerHeight*.84},done=false;
+  const resize=()=>{done=false;target={left:innerWidth*.04,top:innerHeight*.08,width:innerWidth*.92,height:innerHeight*.84};};window.addEventListener('resize',resize);
+  if(session.closing){video.current?.pause();if(video.current)video.current.muted=true;}
   const stop=subscribeTicker(now=>{
-   const elapsed=now-start,t=clamp(elapsed/duration),e=cinemaEase(t,session.closing),p=from+(to-from)*e;motion.current.progress=p;
-   if(t<1||!done){
-    const width=origin.width+(target.width-origin.width)*e,height=origin.height+(target.height-origin.height)*e;
-    el.style.width=`${width}px`;el.style.height=`${height}px`;
-    el.style.transform=`translate3d(${origin.left+(target.left-origin.left)*e}px,${origin.top+(target.top-origin.top)*e}px,0)`;
-    el.style.borderRadius=`${18*p}px`;clip.current?.setAttribute('d',cinemaClip(p,width,height));
-    const mix=closeMix(reducedMotion?550:elapsed);
-    backdrop.current!.style.opacity=String(session.closing?from*mix.backdrop:p);
-    el.style.opacity=String(session.closing?1-mix.handoff:1);
-    if(session.closing)main?.style.setProperty('--cinema-card-opacity',String(mix.handoff));
-    el.style.filter=!session.closing&&!reducedMotion&&elapsed<160?'drop-shadow(-4px 0 0 rgba(255,0,80,.6)) drop-shadow(4px 0 0 rgba(0,230,255,.6))':'none';
+   const t=clamp((now-start)/duration),p=from+(to-from)*ease(t);motion.current.progress=p;
+   const el=frame.current!,r=session.rect;
+   if(t<1 || motion.current.progress!==to || !done){
+   el.style.width=`${target.width}px`;el.style.height=`${target.height}px`;
+   el.style.transform=`translate3d(${r.left+(target.left-r.left)*p}px,${r.top+(target.top-r.top)*p}px,0) scale(${(r.width+(target.width-r.width)*p)/target.width},${(r.height+(target.height-r.height)*p)/target.height})`;
+   el.style.borderRadius=`${18*p}px`;el.style.setProperty('--shutter',String(1-p));
+   const a=.025*(1-p),b=.04*(1-p);clip.current?.setAttribute('d',`M ${a} ${b} Q .5 0 ${1-a} ${b} Q 1 .5 ${1-a} ${1-b} Q .5 1 ${a} ${1-b} Q 0 .5 ${a} ${b} Z`);
+   backdrop.current!.style.opacity=String(p);
+   el.style.filter=!reducedMotion&&now-start<160?'drop-shadow(-4px 0 0 rgba(255,0,80,.6)) drop-shadow(4px 0 0 rgba(0,230,255,.6))':'none';
    }
    if(!session.closing&&t===1)done=true;
    root.current!.dataset.hud=String(!session.closing&&(now-motion.current.lastInput<2500||motion.current.seeking));
@@ -64,6 +54,7 @@ export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{ses
   <svg width="0" height="0" aria-hidden="true"><defs><clipPath id={clipId} clipPathUnits="objectBoundingBox"><path ref={clip}/></clipPath></defs></svg>
   <div ref={frame} className="cinema-frame" style={{clipPath:`url(#${clipId})`}}>
    <video ref={video} src={assetUrl(session.project.video.replace('.mp4','-full.mp4'))} poster={assetUrl(session.project.poster)} playsInline preload="auto" onPlay={()=>setPaused(false)} onPause={()=>setPaused(true)} onEnded={()=>setPaused(true)} onError={()=>setError('Unable to load this video. Please close and try again.')} onClick={togglePlay}/>
+   <i className="cinema-shutter cinema-shutter-top" aria-hidden="true"/><i className="cinema-shutter cinema-shutter-bottom" aria-hidden="true"/>
    {error&&<p className="cinema-error" role="alert">{error}</p>}
   </div>
   <div className="cinema-top cinema-hud"><p>{session.project.shortTitle} — {session.project.role} / {session.project.year}</p><button ref={closeButton} onClick={()=>callbacks.current.onClose()}>CLOSE [ESC]</button></div>

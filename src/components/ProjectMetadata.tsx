@@ -23,7 +23,6 @@ export default function ProjectMetadata({
     const element = root.current!;
     const slots = Array.from(element.querySelectorAll<HTMLElement>("[data-title-slot],[data-meta-slot]"));
     const slotIndices = slots.map((slot) => Number(slot.dataset.titleSlot ?? slot.dataset.metaSlot));
-    const titles = slots.map(slot=>slot.querySelector<HTMLElement>('h1'));
     let centerX = 0;
     let centerY = 0;
     let titleWidth = 0;
@@ -63,9 +62,7 @@ export default function ProjectMetadata({
         slot.style.opacity = String(opacity);
         slot.style.visibility = opacity > 0 ? "visible" : "hidden";
         const blur = isTitle && distance > 0.001 ? `blur(${distance * 4}px)` : "";
-        slot.style.filter = blur || "none";
-        // Glitch only the headline; the single metadata row stays crisp.
-        if(titles[i]) titles[i]!.style.filter = moving ? `url(#${filterId})` : "none";
+        slot.style.filter = [moving ? `url(#${filterId})` : "", blur].filter(Boolean).join(" ") || "none";
       });
       if (moving) {
         particleBudget += Math.min(speed, 2) * (deltaMs / (1000 / 60)) * 1.8;
@@ -97,7 +94,7 @@ export default function ProjectMetadata({
         {projects.map((project,i)=>(
           <div className="title-slot cinema-title-slot" data-title-slot={i} key={project.id} aria-hidden={i!==index} style={{visibility:i===index?'visible':'hidden'}}>
             <h1 className="project-title">{project.title.map((line,j)=><span className={`title-solid ${j===1?'title-line-secondary':''}`} key={j}><WarpedText>{line}</WarpedText></span>)}</h1>
-            <div className="metadata-slot cinema-metadata-row"><span className="role-badge">{project.role}</span><span className="project-year">{project.year}</span></div>
+            <div className="metadata-slot cinema-metadata-row"><span className="role-badge"><WarpedText>{project.role}</WarpedText></span><span className="project-year">{project.year}</span></div>
             <button className="view-project-button" onClick={onView} disabled={i!==index} tabIndex={i===index?0:-1}>View project</button>
           </div>
         ))}

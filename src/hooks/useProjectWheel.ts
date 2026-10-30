@@ -40,7 +40,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
       if (options.current.disabled || blocked(event.target)) return;
       if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(event.key)) {
         event.preventDefault();
-        engine.step(["ArrowDown", "ArrowRight"].includes(event.key) ? -1 : 1, performance.now());
+        engine.step(["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1, performance.now());
       }
     };
     const start = (event: PointerEvent) => {

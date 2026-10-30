@@ -19,18 +19,13 @@ export default function SoftwareTile({software, tools = [toolCatalog[software]]}
     let w=stage.offsetWidth,h=stage.offsetHeight,last=0;
     const render=()=>{
       const unit=w/320,multiple=cubes.length>1;
-      // Place the primary face exactly at the stage center at rest. Preserve
-      // relative orbital depth and the secondary tiles peeking from behind it.
-      const aligned=innerWidth>=760 && multiple;
-      const restSin=aligned?Math.sin(.35):0,restCos=aligned?Math.cos(.35):0;
-      const restScale=aligned?.68+(restCos+1)*.16:1;
       cubes.forEach((cube,i)=>{
         const angle=s.angle+i*2*Math.PI/cubes.length;
         const depth=multiple?(Math.cos(angle)+1)/2:1;
-        const x=multiple?(Math.sin(angle)-restSin)*68*unit:0;
-        const y=multiple?-(Math.sin(angle)-restSin)*16*unit:0;
-        const z=multiple?(Math.cos(angle)-restCos)*75*unit:0;
-        cube.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateX(${-s.y*24}deg) rotateY(${s.x*24+(multiple?(Math.sin(angle)-restSin)*-15:0)}deg) scale(${(.68+depth*.32)/restScale})`;
+        const x=multiple?Math.sin(angle)*68*unit:0;
+        const y=multiple?-Math.sin(angle)*16*unit:0;
+        const z=multiple?Math.cos(angle)*75*unit:0;
+        cube.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateX(${-s.y*24}deg) rotateY(${s.x*24+(multiple?Math.sin(angle)*-15:0)}deg) scale(${.68+depth*.32})`;
         cube.style.zIndex=String(Math.round(depth*100));
         cube.style.filter=`brightness(${.45+depth*.55}) blur(${(1-depth)*1.5}px)`;
         cube.style.opacity=String(.4+depth*.6);
