@@ -70,6 +70,8 @@ export default function ProjectWheels({
     let mobile = false;
     let gap = 0;
     let width = 0;
+    let leftRadiusX = 0;
+    let rightGap = 0;
     let lastIndex = -1;
     let lastPaused = true;
 
@@ -107,14 +109,15 @@ export default function ProjectWheels({
         const blend = Math.min(distance, 1);
         const visible = distance < 2;
         const fade = distance <= 1 ? 1 - distance * 0.64 : 0.36 * (2 - distance);
-        const scale = 1 - blend * 0.3;
+        const scale = 1 - blend * (mobile ? 0.3 : 0.44);
         const angle = d * Math.PI / 2;
-        cards[i].style.transform = `translate3d(${mobile ? d * gap : (Math.cos(angle) - 1) * width * 0.115}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) rotate(${d * (mobile ? 7 : -18)}deg) scale(${scale})`;
+        cards[i].style.transform = `translate3d(${mobile ? d * gap : (Math.cos(angle) - 1) * leftRadiusX}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) perspective(1100px) rotate(${d * (mobile ? 7 : 32)}deg) rotateY(${mobile ? 0 : 12 * (1-blend)}deg) scale(${scale})`;
         cards[i].style.opacity = `${Math.max(0, fade)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
         cards[i].style.zIndex = `${Math.round(10 - distance * 3)}`;
         const iconFade = mobile ? Math.max(0, 1 - distance) : Math.max(0, distance <= 1 ? 1 - distance * 0.67 : 0.33 * (2 - distance));
-        icons[i].style.transform = `translate3d(${mobile ? d * 90 : (1 - Math.cos(angle)) * width * 0.058}px, ${mobile ? 0 : d * gap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 22)}deg) rotateY(${(mobile ? -12 * (1 - blend) : 0) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
+        const rightAngle = d * Math.acos(1 - .205 / .38);
+        icons[i].style.transform = `translate3d(${mobile ? d * 90 : (1 - Math.cos(rightAngle)) * width * .38}px, ${mobile ? 0 : d * rightGap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 38)}deg) rotateY(${(mobile ? -12 * (1 - blend) : 0) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
         captions[i].style.transform = `translate3d(0, ${d * 100}%, 0)`;
@@ -124,10 +127,14 @@ export default function ProjectWheels({
     const resize = () => {
       width = innerWidth;
       mobile = width < 760;
-      const angle = (18 * Math.PI) / 180;
-      const minimumGap = cards[0].offsetHeight * 1.055 / 2 +
-        0.7 * (cards[0].offsetHeight * Math.cos(angle) + cards[0].offsetWidth * Math.sin(angle)) / 2 + 40;
-      gap = mobile ? width * 0.94 : Math.max(225, innerHeight * (innerHeight < 650 ? 0.42 : 0.445), minimumGap);
+      const angle = 32 * Math.PI / 180;
+      const cardW=cards[0].offsetWidth,cardH=cards[0].offsetHeight;
+      const cornerW=.56*(cardW*Math.cos(angle)+cardH*Math.sin(angle));
+      const cornerH=.56*(cardH*Math.cos(angle)+cardW*Math.sin(angle));
+      leftRadiusX=width*.03+(cardW-cornerW)/2;
+      gap = mobile ? width * .94 : innerHeight*.44-cornerH/2;
+      const cubeW=Math.max(165,Math.min(215,width*.11));
+      rightGap=innerHeight*.41-cubeW*.76*(Math.cos(38*Math.PI/180)+Math.sin(38*Math.PI/180))/2;
       render(engine.read());
       refreshGeometry();
     };

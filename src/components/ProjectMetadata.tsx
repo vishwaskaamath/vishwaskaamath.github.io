@@ -93,6 +93,7 @@ export default function ProjectMetadata({
       <div className="project-title title-stage cinema-title-stage">
         {projects.map((project,i)=>(
           <div className="title-slot cinema-title-slot" data-title-slot={i} key={project.id} aria-hidden={i!==index} style={{visibility:i===index?'visible':'hidden'}}>
+            <div className="project-index">N° {String(i+1).padStart(3,'0')} / {String(projects.length).padStart(2,'0')}</div>
             <h1 className="project-title">{project.title.map((line,j)=><span className={`title-solid ${j===1?'title-line-secondary':''}`} key={j}><WarpedText>{line}</WarpedText></span>)}</h1>
             <div className="metadata-slot cinema-metadata-row"><span className="role-badge"><WarpedText>{project.role}</WarpedText></span><span className="project-year">{project.year}</span></div>
             <button className="view-project-button" onClick={onView} disabled={i!==index} tabIndex={i===index?0:-1}>View project</button>
