@@ -34,7 +34,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
     const wheel = (event: WheelEvent) => {
       if (options.current.disabled || event.ctrlKey || blocked(event.target)) return;
       event.preventDefault();
-      engine.wheel(event.deltaY, performance.now());
+      engine.wheel(-event.deltaY, performance.now());
     };
     const key = (event: KeyboardEvent) => {
       if (options.current.disabled || blocked(event.target)) return;
@@ -55,7 +55,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
     const end = (event?: PointerEvent) => {
       if (!drag.isDragging || (event && event.pointerId !== drag.pointerId)) return;
       drag.isDragging = false; drag.wasDragged = drag.distance > 6;
-      engine.endDrag(drag.wasDragged ? drag.velocity : 0, performance.now());
+      engine.endDrag(drag.wasDragged ? -drag.velocity : 0, performance.now());
       delete document.documentElement.dataset.wheelDragging;
     };
     const move = (event: PointerEvent) => {
@@ -64,7 +64,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
       const deltaY = event.clientY - drag.lastY;
       drag.lastY = event.clientY; drag.distance += Math.abs(deltaY); drag.velocity = deltaY;
       drag.wasDragged = drag.distance > 6;
-      engine.add(-deltaY * 0.0045, performance.now());
+      engine.add(deltaY * 0.0045, performance.now());
       if (drag.wasDragged && event.cancelable) event.preventDefault();
     };
     const click = (event: MouseEvent) => {
