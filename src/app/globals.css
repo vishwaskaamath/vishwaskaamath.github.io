@@ -1480,7 +1480,7 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
  .video-wheel { left:4vw; width:32vw; top:50%; }
  .video-card { height:36vh; aspect-ratio:auto; }
  .software-wheel { left:78vw; }
- .portfolio[data-expanded="false"] .project-metadata { left:50%; transform:translate(-50%,-50%); }
+ .portfolio[data-expanded="false"] .project-metadata { left:50%; top:calc(50% + clamp(24px,3.5vh,40px)); transform:translate(-50%,-50%); }
 }
 @media(max-width:759px) {
  .portfolio[data-expanded="true"] .video-card.is-active { width:90vw; height:48vh; }
