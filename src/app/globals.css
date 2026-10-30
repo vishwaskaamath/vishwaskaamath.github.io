@@ -1477,8 +1477,8 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 .portfolio[data-expanded="true"] .project-title { font-size:clamp(32px,4vw,82px); }
 .expansion-scanlines { position:absolute; inset:0; opacity:0; pointer-events:none; background:repeating-linear-gradient(0deg,#0009 0px,#0009 1px,#ffffff20 2px,transparent 4px); }
 @media(min-width:760px) {
- .video-wheel { left:2.5vw; width:clamp(450px,29.5vw,580px); top:50%; }
- .video-card { height:auto; aspect-ratio:16 / 10; }
+ .video-wheel { left:4vw; width:32vw; top:50%; }
+ .video-card { height:36vh; aspect-ratio:auto; }
  .software-wheel { left:78vw; }
  .portfolio[data-expanded="false"] .project-metadata { left:50%; transform:translate(-50%,-50%); }
 }
