@@ -1,7 +1,9 @@
 "use client";
 import { refreshGeometry } from "@/lib/geometryCache";
 import { assetUrl,cachedAsset,assetsReady } from "@/lib/assetPreloader";
-import { useLayoutEffect, useRef, type RefObject } from "react";
+import { useLayoutEffect, useEffect, useRef, useState, type RefObject } from "react";
+import { Volume2, VolumeX } from "lucide-react";
+import { subscribeTicker } from "@/lib/masterTicker";
 import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
@@ -23,6 +25,14 @@ export default function ProjectWheels({
   onCollapse: () => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
+  const [leftCardVolume,setLeftCardVolume]=useState(.25);
+  const [leftCardMuted,setLeftCardMuted]=useState(false);
+  const stopRamp=useRef<(()=>void)|null>(null);
+  const activeVideo=()=>root.current?.querySelector<HTMLVideoElement>('.video-card.is-active video');
+  const changeVolume=(volume:number)=>{stopRamp.current?.();stopRamp.current=null;setLeftCardVolume(volume);setLeftCardMuted(volume===0);const video=activeVideo();if(video){video.volume=volume;video.muted=volume===0;}};
+  const toggleMute=()=>{stopRamp.current?.();stopRamp.current=null;const muted=!leftCardMuted&&leftCardVolume>0;setLeftCardMuted(muted);const volume=leftCardVolume||.25;if(!muted&&leftCardVolume===0)setLeftCardVolume(volume);const video=activeVideo();if(video){video.volume=volume;video.muted=muted;}};
+  useEffect(()=>{if(!expanded){stopRamp.current?.();stopRamp.current=null;}},[expanded]);
+  useEffect(()=>()=>{stopRamp.current?.();},[]);
   const options = useRef({ paused, reducedMotion });
   options.current.paused = paused; options.current.reducedMotion = reducedMotion;
   useLayoutEffect(() => { if(paused)root.current?.querySelectorAll("video").forEach(video=>video.pause()); engine.invalidate(); }, [engine, paused, reducedMotion]);
@@ -155,7 +165,10 @@ export default function ProjectWheels({
                     if (expanded) { onCollapse(); return; }
                     const preview = event.currentTarget.querySelector('video')!;
                     preview.src = assetUrl(project.video.replace('.mp4', '-full.mp4'));
-                    preview.currentTime = 0; preview.muted = false; preview.volume = 1;
+                    preview.currentTime = 0; preview.muted = false; preview.volume = 0;
+                    setLeftCardMuted(leftCardVolume===0);stopRamp.current?.();
+                    const rampStart=performance.now(),targetVolume=leftCardVolume;
+                    stopRamp.current=subscribeTicker(now=>{const amount=Math.min(1,(now-rampStart)/200);preview.volume=targetVolume*amount;if(amount===1){stopRamp.current?.();stopRamp.current=null;}});
                     void preview.play().catch(() => {});
                     onExpand();
                   } else { select(i); }
@@ -167,6 +180,11 @@ export default function ProjectWheels({
                   <div className="expansion-scanlines" aria-hidden="true"/>
                 </div></VideoBezel>
               </button>
+              {expanded&&active&&<div className="left-video-volume" role="group" aria-label="Expanded CRT video volume"
+                onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()} onPointerUp={e=>e.stopPropagation()} onClick={e=>e.stopPropagation()}>
+                <button type="button" onClick={toggleMute} aria-label={leftCardMuted||leftCardVolume===0?'Unmute CRT video':'Mute CRT video'} aria-pressed={leftCardMuted}>{leftCardMuted||leftCardVolume===0?<VolumeX size={14}/>:<Volume2 size={14}/>}</button>
+                <input type="range" aria-label="CRT video volume" min="0" max="1" step=".01" value={leftCardVolume} onChange={e=>changeVolume(Number(e.target.value))}/>
+              </div>}
             </div>
           );
         })}
