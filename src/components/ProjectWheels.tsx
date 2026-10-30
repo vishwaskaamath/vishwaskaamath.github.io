@@ -97,7 +97,7 @@ export default function ProjectWheels({
         const blend = Math.min(distance, 1);
         const visible = distance < 2;
         const fade = distance <= 1 ? 1 - distance * 0.64 : 0.36 * (2 - distance);
-        const scale = 1 - blend * (mobile ? 0.3 : 0.32);
+        const scale = 1 - blend * (mobile ? 0.3 : 0.24);
         cards[i].style.transform = `translate3d(${mobile ? d * gap : -distance * width * 0.035}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) rotate(${d * (mobile ? 7 : -18)}deg) scale(${scale})`;
         cards[i].style.opacity = `${Math.max(0, fade)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
@@ -115,8 +115,8 @@ export default function ProjectWheels({
       mobile = width < 760;
       const angle = (18 * Math.PI) / 180;
       const minimumGap = cards[0].offsetHeight * 1.055 / 2 +
-        (mobile ? 0.7 : 0.68) * (cards[0].offsetHeight * Math.cos(angle) + cards[0].offsetWidth * Math.sin(angle)) / 2 + 40;
-      gap = mobile ? width * 0.94 : Math.max(225, innerHeight * (innerHeight < 650 ? 0.42 : 0.445), minimumGap);
+        (mobile ? 0.7 : 0.76) * (cards[0].offsetHeight * Math.cos(angle) + cards[0].offsetWidth * Math.sin(angle)) / 2 + 40;
+      gap = mobile ? width * 0.94 : Math.max(245, innerHeight * (innerHeight < 650 ? 0.45 : 0.48), minimumGap);
       render(engine.read());
       refreshGeometry();
     };

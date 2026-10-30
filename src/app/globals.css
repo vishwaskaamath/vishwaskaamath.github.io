@@ -1477,7 +1477,7 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 .portfolio[data-expanded="true"] .project-title { font-size:clamp(32px,4vw,82px); }
 .expansion-scanlines { position:absolute; inset:0; opacity:0; pointer-events:none; background:repeating-linear-gradient(0deg,#0009 0px,#0009 1px,#ffffff20 2px,transparent 4px); }
 @media(min-width:760px) {
- .video-wheel { left:2.2vw; width:clamp(310px,24vw,420px); top:50%; }
+ .video-wheel { left:2.5vw; width:clamp(450px,29.5vw,580px); top:50%; }
  .video-card { height:auto; aspect-ratio:16 / 10; }
  .software-wheel { left:78vw; }
  .portfolio[data-expanded="false"] .project-metadata { left:50%; transform:translate(-50%,-50%); }
@@ -1643,8 +1643,8 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 /* Each title, metadata row and CTA share one moving, softly masked slot. */
 .cinema-title-stage { height:calc(2.4em + 190px); mask-image:linear-gradient(to bottom,transparent,black 12%,black 90%,transparent); -webkit-mask-image:linear-gradient(to bottom,transparent,black 12%,black 90%,transparent); }
 .cinema-title-slot { height:calc(2.4em + 110px); }
-.project-metadata .cinema-metadata-row { position:relative; inset:auto; margin-top:24px; height:auto; }
-.view-project-button { position:relative; display:block; margin:22px auto 0; padding:0 0 4px; font:500 .85rem var(--font-pally),sans-serif; letter-spacing:.04em; line-height:1.4; color:#f3efe6; border-bottom:1px solid rgba(243,239,230,.35); transition:color .2s,transform .2s; }
+.project-metadata .cinema-metadata-row { position:relative; inset:auto; margin-top:14px; height:auto; font-size:.72rem; }
+.view-project-button { position:relative; display:block; margin:16px auto 0; padding:0 0 4px; font:500 .8rem var(--font-pally),sans-serif; letter-spacing:.04em; line-height:1.4; color:#f3efe6; border-bottom:1px solid rgba(243,239,230,.35); transition:color .2s,transform .2s; }
 .view-project-button::after { content:''; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:currentColor; box-shadow:0 0 7px currentColor; transform:scaleX(0); transform-origin:left; transition:transform .25s; }
 .view-project-button:hover,.view-project-button:focus-visible { color:white; transform:translateY(-2px); }
 .view-project-button:hover::after,.view-project-button:focus-visible::after { transform:scaleX(1); }
@@ -1678,3 +1678,9 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .cinema-shutter { position:absolute; left:0; right:0; height:15%; background:#000; pointer-events:none; transform:scaleY(var(--shutter,1)); }
 .cinema-shutter-top { top:0; transform-origin:top; }
 .cinema-shutter-bottom { bottom:0; transform-origin:bottom; }
+
+/* Desktop focal balance; mobile retains its stacked layout. */
+@media(min-width:760px) {
+ .project-title { font-size:clamp(3.1rem,4.6vw,5.2rem); line-height:.96; letter-spacing:.02em; }
+ .project-title .title-solid { line-height:.96; }
+}
