@@ -1680,4 +1680,5 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 /* Restore the original headline center without letting the new CTA shift it. */
 @media(min-width:760px) {
  .portfolio[data-expanded="false"] .cinema-title-slot { top:calc(50% - 1.2em); }
+ .portfolio[data-expanded="false"] .cinema-title-slot h1.project-title { translate:1vw 0; }
 }
