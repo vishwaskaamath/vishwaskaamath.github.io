@@ -23,8 +23,7 @@ export default function SoftwareTile({software, tools = [toolCatalog[software]]}
         const angle=s.angle+i*2*Math.PI/cubes.length;
         const depth=multiple?(Math.cos(angle)+1)/2:1;
         const x=multiple?Math.sin(angle)*68*unit:0;
-        // Keep the primary tile centered on the column axis at its resting angle.
-        const y=multiple?(Math.sin(.35)-Math.sin(angle))*16*unit:0;
+        const y=multiple?-Math.sin(angle)*16*unit:0;
         const z=multiple?Math.cos(angle)*75*unit:0;
         cube.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateX(${-s.y*24}deg) rotateY(${s.x*24+(multiple?Math.sin(angle)*-15:0)}deg) scale(${.68+depth*.32})`;
         cube.style.zIndex=String(Math.round(depth*100));

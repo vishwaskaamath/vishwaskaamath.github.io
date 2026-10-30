@@ -1479,8 +1479,6 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 @media(min-width:760px) {
  .video-wheel { left:4vw; width:32vw; top:50%; }
  .video-card { height:36vh; aspect-ratio:auto; }
- .software-wheel { left:78vw; }
- .portfolio[data-expanded="false"] .project-metadata { left:var(--grid-axis-x); top:var(--grid-axis-y); transform:translate(-50%,-50%); }
 }
 @media(max-width:759px) {
  .portfolio[data-expanded="true"] .video-card.is-active { width:90vw; height:48vh; }
@@ -1643,7 +1641,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 /* Each title, metadata row and CTA share one moving, softly masked slot. */
 .cinema-title-stage { height:calc(2.4em + 190px); mask-image:linear-gradient(to bottom,transparent,black 12%,black 90%,transparent); -webkit-mask-image:linear-gradient(to bottom,transparent,black 12%,black 90%,transparent); }
 .cinema-title-slot { height:calc(2.4em + 110px); }
-.project-metadata .cinema-metadata-row { position:relative; inset:auto; margin-top:14px; height:auto; font-size:.72rem; }
+.project-metadata .cinema-metadata-row { position:relative; inset:auto; margin-top:18px; height:auto; font-size:10px; }
 .view-project-button { position:relative; display:block; margin:16px auto 0; padding:0 0 4px; font:500 .8rem var(--font-pally),sans-serif; letter-spacing:.04em; line-height:1.4; color:#f3efe6; border-bottom:1px solid rgba(243,239,230,.35); transition:color .2s,transform .2s; }
 .view-project-button::after { content:''; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:currentColor; box-shadow:0 0 7px currentColor; transform:scaleX(0); transform-origin:left; transition:transform .25s; }
 .view-project-button:hover,.view-project-button:focus-visible { color:white; transform:translateY(-2px); }
@@ -1679,18 +1677,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .cinema-shutter-top { top:0; transform-origin:top; }
 .cinema-shutter-bottom { bottom:0; transform-origin:bottom; }
 
-/* Desktop focal balance; mobile retains its stacked layout. */
+/* Restore the original headline center without letting the new CTA shift it. */
 @media(min-width:760px) {
- .project-title { font-size:clamp(3.1rem,4.6vw,5.2rem); line-height:.96; letter-spacing:.02em; }
- .project-title .title-solid { line-height:.96; }
-}
-
-/* Shared axes follow the supplied desktop ruler guides. */
-@media(min-width:760px) {
- .portfolio { --grid-axis-x:50.8vw; --grid-axis-y:53.5vh; }
- .main-nav { left:calc(var(--grid-axis-x) - 3.5vw); }
- .portfolio[data-expanded="false"] .video-wheel,
- .portfolio[data-expanded="false"] .software-wheel { top:var(--grid-axis-y); }
- /* The two .96em title lines, rather than the padded stage, straddle the axis. */
- .portfolio[data-expanded="false"] .cinema-title-slot { top:calc(50% - .96em); }
+ .portfolio[data-expanded="false"] .cinema-title-slot { top:calc(50% - 1.2em); }
 }
