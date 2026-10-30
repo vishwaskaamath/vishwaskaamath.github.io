@@ -108,12 +108,13 @@ export default function ProjectWheels({
         const visible = distance < 2;
         const fade = distance <= 1 ? 1 - distance * 0.64 : 0.36 * (2 - distance);
         const scale = 1 - blend * 0.3;
-        cards[i].style.transform = `translate3d(${mobile ? d * gap : -distance * width * 0.115}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) rotate(${d * (mobile ? 7 : -18)}deg) scale(${scale})`;
+        const angle = d * Math.PI / 2;
+        cards[i].style.transform = `translate3d(${mobile ? d * gap : (Math.cos(angle) - 1) * width * 0.115}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) rotate(${d * (mobile ? 7 : -18)}deg) scale(${scale})`;
         cards[i].style.opacity = `${Math.max(0, fade)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
         cards[i].style.zIndex = `${Math.round(10 - distance * 3)}`;
         const iconFade = mobile ? Math.max(0, 1 - distance) : Math.max(0, distance <= 1 ? 1 - distance * 0.67 : 0.33 * (2 - distance));
-        icons[i].style.transform = `translate3d(${mobile ? d * 90 : distance * width * 0.055}px, ${mobile ? 0 : d * gap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 22)}deg) rotateY(${-12 * (1 - blend) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
+        icons[i].style.transform = `translate3d(${mobile ? d * 90 : (1 - Math.cos(angle)) * width * 0.058}px, ${mobile ? 0 : d * gap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 22)}deg) rotateY(${(mobile ? -12 * (1 - blend) : 0) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
         captions[i].style.transform = `translate3d(0, ${d * 100}%, 0)`;

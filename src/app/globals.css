@@ -1477,8 +1477,9 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 .portfolio[data-expanded="true"] .project-title { font-size:clamp(32px,4vw,82px); }
 .expansion-scanlines { position:absolute; inset:0; opacity:0; pointer-events:none; background:repeating-linear-gradient(0deg,#0009 0px,#0009 1px,#ffffff20 2px,transparent 4px); }
 @media(min-width:760px) {
- .video-wheel { left:4vw; width:32vw; top:50%; }
- .video-card { height:36vh; aspect-ratio:auto; }
+ .portfolio { --rest-video-width:clamp(390px,25.5vw,490px); --rest-cube-width:clamp(135px,9vw,165px); }
+ .video-wheel { left:1.8vw; width:var(--rest-video-width); top:50%; }
+ .video-card { height:auto; aspect-ratio:16 / 10; }
 }
 @media(max-width:759px) {
  .portfolio[data-expanded="true"] .video-card.is-active { width:90vw; height:48vh; }
@@ -1535,8 +1536,10 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 .software-wheel .software-cube .adobe-symbol { font-size:clamp(52px,7vw,94px); color:var(--brand-glow); }
 .software-cube .tile-brand { width:100%; text-align:center; font-size:7px; letter-spacing:1px; transform:translateZ(2px); }
 @media(min-width:760px) {
- .software-wheel { width:min(320px,25vw); }
- .software-wheel .tool-caption { top:calc(min(160px,12.5vw) + 8px); }
+ /* Mirror the actual clamped video inner edge around 50vw, rather than
+    assuming its width is always 25.5vw. The primary cube is 190/320 of its stage. */
+ .software-wheel { left:calc(100vw - 1.8vw - var(--rest-video-width) + var(--rest-cube-width) / 2); width:calc(var(--rest-cube-width) * 1.6842105263); }
+ .software-wheel .tool-caption { top:calc(var(--rest-cube-width) * .8421052632 + 8px); }
  .portfolio[data-expanded="true"] .software-wheel .software-cube .adobe-symbol { font-size:clamp(32px,4.5vw,72px); }
 }
 @media(max-width:759px) {
