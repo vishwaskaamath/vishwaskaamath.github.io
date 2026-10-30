@@ -2,6 +2,7 @@
 import { refreshGeometry } from "@/lib/geometryCache";
 import { assetUrl,cachedAsset,assetsReady } from "@/lib/assetPreloader";
 import { useLayoutEffect, useRef, type RefObject } from "react";
+import { damp, subscribeTicker } from "@/lib/masterTicker";
 import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
@@ -23,28 +24,18 @@ export default function ProjectWheels({
   onCollapse: () => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const options = useRef({ paused, reducedMotion });
-  options.current.paused = paused; options.current.reducedMotion = reducedMotion;
+  const expandProgress = useRef(0);
+  const options = useRef({ paused, reducedMotion, expanded });
+  options.current = { paused, reducedMotion, expanded };
   useLayoutEffect(() => { if(paused)root.current?.querySelectorAll("video").forEach(video=>video.pause()); engine.invalidate(); }, [engine, paused, reducedMotion]);
   const wasExpanded = useRef(false);
   useLayoutEffect(() => {
     const card = root.current?.querySelector<HTMLElement>('.video-card.is-active');
     const video = card?.querySelector('video');
     if (!card || !video || wasExpanded.current === expanded) return;
-    const active = engine.read().index;
     card.querySelector('button')!.setAttribute('aria-expanded', String(expanded));
-    if (!reducedMotion) {
-      card.querySelector('.video-hit')!.animate([
-        {filter:'none'},
-        {filter:'drop-shadow(-4px 0 0 rgba(255,0,80,.6)) drop-shadow(4px 0 0 rgba(0,230,255,.6))',offset:.2},
-        {filter:'none'}
-      ],{duration:180});
-      card.querySelector('.expansion-scanlines')!.animate([{opacity:0},{opacity:.42,offset:.2},{opacity:0}],{duration:180});
-    }
     if (!expanded) {
       video.muted = true;
-      video.src = assetUrl(projects[active].video);
-      video.currentTime = 0;
       if (!paused) void video.play().catch(() => {});
     }
     wasExpanded.current = expanded;
@@ -57,6 +48,8 @@ export default function ProjectWheels({
     const icons = Array.from(element.querySelectorAll<HTMLElement>("[data-software]"));
     const captions = Array.from(element.querySelectorAll<HTMLElement>("[data-tool-caption]"));
     const videos = Array.from(element.querySelectorAll<HTMLVideoElement>("video"));
+    const centerTitle = element.closest('.work-scene')!.querySelector<HTMLElement>('.project-metadata')!;
+    const activeLogoGroup = element.querySelector<HTMLElement>('.software-wheel')!;
     let mobile = false;
     let gap = 0;
     let width = 0;
@@ -73,6 +66,7 @@ export default function ProjectWheels({
       lastPaused = isPaused;
     };
     const render = (frame: ReelFrame) => {
+      const p = expandProgress.current;
       const { currentScroll, scrollVelocity, index: active } = frame;
       if (lastIndex !== active) {
         playback(active);
@@ -90,6 +84,8 @@ export default function ProjectWheels({
         });
       } else if (lastPaused !== (options.current.paused || document.hidden)) playback(active);
       element.style.setProperty("--reel-glitch", `${Math.min(0.15, Math.abs(scrollVelocity) * 0.06)}`);
+      centerTitle.style.transform = `translate3d(calc(-50% + ${mobile ? 0 : p*16.5}vw), -50%, 0)`;
+      activeLogoGroup.style.transform = `translate3d(${mobile ? 0 : p*12.5}vw,0,0)`;
       // No layout reads, independent tweens, or React animation state in this loop.
       projects.forEach((_, i) => {
         const d = reelOffset(i, currentScroll, projects.length);
@@ -98,12 +94,15 @@ export default function ProjectWheels({
         const visible = distance < 2;
         const fade = distance <= 1 ? 1 - distance * 0.64 : 0.36 * (2 - distance);
         const scale = 1 - blend * 0.3;
-        cards[i].style.transform = `translate3d(${mobile ? d * gap : -distance * width * 0.115}px, ${mobile ? distance * 22 : d * gap}px, 0) translateY(-50%) rotate(${d * (mobile ? 7 : -18)}deg) scale(${scale})`;
+        const isActive = i===active;
+        const pushX = mobile ? 0 : p*width*(isActive ? .015 : -.045);
+        const pushY = mobile || isActive ? 0 : Math.sign(d)*p*innerHeight*.14;
+        cards[i].style.transform = `translate3d(${(mobile ? d * gap : -distance * width * 0.115)+pushX}px, ${(mobile ? distance * 22 : d * gap)+pushY}px, 0) translateY(-50%) rotate(${d * (mobile ? 7 : -18)}deg) scale(${scale*(isActive ? 1+p*(mobile ? .05 : .68) : 1)})`;
         cards[i].style.opacity = `${Math.max(0, fade)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
-        cards[i].style.zIndex = `${Math.round(10 - distance * 3)}`;
+        cards[i].style.zIndex = `${Math.round(10 - distance * 3 + (isActive?p*30:0))}`;
         const iconFade = mobile ? Math.max(0, 1 - distance) : Math.max(0, distance <= 1 ? 1 - distance * 0.67 : 0.33 * (2 - distance));
-        icons[i].style.transform = `translate3d(${mobile ? d * 90 : distance * width * 0.055}px, ${mobile ? 0 : d * gap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 22)}deg) rotateY(${-12 * (1 - blend) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
+        icons[i].style.transform = `translate3d(${mobile ? d * 90 : distance * width * 0.055-(isActive?0:p*width*.10)}px, ${mobile ? 0 : d * gap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 22)}deg) rotateY(${-12 * (1 - blend) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
         captions[i].style.transform = `translate3d(0, ${d * 100}%, 0)`;
@@ -130,11 +129,20 @@ export default function ProjectWheels({
     if(assetsReady())hydrate();
     resize();
     const unsubscribe = engine.subscribe(render);
+    const stopExpansion = subscribeTicker((_now,dt)=>{
+      const target=options.current.expanded?1:0,previous=expandProgress.current;
+      if(previous===target)return;
+      const next=options.current.reducedMotion?target:damp(previous,target,10,dt);
+      expandProgress.current=Math.abs(next-target)<.0001?target:next;
+      render(engine.read());
+      if(expandProgress.current===target)refreshGeometry();
+    });
     window.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       window.removeEventListener("portfolio-assets-ready",hydrate);
       unsubscribe();
+      stopExpansion();
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       videos.forEach((video) => video.pause());
@@ -158,8 +166,9 @@ export default function ProjectWheels({
                   if (i === engine.read().index) {
                     if (expanded) { onCollapse(); return; }
                     const preview = event.currentTarget.querySelector('video')!;
-                    preview.src = assetUrl(project.video.replace('.mp4', '-full.mp4'));
-                    preview.currentTime = 0; preview.muted = false; preview.volume = 1;
+                    // Keep the decoded stream and timestamp; replacing src here
+                    // caused a blank frame and decode stall on every click.
+                    preview.muted = false; preview.volume = 1;
                     void preview.play().catch(() => {});
                     onExpand();
                   } else { select(i); }
