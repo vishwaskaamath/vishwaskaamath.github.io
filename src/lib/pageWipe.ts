@@ -22,9 +22,9 @@ export function tileFill(elapsed:number, threshold:number) {
 }
 export function labelPose(elapsed:number) {
  const p=clamp(elapsed/WIPE_END_MS);
- if(p<.42){const e=easeOutCubic(p/.42);return {offset:60*(1-e),alpha:e};}
+ if(p<.42){const e=easeOutCubic(p/.42);return {offset:140*(1-e),alpha:e};}
  if(p<.58)return {offset:0,alpha:1};
- const e=easeInOutCubic((p-.58)/.42);return {offset:-90*e,alpha:1-e};
+ const e=easeInOutCubic((p-.58)/.42);return {offset:-180*e,alpha:1-e};
 }
 export const createWipeClock=(now:number)=>({elapsed:0,lastTime:now,buffer:0,swapped:false});
 export function advanceWipeClock(clock:ReturnType<typeof createWipeClock>, now:number) {

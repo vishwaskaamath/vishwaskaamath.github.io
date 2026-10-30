@@ -27,7 +27,8 @@ for(const hz of [60,120,240]){
  }
  assert.equal(swaps,1);assert.ok(uncoverZero);assert.ok(closingSamples>25);
 }
-assert.deepEqual(labelPose(WIPE_END_MS),{offset:-90,alpha:0});
+assert.deepEqual(labelPose(0),{offset:140,alpha:0});
+assert.deepEqual(labelPose(WIPE_END_MS),{offset:-180,alpha:0});
 assert.ok(Math.abs(labelPose(WIPE_REVEAL_MS+.1).alpha-1)<.000001);
 const stalled=createWipeClock(100);advanceWipeClock(stalled,1100);assert.equal(stalled.elapsed,16.67);
 console.log('PASS capped 60/120/240Hz timeline, 180ms swap stall, two-frame buffer, zero-progress uncover, continuous tile and label exits');
