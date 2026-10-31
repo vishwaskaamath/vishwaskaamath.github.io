@@ -15,7 +15,7 @@ export default function CinemaBezel({width,height,children}:{width:number;height
    {children}<div className="crt-shading"/>
   </div>
   <svg className="video-rims cinema-rims" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true">
-   <defs><clipPath id={id} clipPathUnits="objectBoundingBox"><path d={shape.clip}/></clipPath></defs>
+   <defs><clipPath id={id} clipPathUnits="objectBoundingBox"><path data-cinema-clip d={shape.clip}/></clipPath></defs>
    <CrtRings path={shape.path} floatingTransform={shape.floating}/>
   </svg>
  </>;
