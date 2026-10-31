@@ -47,7 +47,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
       if (!event.isPrimary || event.button !== 0) return;
       drag.wasDragged = false; drag.distance = 0;
       if (options.current.disabled || blocked(event.target)) return;
-      if (event.target instanceof Element && event.target.closest("button:not(.video-hit):not(.view-project-button),a,[role='button']:not(.video-hit)")) return;
+      if (event.target instanceof Element && event.target.closest("button:not(.video-hit),a,[role='button']:not(.video-hit)")) return;
       drag.isDragging = true; drag.lastY = event.clientY; drag.velocity = 0; drag.pointerId = event.pointerId;
       engine.beginDrag();
       document.documentElement.dataset.wheelDragging = 'true';

@@ -1,14 +1,16 @@
 "use client";
-import { useId, useLayoutEffect, useRef } from "react";
+import { useId, useLayoutEffect, useRef, type RefObject } from "react";
+import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
 import WarpedText from "./WarpedText";
 import { reelOffset, type ScrollPhysics } from "@/lib/scrollPhysics";
 
 export default function ProjectMetadata({
-  index, engine, reducedMotion, onBurst, onView,
+  engine, reducedMotion, onBurst, onView, dragRef,
 }: {
   onView: () => void;
   index: number;
+  dragRef: RefObject<WheelDrag>;
   engine: ScrollPhysics;
   reducedMotion: boolean;
   onBurst: (x: number, y: number, count?: number) => void;
@@ -18,6 +20,8 @@ export default function ProjectMetadata({
   const root = useRef<HTMLElement>(null);
   const options = useRef({ reducedMotion, onBurst });
   options.current = { reducedMotion, onBurst };
+  // React renders and the imperative reel must use the same live selection.
+  const index = engine.read().index;
 
   useLayoutEffect(() => {
     const element = root.current!;
@@ -95,7 +99,7 @@ export default function ProjectMetadata({
           <div className="title-slot cinema-title-slot" data-title-slot={i} key={project.id} aria-hidden={i!==index} style={{visibility:i===index?'visible':'hidden'}}>
             <h1 className="project-title">{project.title.map((line,j)=><span className={`title-solid ${j===1?'title-line-secondary':''}`} key={j}><WarpedText>{line}</WarpedText></span>)}</h1>
             <div className="metadata-slot cinema-metadata-row"><span className="role-badge"><WarpedText>{project.role}</WarpedText></span><span className="project-year">{project.year}</span></div>
-            <button className="view-project-button" onClick={onView} disabled={i!==index} tabIndex={i===index?0:-1}>View project</button>
+            <button className="view-project-button" onPointerDown={(event)=>{event.stopPropagation();dragRef.current.wasDragged=false;}} onMouseDown={(event)=>event.stopPropagation()} onClick={()=>{if(!dragRef.current.wasDragged)onView();}} disabled={i!==index} tabIndex={i===index?0:-1}>View project</button>
           </div>
         ))}
       </div>

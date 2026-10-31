@@ -95,7 +95,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     const card=document.querySelector<HTMLElement>(`[data-video="${requested}"]`);
     const preview=card?.querySelector('video');
     const box=card?.getBoundingClientRect();
-    const rect=box?{left:box.left,top:box.top,width:box.width,height:box.height}:{left:innerWidth*.04,top:innerHeight*.32,width:innerWidth*.32,height:innerHeight*.36};
+    const rect=box&&box.width>0&&box.height>0?{left:box.left,top:box.top,width:box.width,height:box.height}:{left:innerWidth*.045,top:innerHeight*.25,width:innerWidth*.295,height:innerWidth*.185};
     const next={project:projects[requested],rect,time:preview?.currentTime||0,closing:false};
     preview?.pause();if(preview)preview.muted=true;
     if(playing)toggle();
@@ -105,6 +105,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
   openCinemaRef.current=openCinema;
   const closeCinema=(historyChange=true)=>{
     const current=cinemaRef.current;if(!current||current.closing)return;
+    setExpanded(false);
     const returnBox=document.querySelector<HTMLElement>(`[data-video="${projects.indexOf(current.project)}"]`)?.getBoundingClientRect();
     const rect=returnBox?{left:returnBox.left,top:returnBox.top,width:returnBox.width,height:returnBox.height}:current.rect;
     const next={...current,rect,closing:true};cinemaRef.current=next;setCinema(next);
@@ -112,6 +113,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
   };
   closeCinemaRef.current=closeCinema;
   const finishCinema=(time:number)=>{
+    setExpanded(false);
     const preview=document.querySelector<HTMLVideoElement>('.video-card.is-active video');
     if(preview){preview.muted=true;if(Number.isFinite(preview.duration))preview.currentTime=Math.min(time,Math.max(0,preview.duration-.1));}
     cinemaRef.current=null;setCinema(null);refreshGeometry();
@@ -223,6 +225,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
       />
       <ProjectMetadata
         onView={()=>openCinema()}
+        dragRef={dragRef}
         index={index}
         engine={engine}
         reducedMotion={reducedMotion}

@@ -1638,7 +1638,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .cinema-title-stage { height:calc(2.4em + 190px); mask-image:linear-gradient(to bottom,transparent,black 12%,black 90%,transparent); -webkit-mask-image:linear-gradient(to bottom,transparent,black 12%,black 90%,transparent); }
 .cinema-title-slot { height:calc(2.4em + 110px); }
 .project-metadata .cinema-metadata-row { position:relative; inset:auto; margin-top:18px; height:auto; font-size:10px; }
-.view-project-button { position:relative; display:block; margin:16px auto 0; padding:0 0 4px; font:500 .8rem var(--font-pally),sans-serif; letter-spacing:.04em; line-height:1.4; color:#f3efe6; border-bottom:1px solid rgba(243,239,230,.35); transition:color .2s,transform .2s; }
+.view-project-button { position:relative; z-index:60; pointer-events:auto !important; cursor:pointer; display:block; margin:16px auto 0; padding:0 0 4px; font:500 .8rem var(--font-pally),sans-serif; letter-spacing:.04em; line-height:1.4; color:#f3efe6; border-bottom:1px solid rgba(243,239,230,.35); transition:color .2s,transform .2s; }
 .view-project-button::after { content:''; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:currentColor; box-shadow:0 0 7px currentColor; transform:scaleX(0); transform-origin:left; transition:transform .25s; }
 .view-project-button:hover,.view-project-button:focus-visible { color:white; transform:translateY(-2px); }
 .view-project-button:hover::after,.view-project-button:focus-visible::after { transform:scaleX(1); }
