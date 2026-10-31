@@ -57,7 +57,7 @@ export default function ProjectWheels({
     let lastPaused = true;
 
     const playback = (active: number) => {
-      const isPaused = options.current.paused || document.hidden || !assetsReady();
+      const isPaused = options.current.paused || document.hidden || engine.read().handoff>=1 || !assetsReady();
       videos.forEach(video=>video.pause());
       videos.forEach((video, i) => {
         if (i === active && !isPaused) void video.play().catch(() => {});
@@ -82,7 +82,7 @@ export default function ProjectWheels({
           icons[i].setAttribute('aria-hidden', String(i !== active));
           captions[i].setAttribute('aria-hidden', String(i !== active));
         });
-      } else if (lastPaused !== (options.current.paused || document.hidden)) playback(active);
+      } else if (lastPaused !== (options.current.paused || document.hidden || frame.handoff>=1 || !assetsReady())) playback(active);
       element.style.setProperty("--reel-glitch", `${Math.min(0.15, Math.abs(scrollVelocity) * 0.06)}`);
       centerTitle.style.transform = `translate3d(calc(-50% + ${mobile ? 0 : p*16.5}vw), -50%, 0)`;
       activeLogoGroup.style.transform = `translate3d(${mobile ? 0 : p*12.5}vw,0,0)`;
@@ -132,13 +132,17 @@ export default function ProjectWheels({
     const toolkit=element.querySelector<HTMLElement>('.tool-caption')!;
     // Convert viewport bounds to the translated wheel's local coordinate space.
     // This follows the primary slab, including its real 3D orbit and hover tilt.
+    const captionHome=toolkit.parentElement!;
+    document.body.appendChild(toolkit);toolkit.classList.add('toolkit-viewport');
     let previousCaption='';
     const stopCaption=subscribeTicker(()=>{
-      if(element.closest('[inert]'))return;
+      const hidden=!!element.closest('[inert]')||engine.read().handoff>=1;
+      toolkit.style.visibility=hidden?'hidden':'visible';toolkit.setAttribute('aria-hidden',String(hidden));toolkit.style.opacity=String(1-engine.read().handoff);
+      if(hidden)return;
       const cube=icons[engine.read().index].querySelector<HTMLElement>('[data-orbit-cube]');
       if(!cube)return;
-      const box=cube.getBoundingClientRect(),parent=activeLogoGroup.getBoundingClientRect();
-      const x=box.left+box.width/2-parent.left,y=box.bottom+22-parent.top;
+      const box=cube.getBoundingClientRect();
+      const x=box.left+box.width/2,y=box.bottom+22;
       const key=`${x.toFixed(2)},${y.toFixed(2)}`;
       if(key===previousCaption)return;
       previousCaption=key;toolkit.style.left=`${x}px`;toolkit.style.top=`${y}px`;toolkit.style.transform='translate3d(-50%,0,0)';
@@ -158,6 +162,7 @@ export default function ProjectWheels({
       unsubscribe();
       stopExpansion();
       stopCaption();
+      captionHome.appendChild(toolkit);toolkit.classList.remove('toolkit-viewport');
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       videos.forEach((video) => video.pause());

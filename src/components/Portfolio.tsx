@@ -12,9 +12,9 @@ import { projects } from "@/data/projects";
 import { useParticles } from "@/hooks/useParticles";
 import { useProjectWheel } from "@/hooks/useProjectWheel";
 import { useAmbientAudio } from "@/hooks/useAmbientAudio";
-import AboutView from "./AboutView";
-import PageWipe from "./PageWipe";
-import { viewFromPath,updateViewAddress } from "@/lib/viewNavigation";
+import StoryStage from "./StoryStage";
+
+
 import { requestTick } from "@/lib/masterTicker";
 import { refreshGeometry } from "@/lib/geometryCache";
 import GlassHeader from "./GlassHeader";
@@ -25,9 +25,9 @@ import WavyBackground from "./WavyBackground";
 import RibbonCursor from "./RibbonCursor";
 import WarpedText from "./WarpedText";
 import LoadingScreen from "./LoadingScreen";
-import Overlay, { type Panel } from "./Overlay";
 
-export default function Portfolio({initialView="work"}:{initialView?:"work"|"about"}) {
+
+export default function Portfolio() {
   const [isLightMode, setIsLightMode] = useState(false);
   const themeRef = useRef<Theme>('dark');
   const toggleTheme = () => {
@@ -46,53 +46,23 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
   // Server HTML stays visible even when scripts or decorative effects fail.
   const [loading, setLoading] = useState(false);
   const loaded = useCallback(() => setLoading(false), []);
-  const [panel, setPanel] = useState<Panel>(initialView==="about"?"about":null);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [transition,setTransition]=useState<{target:Panel;startedAt:number;push:boolean}|null>(null);
-  const transitionPhaseRef=useRef<typeof transition>(null);
-  const updateTransition=(next:typeof transition)=>{transitionPhaseRef.current=next;setTransition(next);};
-  const [aboutRevealAt,setAboutRevealAt]=useState(0);
-  const pendingNavigation=useRef<{target:Panel;push:boolean}|null>(null);
-  const navigateRef=useRef<(next:Panel,push?:boolean)=>void>(()=>{});
-  const updateAddress=(next:Panel,push:boolean)=>updateViewAddress(next==='about'?'about':'work',push);
-  const navigate=(next:Panel,push=true)=>{
-    if(transitionPhaseRef.current){if(!push)pendingNavigation.current={target:next,push};return;}
-    if(next===panel){updateAddress(next,push);return;}
-    if(!reducedMotion&&(next==='about'||panel==='about')){
-      updateTransition({target:next,startedAt:performance.now(),push});
-    }else {setExpanded(false);setPanel(next);setAboutRevealAt(0);updateAddress(next,push);}
-  };
-  navigateRef.current=navigate;
-  const finishTransition=()=>{
-    updateTransition(null);refreshGeometry();
-    const pending=pendingNavigation.current;pendingNavigation.current=null;
-    if(pending)requestTick(()=>navigateRef.current(pending.target,pending.push));
-  };
   useEffect(()=>{
-    const view=viewFromPath(location.pathname);
-    history.replaceState({...history.state,view},'',location.href);
-    document.title=view==='about'?'Vishwas Kamath — About':'Vishwas Kamath — Motion Portfolio';
-    const pop=()=>{
-      const slug=new URLSearchParams(location.search).get('project');
-      const projectIndex=projects.findIndex(p=>p.slug===slug);
-      if(projectIndex>=0){openCinemaRef.current(projectIndex,false);return;}
-      if(cinemaRef.current){closeCinemaRef.current(false);return;}
-      navigateRef.current(viewFromPath(location.pathname)==='about'?'about':null,false);
-    };
+    history.replaceState({...history.state,view:'work'},'',location.href);
+    document.title='Vishwas Kamath — Motion Portfolio';
+    const pop=()=>{const slug=new URLSearchParams(location.search).get('project');const i=projects.findIndex(p=>p.slug===slug);if(i>=0)openCinemaRef.current(i,false);else if(cinemaRef.current)closeCinemaRef.current(false);};
     window.addEventListener('popstate',pop);return()=>window.removeEventListener('popstate',pop);
   },[]);
   const { canvasRef, burst } = useParticles(reducedMotion, themeRef);
   const { index, engine, select, dragRef } = useProjectWheel(
     projects.length,
-    !!panel || loading || expanded || !!transition || !!cinema,
+    loading || expanded || !!cinema,
     reducedMotion,
   );
   const { playing, toggle } = useAmbientAudio();
-  const close = useCallback(() => setPanel(null), []);
   const openCinema=(requested=engine.read().index,push=true)=>{
-    if(cinemaRef.current||transitionPhaseRef.current||loading)return;
+    if(cinemaRef.current||loading)return;
     if(requested!==engine.read().index){engine.select(requested,performance.now());engine.advance(performance.now(),true);}
-    if(panel)setPanel(null);
     const card=document.querySelector<HTMLElement>(`[data-video="${requested}"]`);
     const preview=card?.querySelector('video');
     const box=card?.getBoundingClientRect();
@@ -118,11 +88,9 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     const preview=document.querySelector<HTMLVideoElement>('.video-card.is-active video');
     if(preview){preview.muted=true;if(Number.isFinite(preview.duration))preview.currentTime=Math.min(time,Math.max(0,preview.duration-.1));}
     cinemaRef.current=null;setCinema(null);refreshGeometry();
-    const view=viewFromPath(location.pathname);
     const slug=new URLSearchParams(location.search).get('project');
     const nextProject=projects.findIndex(p=>p.slug===slug);
     if(nextProject>=0)requestTick(()=>openCinemaRef.current(nextProject,false));
-    else if(view==='about')navigateRef.current('about',false);
     requestTick(()=>document.querySelector<HTMLButtonElement>('.title-slot[aria-hidden="false"] .view-project-button')?.focus({preventScroll:true}));
   };
 
@@ -151,24 +119,23 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     <main
       className="portfolio relative h-dvh w-screen overflow-hidden bg-[#070707] text-[#eeeee7]"
       aria-label="Vishwas Kamath creative portfolio"
-      inert={!!transition || !!cinema}
+      inert={!!cinema}
       data-expanded={expanded}
       data-cinema={cinema ? (cinema.closing ? "closing" : "open") : "closed"}
-      data-view={panel === "about" ? "about" : "work"}
+      data-view="continuous"
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
     >
       <WavyBackground dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded || !!cinema} />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
-      <GlassHeader active={panel||'work'} onNavigate={name=>navigate(name==='work'?null:name as Panel)} onHome={()=>{navigate(null);if(!transitionPhaseRef.current)select(0,true);}} playing={playing} onAudio={toggle} light={isLightMode} onTheme={toggleTheme}/>
-
-      <div className="work-scene" data-active={panel!=='about'} aria-hidden={panel==='about'} inert={panel==='about'}>
+      <GlassHeader engine={engine} playing={playing} onAudio={toggle} light={isLightMode} onTheme={toggleTheme}/>
+      <div className="work-scene" data-active="true">
       <ProjectWheels
         dragRef={dragRef}
         index={index}
         engine={engine}
         reducedMotion={reducedMotion}
         select={select}
-        paused={(!expanded && reducedMotion) || !!panel || loading || !!cinema}
+        paused={(!expanded && reducedMotion) || loading || !!cinema}
         expanded={expanded}
         onCollapse={collapse}
         onExpand={() => { if (playing) toggle(); setExpanded(true); }}
@@ -182,7 +149,8 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
         onBurst={burst}
       />
       </div>
-      <AboutView revealAt={aboutRevealAt} active={panel==='about'} reducedMotion={reducedMotion} onBurst={burst}/>
+      <div className="reel-scroll-prompt" aria-hidden="true">01 / 05 — SCROLL TO EXPLORE</div>
+      <StoryStage engine={engine}/>
       <footer className="hud-footer">
         <button
           className={`audio-player ${playing ? "is-playing" : ""}`}
@@ -207,16 +175,8 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
           </span>
         </button>
       </footer>
-      <Overlay
-        panel={panel === "about" ? null : panel}
-        project={projects[engine.read().index]}
-        onClose={close}
-        onSelect={(i) => select(i, true)}
-        onBurst={burst}
-      />
-      {transition && <PageWipe destination={transition.target === 'about' ? 'ABOUT' : 'WORK'} startedAt={transition.startedAt} onSwap={()=>{setExpanded(false);if(transition.target==='about')setAboutRevealAt(-1);setPanel(transition.target);updateAddress(transition.target,transition.push);}} onReveal={()=>{if(transition.target==='about')setAboutRevealAt(performance.now());}} onComplete={finishTransition}/>}
       {loading && <LoadingScreen onComplete={loaded} />}
-      <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey={panel} />
+      <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey="continuous" />
     </main>
     {cinema && <CinemaPlayer session={cinema} reducedMotion={reducedMotion} onClose={()=>closeCinema()} onDone={finishCinema}/>}
     </ThemeContext.Provider>
