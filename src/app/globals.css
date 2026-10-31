@@ -1474,7 +1474,8 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 .video-hit svg, .video-hit canvas, .video-hit .crt-shading, .video-hit .glitch-flash { pointer-events: none; }
 /* In-place curved cinema expansion. The wheel owns the video at every size. */
 .video-card { transition: none; }
-.video-rims, .video-rim-specks { transition: opacity 450ms cubic-bezier(.16,1,.3,1); }
+.video-rims { opacity:1; transition:none; }
+.video-rim-specks { transition: opacity 450ms cubic-bezier(.16,1,.3,1); }
 .project-metadata { transition: opacity 450ms; }
 .project-title { transition: color 350ms ease; }
 .expansion-scanlines { position:absolute; inset:0; opacity:0; pointer-events:none; background:repeating-linear-gradient(0deg,#0009 0px,#0009 1px,#ffffff20 2px,transparent 4px); }
@@ -1645,10 +1646,11 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 [data-theme="light"] .view-project-button:hover { color:#000; }
 .project-metadata,.software-wheel { transition:scale 350ms,translate 350ms,opacity 350ms,filter 350ms; }
 .portfolio[data-cinema="open"] .project-metadata,.portfolio[data-cinema="open"] .software-wheel { scale:.92; translate:0 15px; opacity:0; filter:blur(8px); }
-.portfolio[data-cinema="open"] .video-card.is-active,.portfolio[data-cinema="closing"] .video-card.is-active { visibility:hidden !important; }
 .cinema-player { position:fixed; inset:0; z-index:99985; color:#f3efe6; --cinema-progress:0; }
 .cinema-backdrop { position:absolute; inset:0; background:rgba(5,5,7,.94); backdrop-filter:blur(20px); opacity:0; }
-.cinema-frame { position:absolute; left:0; top:0; transform-origin:0 0; overflow:hidden; background:transparent !important; padding:0 !important; border:0; outline:0; will-change:transform; box-shadow:none; }
+.cinema-frame { position:absolute; left:0; top:0; transform-origin:0 0; overflow:visible; background:transparent !important; padding:0 !important; border:0; outline:0; will-change:transform; box-shadow:none; }
+.cinema-aperture { position:absolute; inset:0; overflow:hidden; }
+.cinema-rims { z-index:20; opacity:1; transition:none; pointer-events:none; }
 .cinema-frame video { width:100% !important; height:100% !important; object-fit:cover !important; display:block; padding:0 !important; margin:0; border:0; outline:0; background:transparent; }
 .cinema-hud { opacity:var(--cinema-progress); transition:opacity 250ms; }
 .cinema-player[data-hud="false"] .cinema-hud { opacity:0; pointer-events:none; }

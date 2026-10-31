@@ -6,6 +6,7 @@ import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { bezelGeometry, createBoundaryProjector } from '@/lib/bezelGeometry';
 import { damp, subscribeProximity } from '@/lib/proximity';
 import LiquidSurface from './LiquidSurface';
+import CrtRings from './CrtRings';
 
 type Speck = { x: number; y: number; vx: number; vy: number; life: number; size: number };
 
@@ -103,9 +104,7 @@ export default function VideoBezel({ children }: { children: ReactNode }) {
             </radialGradient>
             <filter id={`${id}-bloom`} x="-30%" y="-40%" width="160%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
           </defs>
-          <path data-card-path fill="none" stroke="#161616" strokeWidth="6"/>
-          <path data-card-path fill="none" stroke="#c2cfc5" strokeOpacity=".22" strokeWidth=".65"/>
-          <path data-card-path data-floating-rim fill="none" stroke="#d0dbd5" strokeOpacity=".3" strokeWidth="1.5"/>
+          <CrtRings/>
           <g className="video-rim-flare" style={{display:'none'}} fill="none" stroke={`url(#${id}-glow)`}>
             <g filter={`url(#${id}-bloom)`} opacity=".65"><path data-card-path strokeWidth="9"/><path data-card-path data-floating-rim strokeWidth="4"/></g>
             <path data-card-path strokeWidth="2.5"/><path data-card-path data-floating-rim strokeWidth="1.5"/>
