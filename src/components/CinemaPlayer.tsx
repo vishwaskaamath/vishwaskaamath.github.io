@@ -5,15 +5,16 @@ import {assetUrl} from '@/lib/assetPreloader';
 import {subscribeTicker} from '@/lib/masterTicker';
 import type {Project} from '@/data/projects';
 import CinemaBezel from './CinemaBezel';
-import {cinemaOutline,cinemaVideoBox} from '@/lib/cinemaFraming';
+import {cinemaOutline} from '@/lib/cinemaFraming';
 export type CinemaSession={project:Project;rect:{left:number;top:number;width:number;height:number};time:number;closing:boolean};
 const clamp=(x:number)=>Math.max(0,Math.min(1,x));
 const ease=(p:number)=>{if(p<=0)return 0;if(p>=1)return 1;let lo=0,hi=1;for(let i=0;i<12;i++){const t=(lo+hi)/2,u=1-t;if(3*u*u*t*.22+3*u*t*t*.36+t*t*t<p)lo=t;else hi=t;}return 1-Math.pow(1-(lo+hi)/2,3);};
 const timecode=(n:number)=>`${Math.floor(n/60).toString().padStart(2,'0')}:${Math.floor(n%60).toString().padStart(2,'0')}`;
 export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{session:CinemaSession;onClose:()=>void;onDone:(time:number)=>void;reducedMotion:boolean}){
  const root=useRef<HTMLDivElement>(null),frame=useRef<HTMLDivElement>(null),video=useRef<HTMLVideoElement>(null),backdrop=useRef<HTMLDivElement>(null),range=useRef<HTMLInputElement>(null),clock=useRef<HTMLOutputElement>(null),closeButton=useRef<HTMLButtonElement>(null);
+ const initialRect=useRef(session.rect);
  const callbacks=useRef({onClose,onDone});callbacks.current={onClose,onDone};
- const motion=useRef({progress:0,lastInput:performance.now(),seeking:false,aspect:16/9,dirty:true,box:session.rect});
+ const motion=useRef({progress:0,lastInput:performance.now(),seeking:false,dirty:true,box:session.rect});
  const [paused,setPaused]=useState(false),[muted,setMuted]=useState(false),[error,setError]=useState('');
  useLayoutEffect(()=>{
   const previous=document.activeElement as HTMLElement|null;closeButton.current?.focus({preventScroll:true});
@@ -22,7 +23,7 @@ export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{ses
  },[]);
  useEffect(()=>{
   const v=video.current!;v.muted=false;v.volume=1;
-  const ready=()=>{motion.current.aspect=v.videoWidth/v.videoHeight||16/9;motion.current.dirty=true;root.current!.dataset.vertical=String(motion.current.aspect<1);if(session.time>0&&Number.isFinite(v.duration))v.currentTime=Math.min(session.time,Math.max(0,v.duration-.1));void v.play().catch(()=>setPaused(true));};
+  const ready=()=>{motion.current.dirty=true;if(session.time>0&&Number.isFinite(v.duration))v.currentTime=Math.min(session.time,Math.max(0,v.duration-.1));void v.play().catch(()=>setPaused(true));};
   v.addEventListener('loadedmetadata',ready);if(v.readyState>=1)ready();
   return()=>{v.removeEventListener('loadedmetadata',ready);v.pause();v.muted=true;};
  },[session.project,session.time]);
@@ -31,6 +32,8 @@ export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{ses
   const origin=motion.current.box;
   let target={left:0,top:0,width:innerWidth,height:innerHeight},done=false;
   const el=frame.current!,r=session.rect;
+  const aperture=el.querySelector<HTMLElement>('.cinema-aperture')!;
+  const curvedClip=aperture.dataset.curvedClip!;
   const rim=el.querySelector<SVGSVGElement>('.cinema-rims')!,glass=el.querySelector<HTMLElement>('.crt-shading')!;
   const clip=el.querySelector<SVGPathElement>('[data-cinema-clip]')!,rings=Array.from(rim.querySelectorAll<SVGPathElement>('[data-card-path]'));
   const resize=()=>{done=false;target={left:0,top:0,width:innerWidth,height:innerHeight};};window.addEventListener('resize',resize);
@@ -43,8 +46,7 @@ export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{ses
     motion.current.box=box;
     el.style.left=`${box.left}px`;el.style.top=`${box.top}px`;el.style.width=`${box.width}px`;el.style.height=`${box.height}px`;
     el.style.transform='none';el.style.borderRadius='0';
-    const fit=cinemaVideoBox(box.width,box.height,motion.current.aspect,p),v=video.current!;
-    v.style.width=`${fit.width}px`;v.style.height=`${fit.height}px`;v.style.left=`${fit.left}px`;v.style.top=`${fit.top}px`;
+    aperture.style.clipPath=p>=1&&!session.closing?'none':curvedClip;
     clip.setAttribute('d',cinemaOutline(p));
     const rimPath=cinemaOutline(p,r.width,r.height);rings.forEach(path=>path.setAttribute('d',rimPath));
     rim.style.opacity=String(1-p);glass.style.opacity=String(1-p);
@@ -62,7 +64,7 @@ export default function CinemaPlayer({session,onClose,onDone,reducedMotion}:{ses
  const togglePlay=()=>{const v=video.current!;if(v.paused)void v.play().catch(()=>setError('Playback is unavailable. Please try again.'));else v.pause();};
  return createPortal(<div ref={root} className="cinema-player" data-closing={session.closing} role="dialog" aria-modal="true" aria-label={`${session.project.shortTitle} cinema player`} onFocusCapture={()=>{motion.current.lastInput=performance.now();}} onPointerMove={()=>{motion.current.lastInput=performance.now();}} onPointerDown={()=>{motion.current.lastInput=performance.now();}}>
   <div ref={backdrop} className="cinema-backdrop" onClick={()=>callbacks.current.onClose()}/>
-  <div ref={frame} className="cinema-frame">
+  <div ref={frame} className="cinema-frame" style={initialRect.current}>
    <CinemaBezel width={session.rect.width} height={session.rect.height}>
    <video ref={video} src={assetUrl(session.project.video.replace('.mp4','-full.mp4'))} poster={assetUrl(session.project.poster)} playsInline preload="auto" onPlay={()=>setPaused(false)} onPause={()=>setPaused(true)} onEnded={()=>setPaused(true)} onError={()=>setError('Unable to load this video. Please close and try again.')} onClick={togglePlay}/>
    </CinemaBezel>

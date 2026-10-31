@@ -11,11 +11,11 @@ export default function CinemaBezel({width,height,children}:{width:number;height
   return {path:pathOf(scaled(width,height)),clip:pathOf(scaled(1,1)),floating:`translate(${width/2} ${height/2}) scale(${1+14.5/width} ${1+14.5/height}) translate(${-width/2} ${-height/2})`};
  },[width,height]);
  return <>
-  <div className="cinema-aperture" style={{clipPath:`url(#${id})`}}>
+  <svg width="0" height="0" style={{position:"absolute",pointerEvents:"none"}} aria-hidden="true"><defs><clipPath id={id} clipPathUnits="objectBoundingBox"><path data-cinema-clip d={shape.clip}/></clipPath></defs></svg>
+  <div className="cinema-aperture" data-curved-clip={`url(#${id})`} style={{clipPath:`url(#${id})`}}>
    {children}<div className="crt-shading"/>
   </div>
   <svg className="video-rims cinema-rims" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true">
-   <defs><clipPath id={id} clipPathUnits="objectBoundingBox"><path data-cinema-clip d={shape.clip}/></clipPath></defs>
    <CrtRings path={shape.path} floatingTransform={shape.floating}/>
   </svg>
  </>;

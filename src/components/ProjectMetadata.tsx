@@ -47,7 +47,7 @@ export default function ProjectMetadata({
       const active = engine.read().index;
       if (active !== semanticIndex) {
         semanticIndex = active;
-        element.querySelectorAll<HTMLElement>('[data-title-slot]').forEach((slot,i)=>{slot.setAttribute('aria-hidden',String(i!==active));const button=slot.querySelector('button')!;button.disabled=i!==active;button.tabIndex=i===active?0:-1;});
+        element.querySelectorAll<HTMLElement>('[data-title-slot]').forEach((slot,i)=>{slot.setAttribute('aria-hidden',String(i!==active));const button=slot.querySelector('button')!;button.tabIndex=i===active?0:-1;});
         element.querySelector('.metadata-reel')?.setAttribute('aria-label', `${projects[active].role}, ${projects[active].year}`);
       }
       const speed = Math.abs(scrollVelocity);
@@ -99,7 +99,7 @@ export default function ProjectMetadata({
           <div className="title-slot cinema-title-slot" data-title-slot={i} key={project.id} aria-hidden={i!==index} style={{visibility:i===index?'visible':'hidden'}}>
             <h1 className="project-title">{project.title.map((line,j)=><span className={`title-solid ${j===1?'title-line-secondary':''}`} key={j}><WarpedText>{line}</WarpedText></span>)}</h1>
             <div className="metadata-slot cinema-metadata-row"><span className="role-badge"><WarpedText>{project.role}</WarpedText></span><span className="project-year">{project.year}</span></div>
-            <button className="view-project-button" onPointerDown={(event)=>{event.stopPropagation();dragRef.current.wasDragged=false;}} onMouseDown={(event)=>event.stopPropagation()} onClick={()=>{if(!dragRef.current.wasDragged)onView();}} disabled={i!==index} tabIndex={i===index?0:-1}>View project</button>
+            <button className="view-project-button" onPointerDown={(event)=>{event.stopPropagation();dragRef.current.wasDragged=false;}} onMouseDown={(event)=>event.stopPropagation()} onClick={()=>{if(!dragRef.current.wasDragged)onView();}} tabIndex={i===index?0:-1}>View project</button>
           </div>
         ))}
       </div>

@@ -89,7 +89,7 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
   const { playing, toggle } = useAmbientAudio();
   const close = useCallback(() => setPanel(null), []);
   const openCinema=(requested=engine.read().index,push=true)=>{
-    if(cinemaRef.current||transitionPhaseRef.current||(push&&dragRef.current.wasDragged)||loading)return;
+    if(cinemaRef.current||transitionPhaseRef.current||loading)return;
     if(requested!==engine.read().index){engine.select(requested,performance.now());engine.advance(performance.now(),true);}
     if(panel)setPanel(null);
     const card=document.querySelector<HTMLElement>(`[data-video="${requested}"]`);
