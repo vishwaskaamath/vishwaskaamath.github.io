@@ -17,6 +17,7 @@ import PageWipe from "./PageWipe";
 import { viewFromPath,updateViewAddress } from "@/lib/viewNavigation";
 import { requestTick } from "@/lib/masterTicker";
 import { refreshGeometry } from "@/lib/geometryCache";
+import GlassHeader from "./GlassHeader";
 import ProjectWheels from "./ProjectWheels";
 import ProjectMetadata from "./ProjectMetadata";
 import CinemaPlayer, {type CinemaSession} from "./CinemaPlayer";
@@ -158,59 +159,8 @@ export default function Portfolio({initialView="work"}:{initialView?:"work"|"abo
     >
       <WavyBackground dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded || !!cinema} />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
-      <header className="hud-header">
-        <button
-          className="identity"
-          onClick={() => {
-            navigate(null);
-            if(!transitionPhaseRef.current)select(0, true);
-          }}
-          aria-label="Vishwas Kamath, home"
-        >
-          <span className="monogram">
-            v<span>k</span>
-            <i />
-          </span>
-          <span className="identity-copy">
-            <b className="identity-name"><WarpedText>VISHWAS KAMATH</WarpedText></b><span><WarpedText>INDEPENDENT CREATIVE</WarpedText></span>
-          </span>
-        </button>
-        <nav className="main-nav" aria-label="Main navigation">
-          {(["About", "Lab", "Work", "Studio", "Contact"] as const).map(
-            (label) => (
-              <button
-                key={label}
-                className={
-                  (label === "Work" && !panel) || panel === label.toLowerCase()
-                    ? "nav-active"
-                    : ""
-                }
-                onClick={() => {
-                  navigate(label === "Work" ? null : label.toLowerCase() as Panel);
-                }}
-                aria-current={(label === "Work" && !panel) || panel === label.toLowerCase() ? "page" : undefined}
-              >
-                <WarpedText>{label}</WarpedText>
-              </button>
-            ),
-          )}
-          <span className="nav-divider" />
-          <button
-            className="audio-toggle"
-            onClick={toggle}
-            aria-label={playing ? "Mute ambient audio" : "Enable ambient audio"}
-            aria-pressed={playing}
-          >
-            {playing ? <Volume2 size={16} /> : <VolumeX size={16} />}
-          </button>
-          <span className="nav-divider" />
-          <button className="theme-toggle" onClick={toggleTheme}
-            aria-label={isLightMode ? 'Switch to dark mode' : 'Switch to white mode'}
-            aria-pressed={isLightMode} title={isLightMode ? 'Dark mode' : 'White mode'}>
-            {isLightMode ? <Moon size={16} /> : <Sun size={16} />}
-          </button>
-        </nav>
-      </header>
+      <GlassHeader active={panel||'work'} onNavigate={name=>navigate(name==='work'?null:name as Panel)} onHome={()=>{navigate(null);if(!transitionPhaseRef.current)select(0,true);}} playing={playing} onAudio={toggle} light={isLightMode} onTheme={toggleTheme}/>
+
       <div className="work-scene" data-active={panel!=='about'} aria-hidden={panel==='about'} inert={panel==='about'}>
       <ProjectWheels
         dragRef={dragRef}

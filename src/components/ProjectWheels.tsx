@@ -129,6 +129,20 @@ export default function ProjectWheels({
     if(assetsReady())hydrate();
     resize();
     const unsubscribe = engine.subscribe(render);
+    const toolkit=element.querySelector<HTMLElement>('.tool-caption')!;
+    // Convert viewport bounds to the translated wheel's local coordinate space.
+    // This follows the primary slab, including its real 3D orbit and hover tilt.
+    let previousCaption='';
+    const stopCaption=subscribeTicker(()=>{
+      if(element.closest('[inert]'))return;
+      const cube=icons[engine.read().index].querySelector<HTMLElement>('[data-orbit-cube]');
+      if(!cube)return;
+      const box=cube.getBoundingClientRect(),parent=activeLogoGroup.getBoundingClientRect();
+      const x=box.left+box.width/2-parent.left,y=box.bottom+22-parent.top;
+      const key=`${x.toFixed(2)},${y.toFixed(2)}`;
+      if(key===previousCaption)return;
+      previousCaption=key;toolkit.style.left=`${x}px`;toolkit.style.top=`${y}px`;toolkit.style.transform='translate3d(-50%,0,0)';
+    });
     const stopExpansion = subscribeTicker((_now,dt)=>{
       const target=options.current.expanded?1:0,previous=expandProgress.current;
       if(previous===target)return;
@@ -143,6 +157,7 @@ export default function ProjectWheels({
       window.removeEventListener("portfolio-assets-ready",hydrate);
       unsubscribe();
       stopExpansion();
+      stopCaption();
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       videos.forEach((video) => video.pause());

@@ -1684,3 +1684,51 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 /* Expansion transforms are written by the master ticker, with fixed layout boxes. */
 .video-card.is-active { transform-origin:left center; }
 .software-wheel,.project-metadata { will-change:transform; }
+/* Three-zone glass HUD; independent of the wheel and Cinema geometry. */
+.glass-hud.hud-header { position:fixed; top:2.4vh; left:0; right:auto; width:100vw; padding:0 2.8vw; display:flex; align-items:center; justify-content:space-between; z-index:99950; pointer-events:none; }
+.glass-hud .identity,.glass-hud .telemetry-pod { pointer-events:auto; display:flex; align-items:center; gap:12px; border-radius:999px; background:rgba(10,10,13,.72); backdrop-filter:blur(16px); border:1px solid rgba(243,239,230,.12); box-shadow:0 8px 28px #0007,inset 0 1px 0 #ffffff1a; }
+.glass-hud .identity { padding:6px 16px 6px 7px; }
+.glass-hud .monogram { width:32px; height:32px; flex-shrink:0; border-radius:50%; background:#f3efe612; border:1px solid #f3efe629; font-size:25px; color:#f3efe6; }
+.glass-hud .monogram i { right:4px; bottom:5px; }
+.glass-hud .identity-copy { display:flex; gap:5px; }
+.glass-hud .identity-name { font-size:.76rem; font-weight:600; letter-spacing:.14em; color:#f3efe6; }
+.glass-hud .identity-copy>span { display:flex; align-items:center; gap:6px; font: .55rem monospace; letter-spacing:.16em; color:#f3efe680; white-space:nowrap; }
+.glass-hud .status-led { width:6px; height:6px; background:#10b981; box-shadow:0 0 8px #10b981; animation:status-breathe 2.4s ease-in-out infinite; }
+@keyframes status-breathe { 50% { opacity:.4; } }
+.glass-hud .main-nav { pointer-events:auto; position:absolute; left:50%; top:auto; transform:translateX(-50%); display:flex; gap:4px; padding:5px; border-radius:999px; background:rgba(12,12,15,.76); backdrop-filter:blur(20px); border:1px solid #f3efe621; box-shadow:0 12px 36px #0009,inset 0 1px 0 #ffffff24; }
+.glass-hud .main-nav button { position:relative; z-index:1; padding:7px 18px; font-size:.78rem; letter-spacing:.03em; border-radius:999px; background:transparent; color:#f3efe6aa; }
+.glass-hud .main-nav button:hover { background:#f3efe612; color:#f3efe6; }
+.glass-hud .main-nav button.nav-active { color:#111113; background:transparent; font-weight:600; }
+.glass-hud .nav-pill { position:absolute; top:0; left:0; background:#f3efe6; border-radius:999px; box-shadow:0 2px 12px #f3efe640; pointer-events:none; transition:transform 350ms cubic-bezier(.16,1,.3,1),width 350ms cubic-bezier(.16,1,.3,1); }
+.nav-slot { position:relative; display:block; overflow:hidden; line-height:1.5; }
+.nav-slot>span { display:block; transition:transform 260ms cubic-bezier(.16,1,.3,1); }
+.nav-slot>span+span { position:absolute; inset:0; transform:translateY(100%); }
+.main-nav button:hover .nav-slot>span,.main-nav button:focus-visible .nav-slot>span { transform:translateY(-100%); }
+.main-nav button:hover .nav-slot>span+span,.main-nav button:focus-visible .nav-slot>span+span { transform:translateY(0); }
+.glass-hud .telemetry-pod { padding:6px 14px; margin-left:auto; }
+.telemetry-clock { font:.68rem monospace; letter-spacing:.1em; color:#f3efe6a6; white-space:nowrap; }
+.clock-colon { animation:status-breathe 1s steps(2,end) infinite; }
+.telemetry-pod .nav-divider { width:1px; height:14px; margin:0; background:#f3efe626; }
+.telemetry-pod button { display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; color:#f3efe6; }
+.telemetry-pod button:hover { background:#f3efe614; }
+.telemetry-pod button:focus-visible,.glass-hud .identity:focus-visible { outline:2px solid var(--coral); outline-offset:4px; }
+.telemetry-pod .theme-toggle { transition:transform 450ms cubic-bezier(.34,1.56,.64,1); }
+.telemetry-pod .theme-toggle[aria-pressed="true"] { transform:rotate(180deg); }
+.equalizer { display:flex; align-items:center; gap:3px; height:18px; }
+.equalizer i { display:block; width:2px; height:3px; background:currentColor; border-radius:2px; transition:height 200ms; }
+.equalizer-button[aria-pressed="true"] i { height:16px; animation:equalizer-dance .74s ease-in-out infinite alternate; }
+@keyframes equalizer-dance { from { transform:scaleY(.2); } to { transform:scaleY(1); } }
+[data-theme="light"] .glass-hud .identity,[data-theme="light"] .glass-hud .main-nav,[data-theme="light"] .glass-hud .telemetry-pod { background:#ffffffbf; border-color:#00000014; box-shadow:0 8px 28px #00000010,inset 0 1px 0 #fff; }
+[data-theme="light"] .glass-hud .identity-name,[data-theme="light"] .glass-hud .monogram,[data-theme="light"] .glass-hud .main-nav button,[data-theme="light"] .telemetry-pod button { color:#111113; }
+[data-theme="light"] .glass-hud .identity-copy>span,[data-theme="light"] .telemetry-clock { color:#52525b; }
+[data-theme="light"] .glass-hud .nav-pill { background:#111113; box-shadow:0 2px 12px #0002; }
+[data-theme="light"] .glass-hud .main-nav button.nav-active { color:#f3efe6; background:transparent; }
+[data-theme="light"] .glass-hud button:hover { background:#0000000a; }
+[data-theme="light"] .telemetry-pod .nav-divider { background:#0002; }
+.software-wheel .tool-caption { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; width:max-content; pointer-events:none; }
+.software-wheel .tool-caption-slot[aria-hidden="false"] { position:relative; inset:auto; }
+.software-wheel .tool-caption-slot>span { white-space:nowrap; }
+@media(max-width:1200px) { .glass-hud .main-nav button { padding:7px 12px; } .glass-hud .identity-copy>span { font-size:.45rem; letter-spacing:.08em; } .glass-hud .identity-name { font-size:.65rem; letter-spacing:.08em; } .telemetry-clock { font-size:.58rem; letter-spacing:0; } .glass-hud .telemetry-pod { gap:7px; padding:6px 9px; } }
+@media(max-width:950px) { .glass-hud .main-nav { top:58px; } }
+@media(max-width:480px) { .glass-hud .identity { gap:7px; padding-right:10px; } .glass-hud .identity-copy>span { max-width:143px; font-size:.4rem; letter-spacing:0; } .glass-hud .identity-name { font-size:.57rem; } .telemetry-clock { display:none; } .telemetry-pod .nav-divider { display:none; } .glass-hud .main-nav { width:max-content; } .glass-hud .main-nav button { padding:7px 12px; font-size:.73rem; } }
+@media(prefers-reduced-motion:reduce) { .glass-hud *, .glass-hud *::after { animation:none !important; transition:none !important; } }
