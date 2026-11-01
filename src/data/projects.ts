@@ -21,6 +21,7 @@ export type Project = {
   color: string;
   description: string;
   kind: string;
+  website?: string;
 };
 
 // Titles, categories and years are editable portfolio presentation metadata.
@@ -105,6 +106,77 @@ export const projects: Project[] = [
     kind: "MOTION EXPERIMENT",
     description:
       "In Moe — an experiment in visual energy. Shapes, images, and timing come together in a playful study of how motion changes the way a story feels.",
+  },
+  {
+    "id": "artists",
+    "slug": "artists",
+    "title": [
+        "Artists",
+        "in Motion"
+    ],
+    "shortTitle": "Artists in Motion",
+    "role": "VIDEO EDITING",
+    "year": "2026",
+    "software": "pr",
+    "video": "/media/artists.mp4",
+    "poster": "/media/artists.jpg",
+    "color": "#b7adff",
+    "kind": "MUSIC EDIT",
+    "description": "A rhythm-led artist montage with layered imagery and expressive cuts.",
+    tools: [toolCatalog.pr, toolCatalog.ae]
+  },
+  {
+    "id": "iconic",
+    "slug": "iconic",
+    "title": [
+        "Iconic"
+    ],
+    "shortTitle": "Iconic",
+    "role": "VIDEO EDITING",
+    "year": "2026",
+    "software": "pr",
+    "video": "/media/iconic.mp4",
+    "poster": "/media/iconic.jpg",
+    "color": "#b7adff",
+    "kind": "GAMING EDIT",
+    "description": "A cinematic tribute to an iconic weapon in gaming.",
+    tools: [toolCatalog.pr, toolCatalog.ae]
+  },
+  {
+    "id": "oscar",
+    "slug": "oscar-piastri",
+    "title": [
+        "Oscar",
+        "Piastri"
+    ],
+    "shortTitle": "Oscar Piastri",
+    "role": "VIDEO EDITING",
+    "year": "2026",
+    "software": "pr",
+    "video": "/media/oscar.mp4",
+    "poster": "/media/oscar.jpg",
+    "color": "#b7adff",
+    "kind": "MOTORSPORT EDIT",
+    "description": "A fast-paced motorsport edit built around Oscar Piastri.",
+    tools: [toolCatalog.pr, toolCatalog.ae]
+  },
+  {
+    "id": "induction",
+    "slug": "induction",
+    "title": [
+        "Induction"
+    ],
+    "shortTitle": "Induction",
+    "role": "WEB DESIGN",
+    "year": "2026",
+    "software": "figma",
+    "video": "/media/induction.mp4",
+    "poster": "/media/induction.jpg",
+    "color": "#b7adff",
+    "kind": "INTERACTIVE WEBSITE",
+    "description": "An interactive website redesign for Induction, with animated visual storytelling and data-driven sections.",
+    "website": "https://induction-redesign.vercel.app/",
+    tools: [toolCatalog.figma]
   },
 ];
 

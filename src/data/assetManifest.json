@@ -78,5 +78,65 @@
     "url": "/media/unrequited.mp3",
     "bytes": 2065727,
     "kind": "audio"
+  },
+  {
+    "url": "/media/artists.jpg",
+    "bytes": 146195,
+    "kind": "image"
+  },
+  {
+    "url": "/media/artists.mp4",
+    "bytes": 5657286,
+    "kind": "video"
+  },
+  {
+    "url": "/media/artists-full.mp4",
+    "bytes": 19765980,
+    "kind": "video"
+  },
+  {
+    "url": "/media/iconic.jpg",
+    "bytes": 56095,
+    "kind": "image"
+  },
+  {
+    "url": "/media/iconic.mp4",
+    "bytes": 5259480,
+    "kind": "video"
+  },
+  {
+    "url": "/media/iconic-full.mp4",
+    "bytes": 17261994,
+    "kind": "video"
+  },
+  {
+    "url": "/media/oscar.jpg",
+    "bytes": 19238,
+    "kind": "image"
+  },
+  {
+    "url": "/media/oscar.mp4",
+    "bytes": 3908365,
+    "kind": "video"
+  },
+  {
+    "url": "/media/oscar-full.mp4",
+    "bytes": 15798511,
+    "kind": "video"
+  },
+  {
+    "url": "/media/induction.jpg",
+    "bytes": 38179,
+    "kind": "image"
+  },
+  {
+    "url": "/media/induction.mp4",
+    "bytes": 568217,
+    "kind": "video"
+  },
+  {
+    "url": "/media/induction-full.mp4",
+    "bytes": 5343048,
+    "kind": "video"
   }
 ]

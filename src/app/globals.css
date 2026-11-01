@@ -1776,3 +1776,5 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 @media(prefers-reduced-motion:reduce) { .story-stage *, .minimal-hud * { animation:none !important; transition:none !important; } }
 .discipline-card { transition:transform .25s,scale .25s,background .25s,box-shadow .25s; }
 .discipline-card:hover,.discipline-card:focus-visible { scale:1.015; }
+
+.website-project-link{display:block;width:max-content;margin:12px auto 0!important;text-decoration:none;}
