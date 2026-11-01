@@ -1480,7 +1480,7 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 .project-title { transition: color 350ms ease; }
 .expansion-scanlines { position:absolute; inset:0; opacity:0; pointer-events:none; background:repeating-linear-gradient(0deg,#0009 0px,#0009 1px,#ffffff20 2px,transparent 4px); }
 @media(min-width:760px) {
- .video-wheel { left:4vw; width:30.4vw; top:50%; }
+ .video-wheel { left:calc(4vw - 0.8vw); width:30.4vw; top:calc(50vh - 0.4vh); }
  .video-card { height:34.2vh; aspect-ratio:auto; }
 }
 @media(max-width:759px) {
@@ -1532,7 +1532,7 @@ html[data-loading] .ribbon-cursor { visibility: hidden; }
 .software-wheel .software-cube .adobe-symbol { font-size:clamp(52px,7vw,94px); color:var(--brand-glow); }
 .software-cube .tile-brand { width:100%; text-align:center; font-size:7px; letter-spacing:1px; transform:translateZ(2px); }
 @media(min-width:760px) {
- .software-wheel { width:min(320px,25vw); margin-left:-3.5vw; }
+ .software-wheel { width:min(320px,25vw); margin-left:calc(-3.5vw - 4.5vw); top:calc(50vh - 0.4vh); }
  .software-wheel .tool-caption { top:calc(min(160px,12.5vw) + 8px); }
 }
 @media(max-width:759px) {
@@ -1678,7 +1678,8 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 /* Restore the original headline center without letting the new CTA shift it. */
 @media(min-width:760px) {
  .portfolio .cinema-title-slot { top:calc(50% - 1.2em); }
- .portfolio .cinema-title-slot { translate:1vw 0; }
+ .project-metadata { left:calc(50vw - 0.8vw); top:calc(50vh - 1.6vh); }
+ .portfolio .cinema-title-slot { translate:0 0; }
 }
 
 /* Expansion transforms are written by the master ticker, with fixed layout boxes. */
@@ -1778,3 +1779,8 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .discipline-card:hover,.discipline-card:focus-visible { scale:1.015; }
 
 .website-project-link{display:block;width:max-content;margin:12px auto 0!important;text-decoration:none;}
+
+/* Desktop Work-stage optical axis; mobile chapter layout is unchanged. */
+@media(min-width:760px) {
+ .reel-scroll-prompt { left:calc(50vw - 0.8vw); }
+}
