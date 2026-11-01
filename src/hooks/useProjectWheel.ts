@@ -32,14 +32,14 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
       target instanceof Element && !!target.closest("dialog,input,textarea,select,[contenteditable='true']");
 
     const wheel = (event: WheelEvent) => {
-      if (options.current.disabled || event.ctrlKey || blocked(event.target)) return;
+      if (options.current.disabled || engine.locked || event.ctrlKey || blocked(event.target)) return;
       event.preventDefault();
       engine.wheel(event.deltaY * (event.deltaMode===1?16:event.deltaMode===2?innerHeight:1), performance.now());
     };
     const key = (event: KeyboardEvent) => {
-      if (options.current.disabled || blocked(event.target)) return;
+      if (options.current.disabled || engine.locked || blocked(event.target)) return;
       if(event.target instanceof Element && event.target.closest('button,a')&&!['Home','End','PageDown','PageUp'].includes(event.key))return;
-      if(['Home','End','PageDown','PageUp',' '].includes(event.key)){event.preventDefault();if(event.key==='Home')engine.scrollTo(0);else if(event.key==='End')engine.scrollTo(engine.maxScroll);else engine.scrollTo(engine.targetScroll+(event.key==='PageUp'||event.shiftKey?-1:1)*innerHeight*.8);return;}
+      if(['Home','End','PageDown','PageUp',' '].includes(event.key)){event.preventDefault();if(event.key==='Home')engine.scrollTo(0);else if(event.key==='End')engine.scrollTo(engine.maxScroll);else engine.wheel((event.key==='PageUp'||event.shiftKey?-1:1)*innerHeight*.8,performance.now());return;}
       if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(event.key)) {
         event.preventDefault();
         engine.step(["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1, performance.now());
@@ -48,7 +48,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
     const start = (event: PointerEvent) => {
       if (!event.isPrimary || event.button !== 0) return;
       drag.wasDragged = false; drag.distance = 0;
-      if (options.current.disabled || blocked(event.target)) return;
+      if (options.current.disabled || engine.locked || blocked(event.target)) return;
       if (event.target instanceof Element && event.target.closest("button:not(.video-hit),a,[role='button']:not(.video-hit)")) return;
       drag.isDragging = true; drag.lastY = event.clientY; drag.velocity = 0; drag.pointerId = event.pointerId;
       engine.beginDrag();
