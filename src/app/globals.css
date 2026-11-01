@@ -1715,7 +1715,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .chapter-top>span:last-child { font:9px monospace; letter-spacing:.1em; color:#f3efe680; }
 .story-intro { min-height:155vh; background:linear-gradient(135deg,#151416,#09090b 75%); overflow:hidden; }
 .story-intro:before { content:''; position:absolute; width:65vw; height:65vw; border:1px solid #f3efe60a; border-radius:50%; left:62%; top:15%; pointer-events:none; }
-.story-intro h2 { position:relative; font-size:clamp(4.5rem,10vw,9.5rem); padding-top:3vw; }
+.story-intro h2 { position:relative; font-size:clamp(5.6rem,11.2vw,10.8rem); line-height:.9; letter-spacing:.01em; padding-top:3vw; height:calc(clamp(4.5rem,10vw,9.5rem) * 1.84 + 3vw); }
 .story-intro h2>span { margin-left:9vw; }
 .intro-star { display:inline-block; font:normal .68em sans-serif; color:#e8997f; margin-left:5vw; vertical-align:middle; transform:rotate(-15deg); }
 .intro-copy { max-width:800px; margin:5vw 0 7vw auto; font-size:clamp(1.3rem,2.3vw,2.5rem); line-height:1.65; }
@@ -1723,7 +1723,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .inline-pill:nth-child(2) { transform:rotate(2deg); background:#f3efe60a; }
 .intro-note { font-size:.65em; color:#a6a29c; }
 .scroll-manifesto { position:relative; max-width:1100px; font-size:clamp(1.65rem,3.4vw,3.7rem); line-height:1.38; letter-spacing:-.025em; }
-.scroll-manifesto span { opacity:.18; }
+
 .intro-bottom { border-top:1px solid #f3efe61a; display:flex; justify-content:space-between; margin-top:7vw; padding-top:25px; font:9px/1.8 monospace; letter-spacing:.12em; color:#b0aaa0; }
 .story-capabilities { background:#f3efe6; color:#111113; border-radius:36px 36px 0 0; padding-bottom:10vw; }
 .story-capabilities h2 { font-size:clamp(4.5rem,12vw,12rem); }
@@ -1784,3 +1784,34 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 @media(min-width:760px) {
  .reel-scroll-prompt { left:calc(50vw - 0.8vw); }
 }
+
+/* About editorial color chase: progress comes from the shared virtual-scroll ticker. */
+.intro-star { animation:intro-asterisk-spin 24s linear infinite; }
+@keyframes intro-asterisk-spin { to { transform:rotate(345deg); } }
+.about-manifesto { margin-top:6vh; }
+.manifesto-editorial { max-width:56vw; }
+.manifesto-kicker { font:0.68rem monospace; letter-spacing:.2em; color:rgba(243,239,230,.55); margin-bottom:18px; }
+.about-manifesto .scroll-manifesto { margin:0; max-width:none; font-family:Arial,Helvetica,sans-serif; font-size:clamp(2.1rem,3.6vw,3.8rem); font-weight:700; line-height:1.14; letter-spacing:-.025em; }
+.scroll-word { position:relative; display:inline-block; white-space:pre; color:rgba(255,85,38,.34); }
+.manifesto-sticker { position:absolute; left:50%; top:0; padding:6px 16px; border-radius:999px; background:#ff4d1c; color:#f3efe6; font:600 .82rem/1.25 var(--font-pally),sans-serif; letter-spacing:0; box-shadow:0 10px 24px #0007; white-space:nowrap; pointer-events:none; z-index:5; transform:translate(-50%,-65%) rotate(var(--tilt)) scale(0); opacity:0; transition:transform 320ms cubic-bezier(.34,1.56,.64,1),opacity 180ms; transform-origin:50% 100%; }
+.manifesto-sticker[data-visible="true"] { transform:translate(-50%,-65%) rotate(var(--tilt)) scale(1); opacity:1; }
+.manifesto-trail { width:min(70vw,1000px); margin:2vh 0 -8vw; pointer-events:none; }
+.manifesto-trail svg { width:100%; height:auto; overflow:visible; display:block; }
+.manifesto-path { stroke:#ff4d1c; stroke-width:4; stroke-linecap:round; vector-effect:non-scaling-stroke; stroke-dasharray:2000; stroke-dashoffset:2000; }
+.manifesto-node-content { opacity:0; transform:scale(.6); transition:opacity 220ms,transform 320ms cubic-bezier(.34,1.56,.64,1); }
+.manifesto-node[data-visible="true"] .manifesto-node-content { opacity:1; transform:scale(1); }
+.manifesto-node rect { fill:#101012; stroke:#ff4d1c; stroke-width:2; }
+.manifesto-node text { fill:#f3efe6; font:600 13px Arial,sans-serif; letter-spacing:1px; }
+.manifesto-pen { opacity:0; }
+[data-theme="light"] .manifesto-kicker { color:#11111388; }
+[data-theme="light"] .manifesto-node rect { fill:#f3efe6; }
+[data-theme="light"] .manifesto-node text { fill:#111113; }
+@media(max-width:759px) {
+ .story-intro h2 { font-size:clamp(5rem,20vw,5.6rem); height:calc(clamp(4.5rem,10vw,9.5rem) * 1.84 + 3vw); }
+ .manifesto-editorial { max-width:100%; }
+ .about-manifesto .scroll-manifesto { font-size:clamp(1.65rem,6.4vw,2.1rem); }
+ .manifesto-sticker { font-size:.62rem; padding:5px 9px; }
+ .manifesto-trail { width:100%; margin-bottom:-20px; }
+ .manifesto-node text { font-size:17px; letter-spacing:0; }
+}
+@media(prefers-reduced-motion:reduce) { .intro-star { animation:none; } .manifesto-sticker,.manifesto-node-content { transition:none; } }
