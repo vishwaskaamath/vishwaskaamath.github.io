@@ -7,15 +7,11 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
  const backdrop=document.createElement('canvas'),shade=document.createElement('canvas'),torch=document.createElement('canvas');
  const bg=backdrop.getContext('2d')!,edge=shade.getContext('2d')!,lamp=torch.getContext('2d')!;
  let width=1,height=1,lastLight:boolean|null=null;
- const xs=[.04,.345,.655,.96],ys=[.12,.5,.88];
  function prepare(light:boolean){
   lastLight=light;backdrop.width=shade.width=width;backdrop.height=shade.height=height;
   bg.fillStyle=light?'#f6f6f4':'#09090b';bg.fillRect(0,0,width,height);
   bg.save();bg.translate(width*.5,height*.5);bg.scale(width*.45,height*.32);
   const warmth=bg.createRadialGradient(0,0,0,0,0,1);warmth.addColorStop(0,'rgba(255,77,28,0.08)');warmth.addColorStop(.75,'rgba(255,77,28,0)');bg.fillStyle=warmth;bg.fillRect(-1,-1,2,2);bg.restore();
-  bg.lineWidth=1;bg.strokeStyle=light?'rgba(17,17,19,0.055)':'rgba(243,239,230,0.035)';bg.beginPath();
-  xs.forEach(x=>{bg.moveTo(Math.round(x*width)+.5,0);bg.lineTo(Math.round(x*width)+.5,height);});
-  ys.forEach(y=>{bg.moveTo(0,Math.round(y*height)+.5);bg.lineTo(width,Math.round(y*height)+.5);});bg.stroke();
   const vignette=edge.createRadialGradient(width*.5,height*.5,0,width*.5,height*.5,Math.hypot(width,height)*.5);
   vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(.55,'rgba(0,0,0,0)');vignette.addColorStop(1,light?'rgba(65,48,35,.1)':'rgba(0,0,0,.65)');edge.fillStyle=vignette;edge.fillRect(0,0,width,height);
   torch.width=torch.height=700;const glow=lamp.createRadialGradient(350,350,0,350,350,350);glow.addColorStop(0,light?'rgba(55,45,35,.035)':'rgba(243,239,230,.045)');glow.addColorStop(.8,'rgba(243,239,230,0)');lamp.fillStyle=glow;lamp.fillRect(0,0,700,700);
@@ -50,7 +46,7 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
   ctx.globalCompositeOperation=light?'multiply':'lighter';
   for(const p of pulses){const inner=Math.max(0,p.radius-70),outer=p.radius+70,g=ctx.createRadialGradient(p.x,p.y,inner,p.x,p.y,outer);g.addColorStop(0,'rgba(255,140,95,0)');g.addColorStop(Math.max(.001,(p.radius-inner)/(outer-inner)),`rgba(255,140,95,${.16*p.alpha})`);g.addColorStop(1,'rgba(255,140,95,0)');ctx.strokeStyle=g;ctx.stroke(mesh);}
   ctx.globalCompositeOperation='source-over';ctx.drawImage(shade,0,0);
-  for(const x of xs)for(const y of ys){const px=x*width,py=y*height,near=Math.max(0,1-Math.hypot(px-dynamics.mouseX,py-dynamics.mouseY)/180);ctx.strokeStyle=near>0?`rgba(255,77,28,${.16+.64*near})`:light?'rgba(17,17,19,.16)':'rgba(243,239,230,.16)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px-3.5,py);ctx.lineTo(px+3.5,py);ctx.moveTo(px,py-3.5);ctx.lineTo(px,py+3.5);ctx.stroke();}
+
  };
  return {resize,draw,dispose:()=>{backdrop.width=shade.width=torch.width=1;}};
 }

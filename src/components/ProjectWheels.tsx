@@ -181,8 +181,6 @@ export default function ProjectWheels({
 
   return (
     <div className="project-wheels" ref={root}>
-      <div className="arc arc-left" aria-hidden="true" />
-      <div className="arc arc-right" aria-hidden="true" />
       <div className="video-wheel">
         {projects.map((project, i) => {
           const active = i === index;

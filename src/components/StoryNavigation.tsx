@@ -7,7 +7,7 @@ const clamp=(x:number)=>Math.max(0,Math.min(1,x));
 const out=(x:number)=>1-Math.pow(1-clamp(x),3);
 const ease=(x:number)=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;};
 export default function StoryNavigation({engine}:{engine:ScrollPhysics}){
- const canvas=useRef<HTMLCanvasElement>(null),hud=useRef<HTMLDivElement>(null),counter=useRef<HTMLSpanElement>(null),button=useRef<HTMLButtonElement>(null),theme=useThemeRef();
+ const canvas=useRef<HTMLCanvasElement>(null),hud=useRef<HTMLDivElement>(null),button=useRef<HTMLButtonElement>(null),theme=useThemeRef();
  const navigate=useRef<(view:'work'|'about')=>void>(()=>{});
  useEffect(()=>{
   const c=canvas.current!,ctx=c.getContext('2d')!,main=c.closest('main')!;
@@ -17,7 +17,7 @@ export default function StoryNavigation({engine}:{engine:ScrollPhysics}){
   bake();document.fonts.load('700 100px "Bebas Neue"').then(()=>{if(c.isConnected)bake();});window.addEventListener('resize',bake);
   navigate.current=view=>{if(active||view===engine.view||main.dataset.cinema!=='closed')return;active=true;destination=view;elapsed=0;swapped=false;buffer=0;engine.locked=true;main.inert=true;c.style.visibility='visible';};
   const open=()=>navigate.current('about');window.addEventListener('portfolio:story',open);engine.onBoundary=()=>navigate.current('work');
-  const sync=()=>{const about=engine.view==='about';counter.current!.textContent=`${String(engine.read().index+1).padStart(2,'0')} / ${String(engine.count).padStart(2,'0')} — INFINITE REEL`;counter.current!.hidden=about;button.current!.textContent=about?'← BACK TO REEL':'ABOUT & CONTACT ↓';hud.current!.dataset.view=engine.view;};
+  const sync=()=>{const about=engine.view==='about';button.current!.textContent=about?'← BACK TO REEL':'ABOUT & CONTACT ↓';hud.current!.dataset.view=engine.view;};
   const off=engine.subscribe(sync);
   const stop=subscribeTicker((_now,dt)=>{if(!active)return;
    if(buffer>0)buffer--;else elapsed+=Math.min(dt*1000,16.67);
@@ -32,5 +32,5 @@ export default function StoryNavigation({engine}:{engine:ScrollPhysics}){
   });
   return()=>{off();stop();engine.onBoundary=null;engine.locked=false;main.inert=false;window.removeEventListener('portfolio:story',open);window.removeEventListener('resize',bake);};
  },[engine,theme]);
- return <><div ref={hud} className="reel-scroll-prompt story-portal"><span ref={counter}/><button ref={button} onClick={()=>navigate.current(engine.view==='work'?'about':'work')} onPointerMove={e=>{if(e.pointerType!=='mouse')return;const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.translate=`${(e.clientX-r.left-r.width/2)*.12}px ${(e.clientY-r.top-r.height/2)*.18}px`;}} onPointerLeave={e=>{e.currentTarget.style.translate='0 0';}}>ABOUT & CONTACT ↓</button></div><canvas ref={canvas} className="story-transition-canvas" aria-hidden="true"/></>;
+ return <><div ref={hud} className="reel-scroll-prompt story-portal"><button ref={button} onClick={()=>navigate.current(engine.view==='work'?'about':'work')} onPointerMove={e=>{if(e.pointerType!=='mouse')return;const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.translate=`${(e.clientX-r.left-r.width/2)*.12}px ${(e.clientY-r.top-r.height/2)*.18}px`;}} onPointerLeave={e=>{e.currentTarget.style.translate='0 0';}}>ABOUT & CONTACT ↓</button></div><canvas ref={canvas} className="story-transition-canvas" aria-hidden="true"/></>;
 }
