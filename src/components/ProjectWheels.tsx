@@ -6,7 +6,7 @@ import { damp, subscribeTicker } from "@/lib/masterTicker";
 import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
-import SoftwareTile from "./SoftwareTile";
+import SoftwareCube3D from "./SoftwareCube3D";
 import WarpedText from "./WarpedText";
 import VideoBezel from "./VideoBezel";
 
@@ -90,24 +90,23 @@ export default function ProjectWheels({
       projects.forEach((_, i) => {
         const d = reelOffset(i, currentScroll, projects.length);
         const distance = Math.abs(d);
-        const blend = Math.min(distance, 1);
+        const theta = d * .68;
         const visible = distance < 2;
         const focus = Math.exp(-8*d*d);
-        const fade = Math.max(0,1-Math.pow(distance,1.4)*.58);
-        const scale = .66+.34*Math.exp(-2.2*d*d);
+        const fade = Math.max(0,1-Math.pow(distance,1.5)*.55);
+        const scale = .64+.36*Math.exp(-1.8*d*d);
         const torque=(value:number,limit:number)=>Math.max(-limit,Math.min(limit,value));
         const pushX = mobile ? 0 : p*width*(focus*.015-(1-focus)*.045);
         const pushY = mobile ? 0 : Math.tanh(d*3)*(1-focus)*p*innerHeight*.14;
-        const x=mobile?d*gap:-Math.pow(distance,1.35)*width*.068;
-        const y=mobile?distance*22:d*innerHeight*.42;
-        const z=mobile?0:-Math.pow(distance,1.2)*190;
-        cards[i].style.transform = `translate3d(${x+pushX}px, ${y+pushY}px, ${z}px) translateY(-50%) rotateZ(${mobile?d*7:d*-26+torque(scrollVelocity*-3.5,8)}deg) rotateY(${mobile?0:distance*16}deg) rotateX(${mobile?0:d*-10+torque(scrollVelocity*4,10)}deg) scale(${scale*(1+p*focus*(mobile?.05:.68))})`;
+        const x=mobile?d*gap:(Math.cos(theta)-1)*width*.26;
+        const y=mobile?distance*22:Math.sin(theta)*innerHeight*.46;
+        cards[i].style.transform = `translate3d(${x+pushX}px, ${y+pushY}px, 0) translateY(-50%) rotateZ(${mobile?d*7:-d*28+torque(scrollVelocity*-2.5,6)}deg) scale(${scale*(1+p*focus*(mobile?.05:.68))})`;
         cards[i].style.opacity = `${Math.max(0, fade)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
         cards[i].style.zIndex = `${Math.round(10 - distance * 3 + focus*p*30)}`;
-        const iconFade = mobile ? Math.max(0,1-distance) : Math.max(0,1-Math.pow(distance,1.4)*.65);
-        const iconX=mobile?d*90:Math.pow(distance,1.3)*width*.115-(1-focus)*p*width*.10;
-        icons[i].style.transform = `translate3d(${iconX}px, ${mobile?0:d*innerHeight*.39}px, ${mobile?0:-Math.pow(distance,1.2)*160}px) translate(-50%, -50%) rotateZ(${mobile?d*15:d*38+torque(scrollVelocity*6,14)}deg) rotateX(${mobile?0:-d*22+torque(scrollVelocity*-5,12)}deg) rotateY(${mobile?0:-12*Math.exp(-8*d*d)-distance*18}deg) scale(${.72+.28*Math.exp(-2.4*d*d)})`;
+        const iconFade = mobile ? Math.max(0,1-distance) : Math.max(0,1-Math.pow(distance,1.5)*.55);
+        const iconX=mobile?d*90:(1-Math.cos(theta))*width*.34-(1-focus)*p*width*.10;
+        icons[i].style.transform = `translate3d(${iconX}px, ${mobile?0:Math.sin(theta)*innerHeight*.44}px, 0) translate(-50%, -50%) rotateZ(${mobile?d*15:d*34+torque(scrollVelocity*4,10)}deg) scale(${.72+.28*Math.exp(-2*d*d)})`;
         icons[i].style.setProperty('--light-angle',`${135-d*40}deg`);
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
@@ -151,7 +150,7 @@ export default function ProjectWheels({
         const d=reelOffset(i,frame.currentScroll,projects.length),w=Math.exp(-8*d*d);
         if(w<.001)return;
         const cube=icon.querySelector<HTMLElement>('[data-orbit-cube]');if(!cube)return;
-        const box=cube.getBoundingClientRect();weight+=w;x+=(box.left+box.width/2)*w;y+=(box.bottom+22)*w;
+        const box=cube.getBoundingClientRect();weight+=w;x+=(box.left+box.width/2)*w;y+=(box.bottom+(mobile?22:Math.max(12,innerWidth*.052-box.height/2)))*w;
       });
       if(!weight)return;x/=weight;y/=weight;
       const key=`${x.toFixed(2)},${y.toFixed(2)}`;
@@ -218,7 +217,7 @@ export default function ProjectWheels({
       <div className="software-wheel" aria-label={`Creative tools for ${projects[index].shortTitle}`}>
         {projects.map((project, i) => (
           <div key={project.id} className="software-position" data-software={i} aria-hidden={i !== index}>
-            <SoftwareTile software={project.software} tools={project.tools} />
+            <SoftwareCube3D tool={project.tools[0]} />
           </div>
         ))}
         <div className="tool-caption">
