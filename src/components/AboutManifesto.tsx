@@ -23,6 +23,8 @@ export default function AboutManifesto({engine}:{engine:ScrollPhysics}){
    const scroll=engine.read().storyScrollY,top=height-scroll+paragraphY;
    const p=motion.matches?1:clamp01((height*.82-top)/Math.max(1,paragraphHeight));
    const pathTop=height-scroll+trailY;
+   // Clip the document-flow trail below the fixed brand HUD, including its marker.
+   svg.style.clipPath=`inset(${Math.max(0,84-pathTop)}px 0 0 0)`;
    const draw=motion.matches?1:clamp01((height*.82-pathTop)/Math.max(1,trailHeight));
    const key=`${p.toFixed(5)}:${draw.toFixed(5)}:${theme.current}`;if(key===previous)return;previous=key;
    words.forEach((word,i)=>word.style.color=wordRevealColor(i,words.length,p,theme.current==='light'));
@@ -39,12 +41,12 @@ export default function AboutManifesto({engine}:{engine:ScrollPhysics}){
    height=innerHeight;const origin=story.getBoundingClientRect().top,p=paragraph.getBoundingClientRect(),t=trail.getBoundingClientRect();
    paragraphY=p.top-origin;paragraphHeight=p.height;trailY=t.top-origin;
    const a=anchor.getBoundingClientRect(),lastWord=words[words.length-1].getBoundingClientRect();
-   const scale=600/Math.max(1,t.width),endX=(a.right-t.left)*scale,endY=(a.top+a.height/2-t.top)*scale;
+   const scale=600/Math.max(1,t.width),endX=(a.left+a.width/2-t.left)*scale,endY=(a.top+a.height/2-t.top)*scale;
    trailHeight=Math.max(1,a.top+a.height/2-t.top);
    const startX=Math.max(20,Math.min(580,(lastWord.left+lastWord.width/2-t.left)*scale));
    const h=Math.max(360,endY),y1=h*.2,y2=h*.43,y3=h*.65;
    svg.setAttribute('viewBox',`0 0 600 ${h+8}`);svg.style.height=`${(h+8)/scale}px`;
-   path.setAttribute('d',`M${startX} 0 C${startX} ${y1*.4} 490 ${y1*.25} 490 ${y1} C490 ${y1+h*.17} 100 ${y2-h*.15} 100 ${y2} C100 ${y2+h*.18} 490 ${y3-h*.15} 490 ${y3} C490 ${h*.85} ${endX-80} ${endY} ${endX-40} ${endY} L${endX} ${endY}`);
+   path.setAttribute('d',`M${startX} 0 C${startX} ${y1*.4} 490 ${y1*.25} 490 ${y1} C490 ${y1+h*.17} 100 ${y2-h*.15} 100 ${y2} C100 ${y2+h*.18} 490 ${y3-h*.15} 490 ${y3} C490 ${h*.85} ${endX} ${endY-80} ${endX} ${endY-40} L${endX} ${endY}`);
    originDot.setAttribute('cx',String(startX));
    length=path.getTotalLength();path.style.strokeDasharray=String(length);
    labels.forEach((label,i)=>{const point=path.getPointAtLength(length*nodes[i].at);label.setAttribute('transform',`translate(${point.x} ${point.y})`);});
