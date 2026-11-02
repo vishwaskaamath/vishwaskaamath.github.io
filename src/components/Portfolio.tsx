@@ -60,7 +60,7 @@ export default function Portfolio() {
     loading || expanded || !!cinema,
     reducedMotion,
   );
-  const { playing, toggle } = useAmbientAudio();
+  const { playing, toggle, audio } = useAmbientAudio(expanded || !!cinema);
   const openCinema=(requested=engine.read().index,push=true)=>{
     if(cinemaRef.current||loading)return;
     if(requested!==engine.read().index){engine.select(requested,performance.now());engine.advance(performance.now(),true);}
@@ -70,7 +70,6 @@ export default function Portfolio() {
     const rect=box&&box.width>0&&box.height>0?{left:box.left,top:box.top,width:box.width,height:box.height}:{left:innerWidth*.045,top:innerHeight*.25,width:innerWidth*.295,height:innerWidth*.185};
     const next={project:projects[requested],rect,time:preview?.currentTime||0,closing:false};
     preview?.pause();if(preview)preview.muted=true;
-    if(playing)toggle();
     setExpanded(false);cinemaRef.current=next;setCinema(next);
     if(push)history.pushState({view:'work',project:next.project.id,cinema:true},'',`/?project=${next.project.slug}`);
   };
@@ -128,7 +127,7 @@ export default function Portfolio() {
     >
       <WavyBackground engine={engine} dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded || !!cinema} />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
-      <GlassHeader engine={engine} playing={playing} onAudio={toggle} light={isLightMode} onTheme={toggleTheme} onStory={()=>{collapse();window.dispatchEvent(new Event("portfolio:story"));}}/>
+      <GlassHeader engine={engine} playing={playing} onAudio={toggle} light={isLightMode} onTheme={toggleTheme} audio={audio}/>
       <div className="work-scene" data-active="true">
       <ProjectWheels
         dragRef={dragRef}
@@ -139,7 +138,7 @@ export default function Portfolio() {
         paused={(!expanded && reducedMotion) || loading || !!cinema}
         expanded={expanded}
         onCollapse={collapse}
-        onExpand={() => { if (playing) toggle(); setExpanded(true); }}
+        onExpand={() => setExpanded(true)}
       />
       <ProjectMetadata
         onView={()=>openCinema()}
@@ -152,30 +151,6 @@ export default function Portfolio() {
       </div>
       <StoryNavigation engine={engine}/>
       <StoryStage engine={engine}/>
-      <footer className="hud-footer">
-        <button
-          className={`audio-player ${playing ? "is-playing" : ""}`}
-          onClick={toggle}
-          aria-label={playing ? "Pause ambient track" : "Play ambient track"}
-        >
-          <span className="record">
-            <span />
-          </span>
-          <span className="audio-track">
-            <b className="track-name"><WarpedText>Unrequited</WarpedText></b>
-            <span><WarpedText>{`ORIGINAL AMBIENT · ${playing ? "PLAYING" : "SOUND OFF"}`}</WarpedText></span>
-          </span>
-          <span className="equalizer" aria-hidden="true">
-            
-            {[0, 1, 2, 3, 4].map((i) => (
-              <i key={i} style={{ animationDelay: `${i * 0.18}s` }} />
-            ))}
-          </span>
-          <span className="player-control">
-            {playing ? <Pause size={12} /> : <Play size={12} />}
-          </span>
-        </button>
-      </footer>
       {loading && <LoadingScreen onComplete={loaded} />}
       <RibbonCursor dragRef={dragRef} reducedMotion={reducedMotion} layerKey="continuous" />
     </main>
