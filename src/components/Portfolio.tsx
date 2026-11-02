@@ -126,7 +126,7 @@ export default function Portfolio() {
       data-view="continuous"
       onClick={(event) => { if (expanded && !(event.target as Element).closest("button,a,.video-card,.software-position,.project-metadata,dialog")) collapse(); }}
     >
-      <WavyBackground dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded || !!cinema} />
+      <WavyBackground engine={engine} dragRef={dragRef} reducedMotion={reducedMotion} paused={loading || expanded || !!cinema} />
       <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />
       <GlassHeader engine={engine} playing={playing} onAudio={toggle} light={isLightMode} onTheme={toggleTheme} onStory={()=>{collapse();window.dispatchEvent(new Event("portfolio:story"));}}/>
       <div className="work-scene" data-active="true">

@@ -1,92 +1,56 @@
-import type { ContourPulse } from './contourPulse';
-/** Static ribbon meshes: only time uniforms change per frame; DPR remains 1. */
-export function createWaveRenderer(canvas: HTMLCanvasElement) {
-  const gl=canvas.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,powerPreference:'high-performance'});
-  if(!gl)return null;
-  const vertex=`
-precision highp float;
-attribute vec4 aPoint;
-uniform vec2 uSize;
-uniform float uTime;
-uniform float uSilk;
-varying float vEdge;
-varying float vAlpha;
-varying vec2 vPosition;
-float heightAt(float x,float row){
- if(uSilk<0.5) return row+sin(x*.0025+row*.006+uTime*.4)*55.0+cos(x*.006-row*.004+uTime*.25)*28.0+sin((x+row)*.004+uTime*.3)*18.0;
- float phase=row*.065;
- return uSize.y*.5+sin(x*.0022+uTime*.35)*110.0-(x-uSize.x*.5)*.12
- +sin(x*.0045-uTime*.5+phase)*95.0*sin(x*.0018+phase*.5)+cos(x*.008+uTime*.3-phase*1.2)*35.0;
-}
-void main(){
- float x=aPoint.x,y=heightAt(x,aPoint.y);
- float slope=heightAt(x+1.0,aPoint.y)-y;
- vec2 normal=normalize(vec2(-slope,1.0));
- float halfWidth=mix(1.75,.35,uSilk);
- vec2 p=vec2(x,y)+normal*aPoint.z*(halfWidth+1.0);
- vPosition=p;
- gl_Position=vec4(p/uSize*vec2(2.0,-2.0)+vec2(-1.0,1.0),0,1);
- vEdge=aPoint.z*(halfWidth+1.0);
- vAlpha=mix(.35+(cos(x*.006-aPoint.y*.004+uTime*.25)+1.0)*.25,.028,uSilk);
-}`;
-  const fragment=`precision highp float;
-uniform float uSilk;varying float vEdge;varying float vAlpha;varying vec2 vPosition;
-uniform vec4 uPulse[5];
-uniform float uLight;
-void main(){
- float halfWidth=mix(1.75,.35,uSilk);
- float cover=1.0-smoothstep(max(0.0,halfWidth-.5),halfWidth+.5,abs(vEdge));
- vec3 base=mix(vec3(19.0/255.0),vec3(190.0,200.0,215.0)/255.0,uSilk);
- float light=0.0;
- for(int i=0;i<5;i++){
-  vec4 p=uPulse[i];
-  if(p.w<=0.0)continue;
-  float band=abs(length(vPosition-p.xy)-p.z)/70.0;
-  light+=.16*p.w*(1.0-smoothstep(0.0,1.0,band));
+import type {ContourPulse} from './contourPulse';
+export type RibbonDynamics={mouseX:number;mouseY:number;energy:number};
+type Point={x:number;y:number};
+/** One silk band, fourteen contours. No full-screen ridge mesh or WebGL fallback. */
+export function createWaveRenderer(canvas:HTMLCanvasElement){
+ const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});if(!ctx)return null;
+ const backdrop=document.createElement('canvas'),shade=document.createElement('canvas'),torch=document.createElement('canvas');
+ const bg=backdrop.getContext('2d')!,edge=shade.getContext('2d')!,lamp=torch.getContext('2d')!;
+ let width=1,height=1,lastLight:boolean|null=null;
+ const xs=[.04,.345,.655,.96],ys=[.12,.5,.88];
+ function prepare(light:boolean){
+  lastLight=light;backdrop.width=shade.width=width;backdrop.height=shade.height=height;
+  bg.fillStyle=light?'#f6f6f4':'#09090b';bg.fillRect(0,0,width,height);
+  bg.save();bg.translate(width*.5,height*.5);bg.scale(width*.45,height*.32);
+  const warmth=bg.createRadialGradient(0,0,0,0,0,1);warmth.addColorStop(0,'rgba(255,77,28,0.08)');warmth.addColorStop(.75,'rgba(255,77,28,0)');bg.fillStyle=warmth;bg.fillRect(-1,-1,2,2);bg.restore();
+  bg.lineWidth=1;bg.strokeStyle=light?'rgba(17,17,19,0.055)':'rgba(243,239,230,0.035)';bg.beginPath();
+  xs.forEach(x=>{bg.moveTo(Math.round(x*width)+.5,0);bg.lineTo(Math.round(x*width)+.5,height);});
+  ys.forEach(y=>{bg.moveTo(0,Math.round(y*height)+.5);bg.lineTo(width,Math.round(y*height)+.5);});bg.stroke();
+  const vignette=edge.createRadialGradient(width*.5,height*.5,0,width*.5,height*.5,Math.hypot(width,height)*.5);
+  vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(.55,'rgba(0,0,0,0)');vignette.addColorStop(1,light?'rgba(65,48,35,.1)':'rgba(0,0,0,.65)');edge.fillStyle=vignette;edge.fillRect(0,0,width,height);
+  torch.width=torch.height=700;const glow=lamp.createRadialGradient(350,350,0,350,350,350);glow.addColorStop(0,light?'rgba(55,45,35,.035)':'rgba(243,239,230,.045)');glow.addColorStop(.8,'rgba(243,239,230,0)');lamp.fillStyle=glow;lamp.fillRect(0,0,700,700);
  }
- // Add illumination only where the existing contour geometry is drawn.
- if(uLight>0.5){
-  float opacity=mix(.04+(vAlpha-.35)*.2,.045,uSilk);
-  vec3 ink=mix(vec3(20.,20.,24.),vec3(12.,12.,15.),uSilk)/255.;
-  vec3 tint=mix(vec3(1.),ink,opacity*cover);
-  tint*=mix(vec3(1.),vec3(15.,15.,20.)/255.,light*cover);
-  gl_FragColor=vec4(tint,1.);
- }else gl_FragColor=vec4((base*vAlpha+vec3(.82,.86,.92)*light)*cover,1.0);
-}`;
-  const shaders:WebGLShader[]=[];
-  const compile=(type:number,source:string)=>{const s=gl.createShader(type)!;shaders.push(s);gl.shaderSource(s,source);gl.compileShader(s);return s;};
-  const program=gl.createProgram()!,buffer=gl.createBuffer()!;
-  gl.attachShader(program,compile(gl.VERTEX_SHADER,vertex));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);
-  const dispose=()=>{gl.deleteBuffer(buffer);gl.deleteProgram(program);shaders.forEach(s=>gl.deleteShader(s));};
-  if(!gl.getProgramParameter(program,gl.LINK_STATUS)){console.warn('Wave shader unavailable:', gl.getProgramInfoLog(program), ...shaders.map(s=>gl.getShaderInfoLog(s)));dispose();return null;}
-  gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-  const attr=gl.getAttribLocation(program,'aPoint');gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,4,gl.FLOAT,false,0,0);
-  const size=gl.getUniformLocation(program,'uSize'),time=gl.getUniformLocation(program,'uTime'),silk=gl.getUniformLocation(program,'uSilk');
-  gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);
-  const lightUniform=gl.getUniformLocation(program,'uLight');
-  const pulseUniform=gl.getUniformLocation(program,'uPulse[0]');
-  const pulseData=new Float32Array(20);
-  let ridges=0,total=0;
-  const resize=(width:number,height:number)=>{
-    canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height);gl.uniform2f(size,width,height);
-    const vertices:number[]=[];
-    const line=(row:number)=>{for(let x=0;x<width;x+=28){const end=Math.min(width,x+28);for(const [px,side] of [[x,-1],[end,-1],[x,1],[x,1],[end,-1],[end,1]])vertices.push(px,row,side,0);}};
-    for(let row=-108;row<=height+108;row+=12)line(row);
-    ridges=vertices.length/4;
-    for(let i=0;i<75;i++)line(i);
-    total=vertices.length/4;gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
-  };
-  const draw=(elapsed:number,pulses:ContourPulse[]=[],light=false)=>{
-    pulseData.fill(0);
-    pulses.slice(0,5).forEach((p,i)=>pulseData.set([p.x,p.y,p.radius,p.alpha],i*4));
-    gl.uniform4fv(pulseUniform,pulseData);
-    gl.uniform1f(lightUniform,light?1:0);
-    gl.blendFunc(light?gl.DST_COLOR:gl.ONE,light?gl.ZERO:gl.ONE);
-    gl.clearColor(light?246/255:6/255,light?246/255:6/255,light?244/255:6/255,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(time,elapsed);gl.uniform1f(silk,0);
-    // Four contiguous ridge batches and one translucent filament batch.
-    const group=Math.floor(ridges/24)*6;
-    for(let i=0;i<4;i++){const start=i*group;gl.drawArrays(gl.TRIANGLES,start,i===3?ridges-start:group);}
-    gl.uniform1f(silk,1);gl.drawArrays(gl.TRIANGLES,ridges,total-ridges);
-  };
-  return {resize,draw,dispose};
+ const resize=(w:number,h:number)=>{width=Math.max(1,Math.round(w));height=Math.max(1,Math.round(h));canvas.width=width;canvas.height=height;lastLight=null;};
+ // Midpoint quadratics prevent angular joins even when sampled economically.
+ const trace=(path:Path2D,points:Point[],move=true)=>{if(move)path.moveTo(points[0].x,points[0].y);else path.lineTo(points[0].x,points[0].y);for(let i=1;i<points.length-1;i++)path.quadraticCurveTo(points[i].x,points[i].y,(points[i].x+points[i+1].x)/2,(points[i].y+points[i+1].y)/2);const p=points.at(-1)!;path.lineTo(p.x,p.y);};
+ const draw=(time:number,pulses:ContourPulse[]=[],light=false,dynamics:RibbonDynamics={mouseX:width*.5,mouseY:height*.5,energy:0})=>{
+  if(lastLight!==light)prepare(light);
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.drawImage(backdrop,0,0);ctx.drawImage(torch,dynamics.mouseX-350,dynamics.mouseY-350);
+  const parallax=(dynamics.mouseY/height-.5)*22,energy=Math.min(3,Math.abs(dynamics.energy));
+  const amplitude=Math.min(100,height*.11)*(1+energy*.12),halfWidth=Math.min(70,height*.075);
+  const curves:Point[][]=[];const mesh=new Path2D();
+  for(let i=0;i<14;i++){
+   const v=i/13*2-1,points:Point[]=[];
+   for(let x=-24;x<=width+24;x+=16){
+    const u=x/width,twist=u*Math.PI*3.4-time*.52;
+    const spine=height*.5+Math.sin(u*Math.PI*2.1+time*.37)*amplitude+Math.sin(u*Math.PI*3.8-time*.21)*amplitude*.25+parallax;
+    const spread=Math.sin(twist)*halfWidth;
+    // The entire ribbon rotates about its spine; contour count stays sparse at pinch points.
+    points.push({x,y:spine+v*spread+Math.cos(twist)*Math.sin(v*Math.PI)*halfWidth*.19});
+   }
+   curves.push(points);trace(mesh,points);
+  }
+  const band=new Path2D();trace(band,curves[0]);trace(band,[...curves[13]].reverse(),false);band.closePath();ctx.fillStyle='rgba(255,77,28,.12)';ctx.fill(band);
+  ctx.lineWidth=1;ctx.lineCap='round';ctx.lineJoin='round';
+  curves.forEach((points,i)=>{
+   const path=new Path2D();trace(path,points);
+   const gradient=ctx.createLinearGradient(0,height*.38,width,height*.62);
+   gradient.addColorStop(0,'rgba(165,38,10,.35)');gradient.addColorStop(.26,'rgba(255,77,28,.75)');gradient.addColorStop(.52,i>10?'rgba(255,140,95,.9)':'rgba(255,77,28,.55)');gradient.addColorStop(.72,'rgba(165,38,10,.35)');gradient.addColorStop(1,'rgba(255,77,28,.65)');ctx.strokeStyle=gradient;ctx.stroke(path);
+  });
+  ctx.globalCompositeOperation=light?'multiply':'lighter';
+  for(const p of pulses){const inner=Math.max(0,p.radius-70),outer=p.radius+70,g=ctx.createRadialGradient(p.x,p.y,inner,p.x,p.y,outer);g.addColorStop(0,'rgba(255,140,95,0)');g.addColorStop(Math.max(.001,(p.radius-inner)/(outer-inner)),`rgba(255,140,95,${.16*p.alpha})`);g.addColorStop(1,'rgba(255,140,95,0)');ctx.strokeStyle=g;ctx.stroke(mesh);}
+  ctx.globalCompositeOperation='source-over';ctx.drawImage(shade,0,0);
+  for(const x of xs)for(const y of ys){const px=x*width,py=y*height,near=Math.max(0,1-Math.hypot(px-dynamics.mouseX,py-dynamics.mouseY)/180);ctx.strokeStyle=near>0?`rgba(255,77,28,${.16+.64*near})`:light?'rgba(17,17,19,.16)':'rgba(243,239,230,.16)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px-3.5,py);ctx.lineTo(px+3.5,py);ctx.moveTo(px,py-3.5);ctx.lineTo(px,py+3.5);ctx.stroke();}
+ };
+ return {resize,draw,dispose:()=>{backdrop.width=shade.width=torch.width=1;}};
 }
