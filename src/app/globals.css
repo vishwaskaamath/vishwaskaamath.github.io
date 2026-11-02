@@ -1933,3 +1933,11 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 @media(prefers-reduced-motion:reduce) { .discipline-title-track,.copy-orbit i { animation:none!important; }.hardware-tool,.experience-line strong { transition:none; } }
 
 @media(min-width:760px) { .story-portal { left:50vw; } }
+
+/* Wheel motion is owned exclusively by the master spring ticker. */
+.video-card,.software-position,.tool-caption-slot { transition:none !important; will-change:transform,opacity; }
+@media(min-width:760px){
+ .video-wheel { perspective:1200px; perspective-origin:50% 0; transform-style:preserve-3d; }
+ .software-wheel { perspective:1100px; perspective-origin:0 0; transform-style:preserve-3d; }
+}
+.software-cube .software-tile { background:linear-gradient(var(--light-angle,145deg),#1a1a1a,#080808); }
