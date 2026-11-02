@@ -102,7 +102,7 @@ export default function ProjectWheels({
         cards[i].style.visibility = visible ? "visible" : "hidden";
         cards[i].style.zIndex = `${Math.round(10 - distance * 3 + (isActive?p*30:0))}`;
         const iconFade = mobile ? Math.max(0, 1 - distance) : Math.max(0, distance <= 1 ? 1 - distance * 0.67 : 0.33 * (2 - distance));
-        icons[i].style.transform = `translate3d(${mobile ? d * 90 : distance * width * 0.055-(isActive?0:p*width*.10)}px, ${mobile ? 0 : d * gap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 22)}deg) rotateY(${-12 * (1 - blend) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
+        icons[i].style.transform = `translate3d(${mobile ? d * 90 : (1 - Math.cos(Math.min(distance, 2) * Math.PI / 2)) * width * 0.15-(isActive?0:p*width*.10)}px, ${mobile ? 0 : d * gap}px, 0) translate(-50%, -50%) rotate(${d * (mobile ? 15 : 22)}deg) rotateY(${-12 * (1 - blend) + d * 9 * blend}deg) scale(${1 - blend * 0.24})`;
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
         captions[i].style.transform = `translate3d(0, ${d * 100}%, 0)`;
