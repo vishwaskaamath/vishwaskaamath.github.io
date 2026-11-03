@@ -6,7 +6,7 @@ import { damp, subscribeTicker } from "@/lib/masterTicker";
 import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
-import SoftwareCube3D from "./SoftwareCube3D";
+import SoftwareTile from "./SoftwareTile";
 import WarpedText from "./WarpedText";
 import VideoBezel from "./VideoBezel";
 
@@ -215,7 +215,7 @@ export default function ProjectWheels({
       <div className="software-wheel" aria-label={`Creative tools for ${projects[index].shortTitle}`}>
         {projects.map((project, i) => (
           <div key={project.id} className="software-position" data-software={i} aria-hidden={i !== index}>
-            <SoftwareCube3D tool={project.tools[0]} />
+            <SoftwareTile software={project.tools[0].id} tools={project.tools} />
           </div>
         ))}
         <div className="tool-caption">

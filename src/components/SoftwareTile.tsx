@@ -1,70 +1,13 @@
 "use client";
-import { cachedBox,observeGeometry,geometryRevision } from "@/lib/geometryCache";
-import { getFrameDt } from "@/lib/masterTicker";
-import { useEffect, useRef } from 'react';
-import { toolCatalog, type Software, type Tool } from '@/data/projects';
-import { damp, subscribeProximity } from '@/lib/proximity';
+import {useEffect,useRef} from 'react';
+import {toolCatalog,type Software,type Tool} from '@/data/projects';
+import {subscribeTicker,damp} from '@/lib/masterTicker';
 import SoftwareCube3D from './SoftwareCube3D';
-
-export default function SoftwareTile({software, tools = [toolCatalog[software]]}: {software: Software; tools?: Tool[]}) {
-  const root = useRef<HTMLDivElement>(null);
-  const motion = useRef({x:0,y:0,glow:0,angle:.35,velocity:0});
-  useEffect(()=>{
-    const stage=root.current!;
-    const releaseGeometry=observeGeometry(stage);
-    const card=stage.closest<HTMLElement>('[data-software]')!;
-    const cubes=Array.from(stage.querySelectorAll<HTMLElement>('[data-orbit-cube]'));
-    const probes=Array.from(stage.querySelectorAll<HTMLElement>('.software-probe'));
-    const s=motion.current;
-    let w=stage.offsetWidth,h=stage.offsetHeight,last=0;
-    const render=()=>{
-      const unit=w/320,multiple=cubes.length>1;
-      cubes.forEach((cube,i)=>{
-        const angle=s.angle+i*2*Math.PI/cubes.length;
-        const depth=multiple?(Math.cos(angle)+1)/2:1;
-        const x=multiple?Math.sin(angle)*68*unit:0;
-        const y=multiple?-Math.sin(angle)*16*unit:0;
-        const z=multiple?Math.cos(angle)*75*unit:0;
-        cube.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateX(${-s.y*24}deg) rotateY(${s.x*24+(multiple?Math.sin(angle)*-15:0)}deg) scale(${.68+depth*.32})`;
-        cube.style.zIndex=String(Math.round(depth*100));
-        cube.style.filter=`brightness(${.45+depth*.55}) blur(${(1-depth)*1.5}px)`;
-        cube.style.opacity=String(.4+depth*.6);
-        cube.style.setProperty('--tile-light',String(s.glow));
-        cube.style.setProperty('--light-x',`${(s.x+.5)*100}%`);
-        cube.style.setProperty('--light-y',`${(s.y+.5)*100}%`);
-      });
-    };
-    render();
-    const resize=new ResizeObserver(()=>{w=stage.offsetWidth;h=stage.offsetHeight;render();});resize.observe(stage);
-    const unsubscribe=subscribeProximity(pointer=>{
-      const active=pointer.enabled && !stage.closest('[inert]') && card.getAttribute('aria-hidden')==='false';
-      if(!active && s.x===0 && s.y===0 && s.glow===0 && s.angle===.35)return;
-      const [o,a,b]=probes.map(p=>cachedBox(p));
-      const ax=(a.x-o.x)/w,ay=(a.y-o.y)/w,bx=(b.x-o.x)/h,by=(b.y-o.y)/h;
-      const det=ax*by-ay*bx;if(Math.abs(det)<.001)return;
-      const px=pointer.x-o.x,py=pointer.y-o.y;
-      const x=(px*by-py*bx)/det,y=(py*ax-px*ay)/det;
-      const hover=active && x>=0 && x<=w && y>=0 && y<=h;
-      const nx=hover?Math.max(-.5,Math.min(.5,x/w-.5)):0,ny=hover?Math.max(-.5,Math.min(.5,y/h-.5)):0;
-      return ()=>{
-        const now=performance.now(),dt=getFrameDt()*60;last=now;
-        s.x=damp(s.x,nx,.12);s.y=damp(s.y,ny,.12);s.glow=damp(s.glow,hover?1:0,.12);
-        const orbiting=hover && cubes.length>1;
-        if(orbiting){s.velocity=damp(s.velocity,.025,.12);s.angle+=s.velocity*dt;}
-        else {
-          s.velocity=0;
-          const target=Math.round(s.angle/(Math.PI*2))*Math.PI*2+.35;
-          s.angle=damp(s.angle,target,.09);
-          if(s.angle===target)s.angle=.35;
-        }
-        render();stage.dataset.hover=String(hover);
-        return orbiting || s.angle!==.35 || Math.abs(s.x-nx)>.001 || Math.abs(s.y-ny)>.001 || Math.abs(s.glow-(hover?1:0))>.001;
-      };
-    });
-    return ()=>{releaseGeometry();unsubscribe();resize.disconnect();};
-  },[tools]);
-  return <div ref={root} className="software-orbit-stage">
-    {tools.map(tool=><SoftwareCube3D key={tool.id} tool={tool}/>)}
-    <i className="software-probe probe-origin"/><i className="software-probe probe-x"/><i className="software-probe probe-y"/>
-  </div>;
+export default function SoftwareTile({software,tools=[toolCatalog[software]]}:{software:Software;tools?:Tool[]}){
+ const root=useRef<HTMLDivElement>(null);
+ useEffect(()=>{const el=root.current!,cubes=Array.from(el.querySelectorAll<HTMLElement>('[data-orbit-cube]'));let hover=false,nx=0,ny=0,tx=0,ty=0,angle=0,mix=0;const poses=cubes.map((_,i)=>({x:i?26:-12,y:i?20:-8,z:i?-28:24,ry:i?-16:-12,rx:i?8:6,rz:i?9:-4,s:i?.86:1}));
+ const move=(e:PointerEvent)=>{const r=el.getBoundingClientRect();hover=el.closest('[data-software]')?.getAttribute('aria-hidden')==='false';nx=Math.max(-1,Math.min(1,(e.clientX-r.left)/r.width*2-1));ny=Math.max(-1,Math.min(1,(e.clientY-r.top)/r.height*2-1));};const leave=()=>{hover=false;};el.addEventListener('pointermove',move);el.addEventListener('pointerleave',leave);
+ const stop=subscribeTicker((now,dt)=>{if(document.hidden)return;const active=el.closest('[data-software]')?.getAttribute('aria-hidden')==='false';hover=hover&&active;const multi=cubes.length>1;mix=damp(mix,hover?1:0,9,dt);tx=damp(tx,hover?-ny*16:0,10,dt);ty=damp(ty,hover?nx*16:0,10,dt);if(hover)angle+=dt*2.6;
+ cubes.forEach((cube,k)=>{const a=angle+k*Math.PI*2/cubes.length,rest=poses[k],blend=(idle:number,moving:number)=>idle+(moving-idle)*mix;const x=multi?blend(rest.x,Math.cos(a)*34):0,y=multi?blend(rest.y,Math.sin(a)*18):0,z=multi?blend(rest.z,Math.sin(a)*45):0,ry=multi?blend(rest.ry,Math.cos(a)*22):0,rz=multi?blend(rest.rz,Math.cos(a)*8):0,scale=multi?blend(rest.s,.86+(Math.sin(a)+1)*.09):1;cube.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateX(${tx+(multi?rest.rx*(1-mix):0)}deg) rotateY(${ty+ry}deg) rotateZ(${rz}deg) scale(${scale})`;cube.style.zIndex=String(Math.round(50+z));cube.style.setProperty('--tile-light',String(mix));cube.style.setProperty('--light-x',`${50+nx*50}%`);cube.style.setProperty('--light-y',`${50+ny*50}%`);});});return()=>{stop();el.removeEventListener('pointermove',move);el.removeEventListener('pointerleave',leave);};},[tools]);
+ return <div ref={root} className="software-orbit-stage">{tools.map(tool=><SoftwareCube3D key={tool.id} tool={tool}/>)}</div>;
 }
