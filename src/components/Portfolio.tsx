@@ -31,10 +31,11 @@ import LoadingScreen from "./LoadingScreen";
 export default function Portfolio() {
   const [isLightMode, setIsLightMode] = useState(false);
   const themeRef = useRef<Theme>('dark');
-  const paperIndex=useRef(0);
   const toggleTheme = () => {
-    paperIndex.current=(paperIndex.current+1)%3;
-    document.documentElement.dataset.paper=['indigo','sage','clay'][paperIndex.current];
+    const next = themeRef.current !== 'light';
+    themeRef.current = next ? 'light' : 'dark';
+    document.documentElement.dataset.theme = themeRef.current;
+    setIsLightMode(next);
     window.dispatchEvent(new Event(THEME_EVENT));
   };
   const [cinema,setCinema]=useState<CinemaSession|null>(null);
