@@ -2021,3 +2021,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
  .toolkit-viewport .micro-label { font-size:.69575rem; }
  .toolkit-viewport .tool-caption-slot>span:last-child { font-size:.9108rem; }
 }
+
+/* Persistent living backdrop remains visible through story chapters. */
+.story-stage,.story-intro,.story-workflow,.story-capabilities,.story-contact,
+[data-theme="light"] .story-intro,[data-theme="light"] .story-workflow { background:transparent; }

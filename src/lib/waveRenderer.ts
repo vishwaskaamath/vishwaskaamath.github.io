@@ -1,5 +1,5 @@
 import type {ContourPulse} from './contourPulse';
-export type RibbonDynamics={mouseX:number;mouseY:number;energy:number;palette?:readonly string[];dt?:number;velocity?:number;label?:string};
+export type RibbonDynamics={mouseX:number;mouseY:number;energy:number;palette?:readonly string[];dt?:number;velocity?:number;label?:string;storyProgress?:number;ribbonAlpha?:number;story?:boolean};
 const rgb=(hex:string)=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
 /** Soft volumetric field, without contour lines, mesh strokes, or per-frame blur filters. */
 export function createWaveRenderer(canvas:HTMLCanvasElement){
@@ -14,7 +14,7 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
  const draw=(time:number,_pulses:ContourPulse[]=[],light=false,d:RibbonDynamics={mouseX:width/2,mouseY:height/2,energy:0})=>{
   const dt=d.dt??1/60,k=1-Math.exp(-2.4*dt),palette=d.palette??['#8B5CF6','#10B981','#00B8C9'];
   colors=colors.map((c,i)=>c.map((v,j)=>v+(rgb(palette[i])[j]-v)*k));
-  ctx.globalCompositeOperation='source-over';ctx.fillStyle=light?'#f6f6f4':'#08080b';ctx.fillRect(0,0,width,height);
+  ctx.globalCompositeOperation='source-over';ctx.fillStyle=light?'#F3EFE6':'#08080b';ctx.fillRect(0,0,width,height);
   f.clearRect(0,0,fog.width,fog.height);f.globalCompositeOperation='screen';
   const energy=Math.min(3,d.energy),mx=d.mouseX/width-.5,my=d.mouseY/height-.5;
   for(let i=0;i<2;i++){
@@ -29,7 +29,7 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
   const torch=ctx.createRadialGradient(d.mouseX,d.mouseY,0,d.mouseX,d.mouseY,550);torch.addColorStop(0,light?'rgba(90,75,65,.025)':'rgba(243,239,230,.055)');torch.addColorStop(1,'transparent');ctx.fillStyle=torch;ctx.fillRect(0,0,width,height);ctx.globalCompositeOperation='source-over';
   const movingTime=Math.max(0,time-lastTime);lastTime=time;
   const velocity=d.velocity??0,ink=light?'17,17,19':'243,239,230';
-  ctx.save();ctx.font=`${width*.28}px "Bebas Neue",sans-serif`;ctx.lineWidth=1;ctx.strokeStyle=`rgba(${ink},.028)`;ctx.strokeText(d.label??'01 // MOTION',-d.mouseX*.04+Math.sin(time*.08)*35,height*.34+Math.sin(time*.12)*12);ctx.restore();
+  ctx.save();ctx.globalAlpha=d.story?0:1;ctx.font=`${width*.28}px "Bebas Neue",sans-serif`;ctx.lineWidth=1;ctx.strokeStyle=`rgba(${ink},.028)`;ctx.strokeText(d.label??'01 // MOTION',-d.mouseX*.04+Math.sin(time*.08)*35,height*.34+Math.sin(time*.12)*12);ctx.restore();
   for(let col=0;col<22;col++)for(let row=0;row<12;row++){
    const x=(col+.5)*width/22,y=(row+.5)*height/12,id=col*12+row,target=Math.atan2(d.mouseY-y,d.mouseX-x)+velocity*.4,old=angles.get(id)??target;
    const angle=old+Math.atan2(Math.sin(target-old),Math.cos(target-old))*(1-Math.exp(-6*dt));angles.set(id,angle);
@@ -42,12 +42,13 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
   const cursorLerp=1-Math.pow(.88,dt*60);
   ribbonMouseX+=(d.mouseX-ribbonMouseX)*cursorLerp;ribbonMouseY+=(d.mouseY-ribbonMouseY)*cursorLerp;
   ctx.shadowBlur=0;ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.save();ctx.globalAlpha=d.ribbonAlpha??1;
   const paths:Path2D[]=[];
   for(let i=0;i<15;i++){
    const points:{x:number;y:number}[]=[],v=i/14*2-1;
    for(let j=0;j<=90;j++){
     const x=j*width/90,u=x/width,twist=u*Math.PI*(3.4+energy*.25)-time*.52;
-    const baseY=height*.5+Math.sin(u*Math.PI*2.1+time*.37)*Math.min(100,height*.11)*(1+energy*.18)+v*Math.sin(twist)*Math.min(70,height*.075);
+    const baseY=height*(.5-(d.storyProgress??0)*.18)+(d.story?( .5-u)*height*.18:0)+Math.sin(u*Math.PI*2.1+time*.37)*Math.min(100,height*.11)*(1+energy*.18)+v*Math.sin(twist)*Math.min(70,height*.075);
     const dx=x-ribbonMouseX,dy=baseY-ribbonMouseY;
     const gaussianX=Math.exp(-(dx*dx)/(2*165*165)),gaussianY=Math.exp(-(dy*dy)/(2*140*140));
     const bend=dy/Math.sqrt(dy*dy+3600)*gaussianX*gaussianY*48;
@@ -66,9 +67,9 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
    const g=ctx.createLinearGradient(pulseX-180,0,pulseX+30,0);
    g.addColorStop(0,'rgba(255,77,28,0)');g.addColorStop(.55,'rgba(255,110,60,.45)');g.addColorStop(.88,'rgba(255,225,200,.95)');g.addColorStop(1,'rgba(255,255,255,0)');
    ctx.strokeStyle=g;
-   for(const [line,alpha] of [[9,.07],[4.5,.22],[2.2,1]]){ctx.globalAlpha=alpha;ctx.lineWidth=line;ctx.stroke(paths[2+i*3]);}
+   for(const [line,alpha] of [[9,.07],[4.5,.22],[2.2,1]]){ctx.globalAlpha=alpha*(d.ribbonAlpha??1);ctx.lineWidth=line;ctx.stroke(paths[2+i*3]);}
   }
-  ctx.restore();
+  ctx.restore();ctx.restore();
   const vignette=ctx.createRadialGradient(width/2,height/2,Math.min(width,height)*.25,width/2,height/2,Math.hypot(width,height)*.55);vignette.addColorStop(0,'transparent');vignette.addColorStop(1,light?'rgba(30,25,20,.08)':'rgba(0,0,0,.65)');ctx.fillStyle=vignette;ctx.fillRect(0,0,width,height);
  };
  return {resize,draw,dispose:()=>{fog.width=1;}};
