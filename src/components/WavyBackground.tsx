@@ -47,7 +47,7 @@ export default function WavyBackground({reducedMotion,paused=false,dragRef,engin
    const shift=Math.sin(drift)*innerWidth*.045+(x/innerWidth-.5)*24;
    if(upper.current)upper.current.style.transform=`translate3d(${shift}px,0,0)`;if(lower.current)lower.current.style.transform=`translate3d(${-shift}px,0,0)`;
    const animate=!still&&!options.current.paused;
-   if(animate)phaseRef.current+=dt*(.36+energy*.65);
+   if(animate)phaseRef.current+=dt*.36;
    const pulsing=pulses.length>0;advancePulses(pulses,dt*1000);
    if(dirty||animate||moving||pulsing){draw();dirty=false;}
   });
