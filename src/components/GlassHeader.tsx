@@ -27,6 +27,6 @@ export default function GlassHeader({engine,playing,onAudio,light,onTheme,audio}
    <span className="music-progress" aria-hidden="true"><span ref={fill}/></span>
   </button>
   <output ref={progress} aria-label="Page scroll progress">00%</output>
-  <button className="hud-theme" onClick={onTheme} aria-label={light?'Switch to dark mode':'Switch to white mode'} aria-pressed={light}>{light?<Moon size={17}/>:<Sun size={17}/>}</button>
+  <button className="hud-theme" onClick={onTheme} aria-label="Cycle paper stock: indigo, sage, terracotta" aria-pressed={light}>{light?<Moon size={17}/>:<Sun size={17}/>}</button>
  </div></header>;
 }
