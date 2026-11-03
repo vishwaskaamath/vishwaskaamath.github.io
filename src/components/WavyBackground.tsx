@@ -17,7 +17,7 @@ export default function WavyBackground({reducedMotion,paused=false,dragRef,engin
   const pulses:ContourPulse[]=[],motion=matchMedia('(prefers-reduced-motion: reduce)');
   let mouseX=innerWidth*.5,mouseY=innerHeight*.5,x=mouseX,y=mouseY,energy=0,dirty=true;
   let pointerId=-1,lastY=0,distance=0,lastIndex=-1,drift=0,frameDt=1/60;
-  const draw=()=>renderer.draw(phaseRef.current,pulses,themeRef.current==='light',{mouseX:x,mouseY:y,energy,palette:projects[engine.read().index]?.accentPalette,dt:frameDt});
+  const draw=()=>renderer.draw(phaseRef.current,pulses,themeRef.current==='light',{mouseX:x,mouseY:y,energy,palette:projects[engine.read().index]?.accentPalette,dt:frameDt,velocity:engine.read().scrollVelocity,label:`${String(engine.read().index+1).padStart(2,'0')} // ${projects[engine.read().index].shortTitle.toUpperCase()}`});
   const resize=()=>{renderer.resize(innerWidth,innerHeight);dirty=true;draw();};
   const invalidate=()=>{dirty=true;};
   const unsubscribe=subscribeTicker((_now,dt)=>{
@@ -45,5 +45,5 @@ export default function WavyBackground({reducedMotion,paused=false,dragRef,engin
   window.addEventListener('resize',resize);window.addEventListener(THEME_EVENT,invalidate);window.addEventListener('portfolio-warmup',invalidate);document.addEventListener('visibilitychange',invalidate);motion.addEventListener('change',invalidate);resize();
   return()=>{unsubscribe();renderer.dispose();window.removeEventListener('pointerdown',down,true);window.removeEventListener('pointermove',move,true);window.removeEventListener('pointerup',up,true);window.removeEventListener('pointercancel',cancel,true);window.removeEventListener('resize',resize);window.removeEventListener(THEME_EVENT,invalidate);window.removeEventListener('portfolio-warmup',invalidate);document.removeEventListener('visibilitychange',invalidate);motion.removeEventListener('change',invalidate);};
  },[dragRef,engine,themeRef]);
- return <div className="wavy-background" aria-hidden="true" data-renderer="canvas2d"><canvas ref={canvasRef} className="wavy-canvas"/><div className="atmosphere-watermark upper" ref={upper}>01 // MOTION</div><div className="atmosphere-watermark lower" ref={lower}>01 // MOTION</div><div className="wavy-grain"/></div>;
+ return <div className="wavy-background" aria-hidden="true" data-renderer="canvas2d"><canvas ref={canvasRef} className="wavy-canvas"/><div className="wavy-grain"/></div>;
 }
