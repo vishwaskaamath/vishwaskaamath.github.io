@@ -1994,3 +1994,17 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 [data-theme="light"] .music-bars i { background:#11111366; }
 [data-theme="light"] .is-playing .music-bars i { background:#ff4d1c; }
 @media(prefers-reduced-motion:reduce) { .music-pill:not(.is-playing):hover .music-bars { animation:none; } }
+
+/* Atmospheric stage: all decoration stays within the existing background layer. */
+.atmosphere-watermark { position:absolute; z-index:1; pointer-events:none; font-family:'Bebas Neue',sans-serif; font-size:clamp(16rem,28vw,34rem); line-height:.8; letter-spacing:.02em; color:transparent; -webkit-text-stroke:1px rgba(243,239,230,.045); white-space:nowrap; user-select:none; will-change:transform; }
+.atmosphere-watermark.upper { top:14vh; left:-3vw; }
+.atmosphere-watermark.lower { bottom:12vh; right:-3vw; }
+[data-theme="light"] .atmosphere-watermark { -webkit-text-stroke-color:rgba(17,17,19,.065); }
+.wavy-grain { z-index:3; opacity:.04; inset:-6%; animation:stage-grain 1.2s steps(4) infinite; }
+@keyframes stage-grain { 0%,100%{transform:translate(0,0)} 25%{transform:translate(2%,-2%)} 50%{transform:translate(-2%,1%)} 75%{transform:translate(1%,2%)} }
+.story-portal { left:calc(50vw - .8vw); bottom:3.4vh; }
+.story-portal button,[data-theme="light"] .story-portal button { display:flex; align-items:center; gap:14px; padding:6px 7px 6px 18px; background:#F3EFE6; color:#0b0b0d; border:1px solid #f3efe6; font-weight:700; box-shadow:0 5px 24px #0003; }
+.story-portal button:hover,[data-theme="light"] .story-portal button:hover { background:#fffaf0; color:#0b0b0d; }
+.portal-arrow { display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:#ff4d1c; color:#0b0b0d; font-size:17px; animation:portal-bounce 1.8s ease-in-out infinite; }
+@keyframes portal-bounce { 0%,100%{transform:translateY(-1px)} 50%{transform:translateY(2px)} }
+@media(prefers-reduced-motion:reduce) { .wavy-grain,.portal-arrow { animation:none; } }

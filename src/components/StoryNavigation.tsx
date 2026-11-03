@@ -17,7 +17,7 @@ export default function StoryNavigation({engine}:{engine:ScrollPhysics}){
   bake();document.fonts.load('700 100px "Bebas Neue"').then(()=>{if(c.isConnected)bake();});window.addEventListener('resize',bake);
   navigate.current=view=>{if(active||view===engine.view||main.dataset.cinema!=='closed')return;active=true;destination=view;elapsed=0;swapped=false;buffer=0;engine.locked=true;main.inert=true;c.style.visibility='visible';};
   const open=()=>navigate.current('about');window.addEventListener('portfolio:story',open);engine.onBoundary=()=>navigate.current('work');
-  const sync=()=>{const about=engine.view==='about';button.current!.textContent=about?'← BACK TO REEL':'ABOUT & CONTACT ↓';hud.current!.dataset.view=engine.view;};
+  const sync=()=>{const about=engine.view==='about';button.current!.querySelector('.portal-label')!.textContent=about?'BACK TO REEL':'ABOUT & CONTACT';button.current!.querySelector('.portal-arrow')!.textContent=about?'↑':'↓';hud.current!.dataset.view=engine.view;};
   const off=engine.subscribe(sync);
   const stop=subscribeTicker((_now,dt)=>{if(!active)return;
    if(buffer>0)buffer--;else elapsed+=Math.min(dt*1000,16.67);
@@ -32,5 +32,5 @@ export default function StoryNavigation({engine}:{engine:ScrollPhysics}){
   });
   return()=>{off();stop();engine.onBoundary=null;engine.locked=false;main.inert=false;window.removeEventListener('portfolio:story',open);window.removeEventListener('resize',bake);};
  },[engine,theme]);
- return <><div ref={hud} className="reel-scroll-prompt story-portal"><button ref={button} onClick={()=>navigate.current(engine.view==='work'?'about':'work')} onPointerMove={e=>{if(e.pointerType!=='mouse')return;const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.translate=`${(e.clientX-r.left-r.width/2)*.12}px ${(e.clientY-r.top-r.height/2)*.18}px`;}} onPointerLeave={e=>{e.currentTarget.style.translate='0 0';}}>ABOUT & CONTACT ↓</button></div><canvas ref={canvas} className="story-transition-canvas" aria-hidden="true"/></>;
+ return <><div ref={hud} className="reel-scroll-prompt story-portal"><button ref={button} onClick={()=>navigate.current(engine.view==='work'?'about':'work')} onPointerMove={e=>{if(e.pointerType!=='mouse')return;const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.translate=`${(e.clientX-r.left-r.width/2)*.12}px ${(e.clientY-r.top-r.height/2)*.18}px`;}} onPointerLeave={e=>{e.currentTarget.style.translate='0 0';}}><span className="portal-label">ABOUT & CONTACT</span><span className="portal-arrow" aria-hidden="true">↓</span></button></div><canvas ref={canvas} className="story-transition-canvas" aria-hidden="true"/></>;
 }

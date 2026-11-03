@@ -19,6 +19,7 @@ export type Project = {
   video: string;
   poster: string;
   color: string;
+  accentPalette: [string, string, string];
   description: string;
   kind: string;
   website?: string;
@@ -39,6 +40,7 @@ export const projects: Project[] = [
     video: "/media/pocket.mp4",
     poster: "/media/pocket.jpg",
     color: "#b7adff",
+    accentPalette: ['#8B5CF6', '#10B981', '#00B8C9'],
     kind: "PRODUCT MOTION",
     description:
       "A compact product story told through fluid transitions, crisp typography, and carefully timed movement. A motion study built around an iPhone SaaS experience.",
@@ -55,6 +57,7 @@ export const projects: Project[] = [
     video: "/media/nightcity.mp4",
     poster: "/media/nightcity.jpg",
     color: "#d5ef72",
+    accentPalette: ['#00F0FF', '#713BFF', '#0A718C'],
     kind: "CINEMATIC EDIT",
     description:
       "An atmospheric journey through the world of Cyberpunk 2077. Rhythm, contrast, and cinematic pacing turn game footage into a visual mood piece.",
@@ -71,6 +74,7 @@ export const projects: Project[] = [
     video: "/media/dolce.mp4",
     poster: "/media/dolce.jpg",
     color: "#f6ad89",
+    accentPalette: ['#FF3B1D', '#F59E0B', '#A61938'],
     kind: "GAMING MONTAGE",
     description:
       "A high-energy gaming montage from the Dolce&Gabbana source edit. Layered compositions, colour, and tightly timed cuts turn gameplay imagery into a rhythmic visual sequence.",
@@ -87,6 +91,7 @@ export const projects: Project[] = [
     video: "/media/music.mp4",
     poster: "/media/music.jpg",
     color: "#8ebbd3",
+    accentPalette: ['#EC4899', '#FF6B22', '#8048CF'],
     kind: "MUSIC & CULTURE",
     description:
       "The Art That Is Music — a visual appreciation of sound and the people behind it. An exploration of pace, emotion, and the moments between the beats.",
@@ -103,6 +108,7 @@ export const projects: Project[] = [
     video: "/media/inmoe.mp4",
     poster: "/media/inmoe.jpg",
     color: "#e7a8ca",
+    accentPalette: ['#F59E0B', '#E85827', '#7544C8'],
     kind: "MOTION EXPERIMENT",
     description:
       "In Moe — an experiment in visual energy. Shapes, images, and timing come together in a playful study of how motion changes the way a story feels.",
@@ -121,6 +127,7 @@ export const projects: Project[] = [
     "video": "/media/artists.mp4",
     "poster": "/media/artists.jpg",
     "color": "#b7adff",
+    accentPalette: ['#10B981', '#32A8A0', '#987B24'],
     "kind": "MUSIC EDIT",
     "description": "A rhythm-led artist montage with layered imagery and expressive cuts.",
     tools: [toolCatalog.pr, toolCatalog.ae]
@@ -138,6 +145,7 @@ export const projects: Project[] = [
     "video": "/media/iconic.mp4",
     "poster": "/media/iconic.jpg",
     "color": "#b7adff",
+    accentPalette: ['#A855F7', '#3B82F6', '#D95635'],
     "kind": "GAMING EDIT",
     "description": "A cinematic tribute to an iconic weapon in gaming.",
     tools: [toolCatalog.pr, toolCatalog.ae]
@@ -156,6 +164,7 @@ export const projects: Project[] = [
     "video": "/media/oscar.mp4",
     "poster": "/media/oscar.jpg",
     "color": "#b7adff",
+    accentPalette: ['#FF870F', '#DF4128', '#9760C9'],
     "kind": "MOTORSPORT EDIT",
     "description": "A fast-paced motorsport edit built around Oscar Piastri.",
     tools: [toolCatalog.pr, toolCatalog.ae]
@@ -173,6 +182,7 @@ export const projects: Project[] = [
     "video": "/media/induction.mp4",
     "poster": "/media/induction.jpg",
     "color": "#b7adff",
+    accentPalette: ['#10B981', '#30C7CF', '#6173FF'],
     "kind": "INTERACTIVE WEBSITE",
     "description": "An interactive website redesign for Induction, with animated visual storytelling and data-driven sections.",
     "website": "https://induction-redesign.vercel.app/",
