@@ -5,7 +5,7 @@ import {assetUrl} from '@/lib/assetPreloader';
 import {damp,subscribeTicker} from '@/lib/masterTicker';
 import type {ScrollPhysics} from '@/lib/scrollPhysics';
 import WarpedText from './WarpedText';
-import {LiquidDivider,InspectionLens,VortexPool} from './LiquidStory';
+import {LiquidDivider} from './LiquidStory';
 
 const disciplines=[
  ['VIDEO EDITING','COMMERCIALS • PACING • SOUND','music'],
@@ -83,7 +83,7 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
  const copy=async()=>{try{await navigator.clipboard.writeText(profile.email);setCopied(true);setCopyError(false);}catch{setCopyError(true);}};
  return <div ref={root} className="kinetic-chapters" onPointerMove={e=>{pointer.current.x=e.clientX;pointer.current.y=e.clientY;}}>
   <section className="story-capabilities story-chapter kinetic-capabilities" aria-labelledby="capabilities-title">
-   <LiquidDivider engine={engine}/><InspectionLens engine={engine}/>
+   <LiquidDivider engine={engine}/>
    <h2 id="capabilities-title">THIS IS<br/>MY THING<span className="capabilities-trail-anchor" aria-label="."/></h2>
    <div className="discipline-rows">{disciplines.map((d,i)=><article className="kinetic-discipline" key={d[0]} tabIndex={0} onPointerEnter={e=>{if(e.pointerType==='mouse'){pointer.current.row=i;pointer.current.x=e.clientX;pointer.current.y=e.clientY;}}} onPointerLeave={()=>pointer.current.row=-1}>
     <span className="discipline-number">0{i+1}</span><h3><span className="discipline-title-track"><span>{d[0]}</span><span aria-hidden="true">{d[0]}</span></span></h3><span className="discipline-tags">[ {d[1]} ]</span><span className="discipline-arrow" aria-hidden="true">↗</span>
@@ -103,17 +103,14 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
    <div className="experience-index">{experience.map((row,i)=><div className="experience-line" key={row[0]} tabIndex={0}><span>0{i+1}</span><strong>{row[0]}</strong><span>{row[1]}</span><time>{row[2]}</time></div>)}<a className="index-resume" href="/resume.pdf" target="_blank" rel="noreferrer">RESUME ↗</a></div>
   </section>
   <section className="story-contact story-chapter kinetic-contact" aria-labelledby="contact-title">
-   <LiquidDivider engine={engine}/>
    <div className="contact-ticker" aria-label={tickerCopy}><div className="contact-ticker-track" aria-hidden="true">{[0,1].map(i=><span key={i}>{tickerCopy.repeat(2)}</span>)}</div></div>
-   <p className="contact-enough">Okay, that's enough website.</p>
    <div className="contact-copy-zone" onPointerEnter={e=>{if(e.pointerType==='mouse')pointer.current.contact=true;}} onPointerLeave={()=>pointer.current.contact=false}>
     <h2 id="contact-title"><button onClick={copy} aria-label="Copy email address"><WarpedText radius={130} smoothing={.1}>LET'S TALK</WarpedText></button></h2>
     <button className="copy-email" onClick={copy}><span>{copied?'COPIED ✓':profile.email}</span><b aria-hidden="true">↗</b></button>
    </div>
    <div className="copy-orbit" data-copied={copied} aria-hidden="true"><span>{copied?'COPIED ✓':'CLICK TO\nCOPY EMAIL'}</span><i/><i/><i/><i/></div>
    <span className="copy-feedback" role="status">{copyError?'Copy unavailable — use EMAIL below.':copied?'Email address copied.':''}</span>
-   <div className="contact-pool"><LiquidDivider engine={engine} dark/><VortexPool engine={engine}/><div className="water-reflection" aria-hidden="true"><b>LET'S TALK</b><span>{profile.email}</span></div><button className="drain-badge" onClick={()=>engine.onBoundary?.()}>SCROLL TO DRAIN<br/>BACK TO REEL ↻</button>
-   <div className="contact-links"><a href={`mailto:${profile.email}`}>EMAIL ↗</a><a href="https://www.instagram.com/sydorm_/" target="_blank" rel="noreferrer">INSTAGRAM ↗</a><a href="https://www.linkedin.com/in/vishwas-kamath-717016369/" target="_blank" rel="noreferrer">LINKEDIN ↗</a><a href="/resume.pdf" target="_blank" rel="noreferrer">RÉSUMÉ ↗</a></div></div>
+   <div className="contact-links"><a href={`mailto:${profile.email}`}>EMAIL ↗</a><a href="https://www.instagram.com/sydorm_/" target="_blank" rel="noreferrer">INSTAGRAM ↗</a><a href="https://www.linkedin.com/in/vishwas-kamath-717016369/" target="_blank" rel="noreferrer">LINKEDIN ↗</a></div>
    <div className="contact-bottom"><span>VISHWAS KAMATH © {new Date().getFullYear()}<br/>BENGALURU, IN</span><button onClick={()=>engine.onBoundary?.()}>BACK TO REEL ↑</button></div>
   </section>
  </div>;
