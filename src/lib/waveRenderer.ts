@@ -44,11 +44,11 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
   ctx.shadowBlur=0;ctx.lineCap='round';ctx.lineJoin='round';
   ctx.save();ctx.globalAlpha=d.ribbonAlpha??1;
   const paths:Path2D[]=[];
-  for(let i=0;i<15;i++){
-   const points:{x:number;y:number}[]=[],v=i/14*2-1;
+  for(let i=0;i<20;i++){
+   const points:{x:number;y:number}[]=[],v=i/19*2-1;
    for(let j=0;j<=90;j++){
     const x=j*width/90,u=x/width,twist=u*Math.PI*(3.4+energy*.25)-time*.52;
-    const baseY=height*(.5-(d.storyProgress??0)*.18)+(d.story?( .5-u)*height*.18:0)+Math.sin(u*Math.PI*2.1+time*.37)*Math.min(100,height*.11)*(1+energy*.18)+v*Math.sin(twist)*Math.min(70,height*.075);
+    const baseY=height*(.5-(d.storyProgress??0)*.18)+(d.story?( .5-u)*height*.18:0)+Math.sin(u*Math.PI*2.1+time*.37)*Math.min(100,height*.11)*(1+energy*.18)+Math.sin(twist+i/20*Math.PI*2)*Math.min(70,height*.075);
     const dx=x-ribbonMouseX,dy=baseY-ribbonMouseY;
     const gaussianX=Math.exp(-(dx*dx)/(2*165*165)),gaussianY=Math.exp(-(dy*dy)/(2*140*140));
     const bend=dy/Math.sqrt(dy*dy+3600)*gaussianX*gaussianY*48;
@@ -57,7 +57,8 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
    const path=new Path2D();path.moveTo(points[0].x,points[0].y);
    for(let j=1;j<points.length-1;j++){const p=points[j],next=points[j+1];path.quadraticCurveTo(p.x,p.y,(p.x+next.x)/2,(p.y+next.y)/2);}
    const tail=points[points.length-1];path.lineTo(tail.x,tail.y);paths.push(path);
-   ctx.strokeStyle=`rgba(255,77,28,${.3+i/14*.35})`;ctx.lineWidth=.9;ctx.stroke(path);
+   const depth=(Math.cos(time*.52-i/20*Math.PI*2)+1)/2;
+   const tint=ctx.createLinearGradient(0,0,width,0);tint.addColorStop(0,`rgba(165,38,10,${.15+depth*.3})`);tint.addColorStop(.5,`rgba(255,${77+Math.round(depth*163)},${28+Math.round(depth*204)},${.15+depth*.8})`);tint.addColorStop(1,`rgba(255,77,28,${.2+depth*.5})`);ctx.strokeStyle=tint;ctx.lineWidth=.6+depth*1.8;ctx.stroke(path);
   }
   // The full cached spline is stroked: only a continuous gradient window moves.
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.shadowBlur=0;

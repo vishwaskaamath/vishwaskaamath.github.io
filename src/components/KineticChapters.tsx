@@ -5,6 +5,7 @@ import {assetUrl} from '@/lib/assetPreloader';
 import {damp,subscribeTicker} from '@/lib/masterTicker';
 import type {ScrollPhysics} from '@/lib/scrollPhysics';
 import WarpedText from './WarpedText';
+import {LiquidDivider,InspectionLens,VortexPool} from './LiquidStory';
 
 const disciplines=[
  ['VIDEO EDITING','COMMERCIALS • PACING • SOUND','music'],
@@ -46,7 +47,7 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
   const hudName=el.querySelector<HTMLElement>('[data-module-name]')!,hudUse=el.querySelector<HTMLElement>('[data-module-use]')!,hudNumber=el.querySelector<HTMLElement>('[data-module-number]')!,hudBar=el.querySelector<HTMLElement>('.module-signal i')!;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let height=innerHeight,width=innerWidth,rowsY:number[]=[],dockY=0,dockHeight=1,statsY=0,contactY=0,contactX=0,centers:{x:number;y:number}[]=[];
-  let active=-1,decodeAt=0,lastGlyphFrame=-1,lastPreview=-1,px=0,py=0,cx=0,cy=0,visible=0,signal=0,tickerX=0,tickerWidth=1,lastScroll=0,speed=0;
+  let active=-1,decodeAt=0,lastGlyphFrame=-1,lastPreview=-1,px=0,py=0,cx=0,cy=0,visible=0,signal=0,tickerX=0,tickerWidth=1,lastScroll=0,speed=0,countStart=-1;
   const scales=modules.map(()=>1),lifts=modules.map(()=>0);
   const measure=()=>{const origin=story.getBoundingClientRect().top;const d=dock.getBoundingClientRect(),c=contact.getBoundingClientRect();height=innerHeight;width=innerWidth;rowsY=rows.map(row=>row.getBoundingClientRect().top-origin);dockY=d.top-origin;dockHeight=d.height;statsY=stats.getBoundingClientRect().top-origin;contactY=c.top-origin;contactX=c.left;centers=tiles.map(tile=>{const r=tile.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top-origin+r.height/2};});tickerWidth=ticker.scrollWidth/2;};
   const resize=new ResizeObserver(measure);resize.observe(story);window.addEventListener('resize',measure);document.fonts.ready.then(()=>{if(el.isConnected)measure();});measure();
@@ -70,7 +71,8 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
    signal=damp(signal,98,8,dt);hudNumber.textContent=`${Math.round(signal)}%`;hudBar.style.transform=`scaleX(${signal/100})`;
    const dockVisible=dockY+shift<height+100&&dockY+shift+dockHeight>-100;
    if(dockVisible)tiles.forEach((tile,i)=>{const dist=Math.abs(i-active),goal=dist===0?1.22:dist===1?1.08:1;scales[i]=damp(scales[i],goal,12,dt);lifts[i]=damp(lifts[i],dist===0?-12:0,12,dt);const bob=motion?Math.sin(now*.0013+i*.8)*4:0;const nx=m.tool===i?Math.max(-1,Math.min(1,(m.x-centers[i].x)/65)):0,ny=m.tool===i?Math.max(-1,Math.min(1,(m.y-centers[i].y-shift)/65)):0;tile.style.transform=`translate3d(0,${lifts[i]+bob}px,0) rotateX(${-ny*10}deg) rotateY(${nx*12}deg) scale(${scales[i]})`;tile.dataset.active=String(i===active);});
-   const count=motion?clamp((height*.9-statsY-shift)/(height*.5)):1;
+   if(countStart<0&&statsY+shift<height*.88)countStart=now;
+   const count=motion?(countStart<0?0:1-Math.pow(1-clamp((now-countStart)/950),3)):1;
    counters[0].textContent=`${Math.round(200*count)}K+`;counters[1].textContent=`${Math.round(20*count)}+`;counters[2].textContent=count>=1?'1ST':`${Math.round(count)}`;
    const delta=Math.abs(scroll-lastScroll)/Math.max(dt,.001);lastScroll=scroll;speed=damp(speed,Math.min(delta,1800),8,dt);
    if(motion)tickerX=(tickerX+dt*(30+speed*.12))%Math.max(1,tickerWidth);ticker.style.transform=`translate3d(${-tickerX}px,0,0)`;
@@ -81,6 +83,7 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
  const copy=async()=>{try{await navigator.clipboard.writeText(profile.email);setCopied(true);setCopyError(false);}catch{setCopyError(true);}};
  return <div ref={root} className="kinetic-chapters" onPointerMove={e=>{pointer.current.x=e.clientX;pointer.current.y=e.clientY;}}>
   <section className="story-capabilities story-chapter kinetic-capabilities" aria-labelledby="capabilities-title">
+   <LiquidDivider engine={engine}/><InspectionLens engine={engine}/>
    <h2 id="capabilities-title">THIS IS<br/>MY THING<span className="capabilities-trail-anchor" aria-label="."/></h2>
    <div className="discipline-rows">{disciplines.map((d,i)=><article className="kinetic-discipline" key={d[0]} tabIndex={0} onPointerEnter={e=>{if(e.pointerType==='mouse'){pointer.current.row=i;pointer.current.x=e.clientX;pointer.current.y=e.clientY;}}} onPointerLeave={()=>pointer.current.row=-1}>
     <span className="discipline-number">0{i+1}</span><h3><span className="discipline-title-track"><span>{d[0]}</span><span aria-hidden="true">{d[0]}</span></span></h3><span className="discipline-tags">[ {d[1]} ]</span><span className="discipline-arrow" aria-hidden="true">↗</span>
@@ -88,6 +91,7 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
   </section>
   <div className="discipline-preview" aria-hidden="true"><video muted loop playsInline preload="none"/><i/></div>
   <section className="story-workflow story-chapter kinetic-workflow" aria-labelledby="workflow-title">
+   <LiquidDivider engine={engine} dark/>
    <span className="chapter-kicker">[ 03 / THE STACK ]</span><h2 id="workflow-title">INSIDE THE<br/>WORKFLOW.</h2>
    <div className="hardware-dock" onPointerLeave={()=>pointer.current.tool=-1}>{modules.map((tool,i)=><button className="hardware-tool" key={tool[0]} aria-label={tool[1]} style={{'--tool-brand':tool[2]} as CSSProperties} onPointerEnter={()=>pointer.current.tool=i} onFocus={()=>pointer.current.tool=i} onBlur={()=>pointer.current.tool=-1} onClick={()=>pointer.current.tool=i}>
     {[1,2,3,4,5].map(z=><i className="hardware-depth" key={z} style={{transform:`translateZ(${-z*2}px)`}}/>)}<span className="hardware-face"><b>{tool[0]}</b></span>
@@ -99,14 +103,17 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
    <div className="experience-index">{experience.map((row,i)=><div className="experience-line" key={row[0]} tabIndex={0}><span>0{i+1}</span><strong>{row[0]}</strong><span>{row[1]}</span><time>{row[2]}</time></div>)}<a className="index-resume" href="/resume.pdf" target="_blank" rel="noreferrer">RESUME ↗</a></div>
   </section>
   <section className="story-contact story-chapter kinetic-contact" aria-labelledby="contact-title">
+   <LiquidDivider engine={engine}/>
    <div className="contact-ticker" aria-label={tickerCopy}><div className="contact-ticker-track" aria-hidden="true">{[0,1].map(i=><span key={i}>{tickerCopy.repeat(2)}</span>)}</div></div>
+   <p className="contact-enough">Okay, that's enough website.</p>
    <div className="contact-copy-zone" onPointerEnter={e=>{if(e.pointerType==='mouse')pointer.current.contact=true;}} onPointerLeave={()=>pointer.current.contact=false}>
     <h2 id="contact-title"><button onClick={copy} aria-label="Copy email address"><WarpedText radius={130} smoothing={.1}>LET'S TALK</WarpedText></button></h2>
     <button className="copy-email" onClick={copy}><span>{copied?'COPIED ✓':profile.email}</span><b aria-hidden="true">↗</b></button>
    </div>
    <div className="copy-orbit" data-copied={copied} aria-hidden="true"><span>{copied?'COPIED ✓':'CLICK TO\nCOPY EMAIL'}</span><i/><i/><i/><i/></div>
    <span className="copy-feedback" role="status">{copyError?'Copy unavailable — use EMAIL below.':copied?'Email address copied.':''}</span>
-   <div className="contact-links"><a href={`mailto:${profile.email}`}>EMAIL ↗</a><a href="https://www.instagram.com/sydorm_/" target="_blank" rel="noreferrer">INSTAGRAM ↗</a><a href="https://www.linkedin.com/in/vishwas-kamath-717016369/" target="_blank" rel="noreferrer">LINKEDIN ↗</a></div>
+   <div className="contact-pool"><LiquidDivider engine={engine} dark/><VortexPool engine={engine}/><div className="water-reflection" aria-hidden="true"><b>LET'S TALK</b><span>{profile.email}</span></div><button className="drain-badge" onClick={()=>engine.onBoundary?.()}>SCROLL TO DRAIN<br/>BACK TO REEL ↻</button>
+   <div className="contact-links"><a href={`mailto:${profile.email}`}>EMAIL ↗</a><a href="https://www.instagram.com/sydorm_/" target="_blank" rel="noreferrer">INSTAGRAM ↗</a><a href="https://www.linkedin.com/in/vishwas-kamath-717016369/" target="_blank" rel="noreferrer">LINKEDIN ↗</a><a href="/resume.pdf" target="_blank" rel="noreferrer">RÉSUMÉ ↗</a></div></div>
    <div className="contact-bottom"><span>VISHWAS KAMATH © {new Date().getFullYear()}<br/>BENGALURU, IN</span><button onClick={()=>engine.onBoundary?.()}>BACK TO REEL ↑</button></div>
   </section>
  </div>;
