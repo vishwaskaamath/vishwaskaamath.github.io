@@ -2008,3 +2008,16 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .portal-arrow { display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:#ff4d1c; color:#0b0b0d; font-size:17px; animation:portal-bounce 1.8s ease-in-out infinite; }
 @keyframes portal-bounce { 0%,100%{transform:translateY(-1px)} 50%{transform:translateY(2px)} }
 @media(prefers-reduced-motion:reduce) { .wavy-grain,.portal-arrow { animation:none; } }
+
+/* Shared desktop calibration: 10% larger with more breathing room on the arcs. */
+@media(min-width:760px) {
+ .video-wheel { width:clamp(417.45px,30.9925vw,556.6px); }
+ .project-metadata { top:50vh; }
+ .project-metadata .project-title { font-size:clamp(2.783rem,4.048vw,4.36425rem); }
+ .project-metadata .project-meta-row { font-size:.7843rem; }
+ .project-metadata .view-project-button { font-size:.9361rem; }
+ .software-wheel { left:75.3vw; width:clamp(145.475px,9.867vw,179.63px); }
+ .software-wheel .software-cube .adobe-symbol { font-size:clamp(50.6px,5.566vw,80.96px); }
+ .toolkit-viewport .micro-label { font-size:.69575rem; }
+ .toolkit-viewport .tool-caption-slot>span:last-child { font-size:.9108rem; }
+}
