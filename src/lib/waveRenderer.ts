@@ -6,9 +6,10 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
  const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return null;
  const fog=document.createElement('canvas'),f=fog.getContext('2d')!;
  let width=1,height=1,colors=[[139,92,246],[16,185,129],[0,184,201]];
- const plucks=new Map<string,{p:number;v:number}>(),angles=new Map<number,number>();
+ const angles=new Map<number,number>();
  const motes=Array.from({length:65},(_,i)=>({x:(i*.618033)%1,y:(i*.41421)%1,z:.2+(i%17)/20,r:.8+(i%10)*.2}));
- let pulseClock=0,lastTime=0;
+ let lastTime=0,ribbonMouseX=0,ribbonMouseY=0,cursorReady=false;
+ const pulsePositions=[0,.25,.5,.75];
  const resize=(w:number,h:number)=>{width=Math.max(1,Math.round(w));height=Math.max(1,Math.round(h));canvas.width=width;canvas.height=height;fog.width=Math.ceil(width/4);fog.height=Math.ceil(height/4);};
  const draw=(time:number,_pulses:ContourPulse[]=[],light=false,d:RibbonDynamics={mouseX:width/2,mouseY:height/2,energy:0})=>{
   const dt=d.dt??1/60,k=1-Math.exp(-2.4*dt),palette=d.palette??['#8B5CF6','#10B981','#00B8C9'];
@@ -26,7 +27,7 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
   f.globalCompositeOperation='destination-out';const well=f.createRadialGradient(d.mouseX/4,d.mouseY/4,0,d.mouseX/4,d.mouseY/4,105);well.addColorStop(0,'rgba(0,0,0,.32)');well.addColorStop(1,'transparent');f.fillStyle=well;f.fillRect(0,0,fog.width,fog.height);
   ctx.globalCompositeOperation=light?'multiply':'screen';ctx.globalAlpha=light?.25:.55;ctx.drawImage(fog,0,0,width,height);ctx.globalAlpha=1;
   const torch=ctx.createRadialGradient(d.mouseX,d.mouseY,0,d.mouseX,d.mouseY,550);torch.addColorStop(0,light?'rgba(90,75,65,.025)':'rgba(243,239,230,.055)');torch.addColorStop(1,'transparent');ctx.fillStyle=torch;ctx.fillRect(0,0,width,height);ctx.globalCompositeOperation='source-over';
-  const movingTime=Math.max(0,time-lastTime);lastTime=time;pulseClock+=movingTime*(1+energy*2);
+  const movingTime=Math.max(0,time-lastTime);lastTime=time;
   const velocity=d.velocity??0,ink=light?'17,17,19':'243,239,230';
   ctx.save();ctx.font=`${width*.28}px "Bebas Neue",sans-serif`;ctx.lineWidth=1;ctx.strokeStyle=`rgba(${ink},.028)`;ctx.strokeText(d.label??'01 // MOTION',-d.mouseX*.04+Math.sin(time*.08)*35,height*.34+Math.sin(time*.12)*12);ctx.restore();
   for(let col=0;col<22;col++)for(let row=0;row<12;row++){
@@ -36,21 +37,38 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
    ctx.strokeStyle=q>.02?`rgba(255,77,28,${.08+q*.3})`:`rgba(${ink},.08)`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-Math.cos(angle)*len/2,y-Math.sin(angle)*len/2);ctx.lineTo(x+Math.cos(angle)*len/2,y+Math.sin(angle)*len/2);ctx.stroke();
   }
   motes.forEach((m,i)=>{m.y=(m.y-movingTime*(.009+velocity*.05)*m.z+2)%1;const x=m.x*width+Math.sin(time*.4+i)*14-d.mouseX*.03*m.z,y=m.y*height-d.mouseY*.012*m.z;ctx.fillStyle=i%3?`rgba(255,77,28,${.08+m.z*.24})`:`rgba(${ink},${.08+m.z*.2})`;ctx.beginPath();ctx.ellipse(x,y,m.r,m.r+Math.min(18,Math.abs(velocity)*3*m.z),0,0,Math.PI*2);ctx.fill();});
-  const curves:{x:number;y:number}[][]=[];
+  // A dedicated, time-corrected 0.12 cursor lerp keeps the bend continuous.
+  if(!cursorReady){ribbonMouseX=d.mouseX;ribbonMouseY=d.mouseY;cursorReady=true;}
+  const cursorLerp=1-Math.pow(.88,dt*60);
+  ribbonMouseX+=(d.mouseX-ribbonMouseX)*cursorLerp;ribbonMouseY+=(d.mouseY-ribbonMouseY)*cursorLerp;
+  ctx.shadowBlur=0;ctx.lineCap='round';ctx.lineJoin='round';
+  const paths:Path2D[]=[];
   for(let i=0;i<15;i++){
    const points:{x:number;y:number}[]=[],v=i/14*2-1;
-   for(let j=0,x=-20;x<=width+20;j++,x+=20){
-    const u=x/width,twist=u*Math.PI*(3.4+energy*.25)-time*.52;
-    let y=height*.5+Math.sin(u*Math.PI*2.1+time*.37)*Math.min(100,height*.11)*(1+energy*.18)+v*Math.sin(twist)*Math.min(70,height*.075);
-    const dy=y-d.mouseY,dist=Math.hypot(x-d.mouseX,dy)||1,target=dist<220?(dy/dist)*Math.pow(1-dist/220,2)*55:0,key=i+':'+j,state=plucks.get(key)??{p:0,v:0};
-    const steps=Math.max(1,Math.ceil(dt/.008));for(let n=0;n<steps;n++){const h=dt/steps;state.v+=((target-state.p)*100-state.v*17)*h;state.p+=state.v*h;}plucks.set(key,state);y+=state.p;points.push({x,y});
+   for(let j=0;j<=90;j++){
+    const x=j*width/90,u=x/width,twist=u*Math.PI*(3.4+energy*.25)-time*.52;
+    const baseY=height*.5+Math.sin(u*Math.PI*2.1+time*.37)*Math.min(100,height*.11)*(1+energy*.18)+v*Math.sin(twist)*Math.min(70,height*.075);
+    const dx=x-ribbonMouseX,dy=baseY-ribbonMouseY;
+    const gaussianX=Math.exp(-(dx*dx)/(2*165*165)),gaussianY=Math.exp(-(dy*dy)/(2*140*140));
+    const bend=dy/Math.sqrt(dy*dy+3600)*gaussianX*gaussianY*48;
+    points.push({x,y:baseY+bend});
    }
-   curves.push(points);ctx.beginPath();points.forEach((p,j)=>j?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=`rgba(255,77,28,${.3+i/14*.35})`;ctx.lineWidth=.9;ctx.stroke();
+   const path=new Path2D();path.moveTo(points[0].x,points[0].y);
+   for(let j=1;j<points.length-1;j++){const p=points[j],next=points[j+1];path.quadraticCurveTo(p.x,p.y,(p.x+next.x)/2,(p.y+next.y)/2);}
+   const tail=points[points.length-1];path.lineTo(tail.x,tail.y);paths.push(path);
+   ctx.strokeStyle=`rgba(255,77,28,${.3+i/14*.35})`;ctx.lineWidth=.9;ctx.stroke(path);
   }
-  // Layered strokes give soft traveling bloom without costly per-segment shadowBlur.
-  for(let i=0;i<4;i++){const points=curves[2+i*3],head=((pulseClock*(.12+i*.027)+i*.24)%1)*width;
-   for(const [line,alpha] of [[9,.07],[4.5,.2],[2.2,.95]]){ctx.beginPath();let started=false;for(const p of points){if(p.x>head-100&&p.x<head){if(!started){ctx.moveTo(p.x,p.y);started=true;}else ctx.lineTo(p.x,p.y);}}const g=ctx.createLinearGradient(head-100,0,head,0);g.addColorStop(0,'rgba(255,77,28,0)');g.addColorStop(1,`rgba(255,210,184,${alpha})`);ctx.strokeStyle=g;ctx.lineWidth=line;ctx.stroke();}
+  // The full cached spline is stroked: only a continuous gradient window moves.
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.shadowBlur=0;
+  for(let i=0;i<4;i++){
+   if(movingTime>0)pulsePositions[i]=(pulsePositions[i]+dt*(120+i*32)*(1+Math.abs(velocity)*1.5)/(width+210))%1;
+   const pulseX=pulsePositions[i]*(width+210)-30;
+   const g=ctx.createLinearGradient(pulseX-180,0,pulseX+30,0);
+   g.addColorStop(0,'rgba(255,77,28,0)');g.addColorStop(.55,'rgba(255,110,60,.45)');g.addColorStop(.88,'rgba(255,225,200,.95)');g.addColorStop(1,'rgba(255,255,255,0)');
+   ctx.strokeStyle=g;
+   for(const [line,alpha] of [[9,.07],[4.5,.22],[2.2,1]]){ctx.globalAlpha=alpha;ctx.lineWidth=line;ctx.stroke(paths[2+i*3]);}
   }
+  ctx.restore();
   const vignette=ctx.createRadialGradient(width/2,height/2,Math.min(width,height)*.25,width/2,height/2,Math.hypot(width,height)*.55);vignette.addColorStop(0,'transparent');vignette.addColorStop(1,light?'rgba(30,25,20,.08)':'rgba(0,0,0,.65)');ctx.fillStyle=vignette;ctx.fillRect(0,0,width,height);
  };
  return {resize,draw,dispose:()=>{fog.width=1;}};
