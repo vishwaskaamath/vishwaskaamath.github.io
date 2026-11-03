@@ -2071,3 +2071,27 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .software-cube .software-tile{contain:none;transform-style:preserve-3d;overflow:visible}
 .software-cube .tile-emblem,.software-cube .tile-brand{transform:translateZ(16px)}
 .software-backplate{background:linear-gradient(135deg,#1c1c22,#0a0a0e);box-shadow:inset 0 1px #ffffff20,0 8px 14px #0005}
+
+/* Workflow hardware stage: isolated from the Work wheel and other chapters. */
+.kinetic-workflow{min-height:82vh;display:flex;flex-direction:column;justify-content:center;padding:7vh 6vw 8vh;}
+.workflow-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;}
+.kinetic-workflow h2{margin:20px 0 38px;font-size:clamp(3.5rem,6.5vw,7.5rem);}
+.workflow-status{font:10px/1.6 var(--mono);letter-spacing:.1em;border:1px solid currentColor;padding:10px 16px;border-radius:999px;transition:color .35s;}
+.workflow-hardware-stage{--brand-color:#9999ff;--tile-x:50%;position:relative;isolation:isolate;}
+.workflow-hardware-stage:before{content:"";position:absolute;inset:-100px -3vw 0;z-index:-1;pointer-events:none;background:radial-gradient(380px circle at var(--tile-x) 50%,color-mix(in srgb,var(--brand-color) 18%,transparent),transparent 75%);transition:background .4s;}
+.workflow-hardware-stage .hardware-dock{gap:clamp(14px,1.6vw,24px);padding:28px 0 12px;min-height:165px;max-width:none;margin:0;}
+.workflow-hardware-stage .hardware-tool{flex:0 0 clamp(88px,6.8vw,112px);height:clamp(88px,6.8vw,112px);perspective:700px;transform-style:preserve-3d;border-radius:22px;}
+.hardware-glyph{position:absolute;inset:21%;display:grid;place-items:center;transform:translateZ(16px);filter:drop-shadow(0 7px 4px #0009);color:var(--tool-brand);}
+.hardware-glyph svg{width:100%;height:100%;}.hardware-glyph .figma-symbol{width:70%;height:100%;}
+.hardware-glyph .adobe-symbol{font:600 clamp(34px,3.4vw,48px)/1 Arial,sans-serif;letter-spacing:-.055em;}
+.workflow-hardware-stage .hardware-face{background:rgba(16,16,22,.85);box-shadow:inset 0 0 0 3px #060609, inset 0 1px 2px #ffffff65,0 16px 24px #0006;}
+.hardware-reflection{position:absolute;inset:75% -10% -45%;border-radius:50%;background:var(--tool-brand);transform:translateY(18px) scaleY(.25);filter:blur(12px);opacity:.45;pointer-events:none;}
+.workflow-trace{display:block;overflow:visible;opacity:.7;}
+.inspection-deck{text-align:center;min-height:110px;padding:6px 0 12px;}
+.inspection-name{overflow:hidden;}.inspection-name strong{display:block;font-size:clamp(1.6rem,2.4vw,2.3rem);font-weight:600;letter-spacing:-.02em;}
+.inspection-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:16px;}.inspection-tags span{font:10px/1.4 var(--mono);letter-spacing:.08em;padding:8px 13px;border:1px solid #f3efe627;border-radius:999px;background:#f3efe606;}
+.software-pr .adobe-symbol{color:#9999FF}.software-ae .adobe-symbol{color:#D291FF}.software-ps .adobe-symbol{color:#31A8FF}
+.software-pr{--brand:#9999FF;background-color:#140a38}.software-ae{--brand:#D291FF;background-color:#180830}.software-ps{--brand:#31A8FF;background-color:#061e36}
+[data-theme="light"] .inspection-tags span{border-color:#11111330;background:#11111308;}
+@media(max-width:1000px){.workflow-hardware-stage .hardware-dock{display:grid;grid-template-columns:repeat(4,clamp(88px,12vw,112px));gap:24px;}.workflow-hardware-stage .hardware-tool{width:clamp(88px,12vw,112px);height:clamp(88px,12vw,112px);}.workflow-heading{align-items:flex-start;flex-direction:column;gap:0;}.workflow-status{margin-bottom:28px;}.kinetic-workflow{padding-top:70px;padding-bottom:70px;}}
+@media(max-width:470px){.workflow-hardware-stage .hardware-dock{grid-template-columns:repeat(2,100px);gap:30px 42px;}.workflow-hardware-stage .hardware-tool{width:100px;height:100px;}.workflow-status{font-size:8px;}.inspection-tags{gap:7px}.inspection-tags span{font-size:9px;}}
