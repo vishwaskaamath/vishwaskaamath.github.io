@@ -21,7 +21,7 @@ export class ScrollPhysics {
  configureStory(height:number,viewport:number){this.storyHeight=Math.max(0,height);this.viewportHeight=Math.max(1,viewport);if(this.view==='about'){this.targetScroll=Math.min(this.targetScroll,this.maxScroll);this.currentScroll=Math.min(this.currentScroll,this.maxScroll);}this.invalidate();}
  scrollTo(y:number,now=performance.now()){if(this.locked)return;this.targetScroll=this.view==='work'?y:Math.max(0,Math.min(this.maxScroll,y));this.lastInput=now;this.invalidate();}
  add(delta:number,now:number){this.wheel(delta*PROJECT_TRAVEL,now);}
- wheel(delta:number,now:number){if(this.locked)return;if(this.view==='about'){const end=this.maxScroll;if((delta<0&&this.currentScroll<=1)||(delta>0&&this.currentScroll>=end-1)){this.overshoot+=Math.abs(delta);this.invalidate();if(this.overshoot>=120)this.onBoundary?.();return;}this.overshoot=0;}this.scrollTo(this.targetScroll+delta,now);}
+ wheel(delta:number,now:number){if(this.locked)return;if(this.view==='about'){if(delta<0&&this.currentScroll<=1){this.overshoot+=Math.abs(delta);this.invalidate();if(this.overshoot>=120)this.onBoundary?.();return;}this.overshoot=0;}this.scrollTo(this.targetScroll+delta,now);}
  beginDrag(){this.dragging=true;}
  endDrag(velocity:number,now:number){this.dragging=false;this.scrollTo(this.targetScroll-velocity*7.2,now);if(this.view==='work')this.targetScroll=Math.round(this.targetScroll/PROJECT_TRAVEL)*PROJECT_TRAVEL;}
  select(index:number,now:number){const turn=Math.round((this.currentScroll/PROJECT_TRAVEL-index)/this.count);this.scrollTo((index+turn*this.count)*PROJECT_TRAVEL,now);}

@@ -120,8 +120,7 @@ export default function ProjectWheels({
       width = innerWidth;
       mobile = width < 760;
       const angle = (18 * Math.PI) / 180;
-      // Keep the existing orbital spacing based on the original 32vw × 36vh
-      // footprint; only the rendered desktop cards are now five percent smaller.
+      // Keep orbital spacing independent of the rendered card size.
       const spacingWidth = mobile ? cards[0].offsetWidth : Math.round(width * .32);
       const spacingHeight = mobile ? cards[0].offsetHeight : Math.round(innerHeight * .36);
       const minimumGap = spacingHeight * 1.055 / 2 +
