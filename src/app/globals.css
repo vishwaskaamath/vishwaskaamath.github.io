@@ -2068,6 +2068,8 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 
 .software-position .software-orbit-stage{perspective:750px;transform-style:preserve-3d}
 .software-position .software-orbit-stage>.software-cube{left:0;top:0;width:100%;height:100%;transform-style:preserve-3d;contain:none}
+.software-position .software-orbit-stage[data-multi="true"]{perspective:none;transform-style:flat}
+.software-position .software-orbit-stage[data-multi="true"]>.software-cube{transform-style:flat}
 .software-cube .software-tile{contain:none;transform-style:preserve-3d;overflow:visible}
 .software-cube .tile-emblem,.software-cube .tile-brand{transform:translateZ(16px)}
 .software-backplate{background:linear-gradient(135deg,#1c1c22,#0a0a0e);box-shadow:inset 0 1px #ffffff20,0 8px 14px #0005}
@@ -2077,7 +2079,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .workflow-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;}
 .kinetic-workflow h2{margin:20px 0 38px;font-size:clamp(3.5rem,6.5vw,7.5rem);}
 .workflow-hardware-stage{--brand-color:#9999ff;--tile-x:50%;position:relative;isolation:isolate;}
-.workflow-hardware-stage:before{content:"";position:absolute;inset:-100px -3vw 0;z-index:-1;pointer-events:none;background:radial-gradient(380px circle at var(--tile-x) 50%,color-mix(in srgb,var(--brand-color) 18%,transparent),transparent 75%);transition:background .4s;}
+.workflow-hardware-stage:before{content:"";position:absolute;inset:-220px -3vw -110px;z-index:-1;pointer-events:none;background:radial-gradient(380px circle at var(--tile-x) 50%,color-mix(in srgb,var(--brand-color) 18%,transparent),transparent 75%);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 25%,#000 75%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 25%,#000 75%,transparent);transition:background .4s;}
 .workflow-hardware-stage .hardware-dock{gap:clamp(14px,1.6vw,24px);padding:28px 0 12px;min-height:165px;max-width:none;margin:0;}
 .workflow-hardware-stage .hardware-tool{flex:0 0 clamp(88px,6.8vw,112px);height:clamp(88px,6.8vw,112px);perspective:700px;transform-style:preserve-3d;border-radius:22px;}
 .hardware-glyph{position:absolute;inset:21%;display:grid;place-items:center;transform:translateZ(16px);filter:drop-shadow(0 7px 4px #0009);color:var(--tool-brand);}
