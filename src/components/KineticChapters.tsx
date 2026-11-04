@@ -16,7 +16,7 @@ const disciplines=[
 ];
 const modules=[
  ['Pr','PREMIERE PRO','#9999FF','NARRATIVE CUTS • RHYTHM • AUDIO MIX'],
- ['Ae','AFTER EFFECTS','#D291FF','KINETIC TYPOGRAPHY • 2D/3D COMPOSITING • MOTION SYSTEMS'],
+ ['Ae','AFTER EFFECTS','#9999FF','KINETIC TYPOGRAPHY • 2D/3D COMPOSITING • MOTION SYSTEMS'],
  ['Ps','PHOTOSHOP','#31A8FF','COMPOSITES • RETOUCH • ARTWORK'],
  ['Fi','FIGMA','#ff7964','SYSTEMS • PROTOTYPES • INTERACTION'],
  ['Bl','BLENDER','#f97316','3D MODELING • HARD-SURFACE ASSETS • LIGHTING & SHADING'],
@@ -25,7 +25,6 @@ const modules=[
  ['Ai','ILLUSTRATOR','#FF9A00','VECTORS • IDENTITY • ASSETS'],
 ];
 const toolIds=['pr','ae','ps','figma','blender','davinci','handbrake','ai'];
-const categories=['EDITING & AUDIO','MOTION & COMPOSITING','IMAGE & ARTWORK','DESIGN & INTERACTION','3D & LIGHTING','COLOR & FINISHING','ENCODING & DELIVERY','VECTOR & IDENTITY'];
 const clamp=(n:number)=>Math.max(0,Math.min(1,n));
 const tickerCopy='AVAILABLE FOR FREELANCE & CREATIVE DIRECTION ✳ BENGALURU, IN ✳ ';
 
@@ -37,7 +36,7 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
   const rows=Array.from(el.querySelectorAll<HTMLElement>('.kinetic-discipline'));
   const tiles=Array.from(el.querySelectorAll<HTMLElement>('.hardware-tool'));
   const dock=el.querySelector<HTMLElement>('.hardware-dock')!;
-  const stage=el.querySelector<HTMLElement>('.workflow-hardware-stage')!, status=el.querySelector<HTMLElement>('.workflow-status')!, trace=el.querySelector<SVGPathElement>('.workflow-trace path')!;
+  const stage=el.querySelector<HTMLElement>('.workflow-hardware-stage')!, trace=el.querySelector<SVGPathElement>('.workflow-trace path')!;
   const preview=el.querySelector<HTMLElement>('.discipline-preview')!,video=preview.querySelector('video')!;
   const contact=el.querySelector<HTMLElement>('.story-contact')!,portal=el.querySelector<HTMLElement>('.copy-orbit')!;
   const ticker=el.querySelector<HTMLElement>('.contact-ticker-track')!;
@@ -66,8 +65,7 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
    const decode=motion?clamp((now-decodeAt)/220):1;
    hudName.textContent=modules[active][1];hudName.style.transform=`translateY(${(1-decode)*22}px)`;hudName.style.opacity=String(decode);
    modules[active][3].split(' • ').forEach((tag,i)=>hudTags[i].textContent=tag);
-   status.textContent=`● ACTIVE NODE // ${categories[active]}`;
-   stage.style.setProperty('--brand-color',modules[active][2]);status.style.color=modules[active][2];
+   stage.style.setProperty('--brand-color',modules[active][2]);
    const stageWidth=dock.clientWidth, tx=centers[active].x-(width-stageWidth)/2;
    stage.style.setProperty('--tile-x',`${tx}px`);
    const tipY=centers[active].y+centers[active].h/2+lifts[active]-(dockY+dockHeight);
@@ -93,7 +91,7 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
   <div className="discipline-preview" aria-hidden="true"><video muted loop playsInline preload="none"/><i/></div>
   <section className="story-workflow story-chapter kinetic-workflow" aria-labelledby="workflow-title">
    <LiquidDivider engine={engine} dark/>
-   <header className="workflow-heading"><div><span className="chapter-kicker">[ 03 / THE STACK ]</span><h2 id="workflow-title">INSIDE THE<br/>WORKFLOW.</h2></div><span className="workflow-status">● ACTIVE NODE // EDITING &amp; AUDIO</span></header>
+   <header className="workflow-heading"><div><span className="chapter-kicker">[ 03 / THE STACK ]</span><h2 id="workflow-title">INSIDE THE<br/>WORKFLOW.</h2></div></header>
    <div className="workflow-hardware-stage">
     <div className="hardware-dock" onPointerLeave={()=>pointer.current.tool=-1}>{modules.map((tool,i)=><button className="hardware-tool" key={tool[0]} aria-label={tool[1]} style={{'--tool-brand':tool[2]} as CSSProperties} onPointerEnter={()=>pointer.current.tool=i} onFocus={()=>pointer.current.tool=i} onBlur={()=>pointer.current.tool=-1} onClick={()=>pointer.current.tool=i}>
      <i className="hardware-reflection"/>{[4,8,11,14].map(z=><i className="hardware-depth" key={z} style={{transform:`translateZ(${-z}px)`}}/>)}<span className="hardware-face"/><span className="hardware-glyph"><SoftwareEmblem software={toolIds[i]}/></span>
