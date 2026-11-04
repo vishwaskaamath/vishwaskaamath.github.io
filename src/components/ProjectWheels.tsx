@@ -7,7 +7,6 @@ import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
 import SoftwareTile from "./SoftwareTile";
-import WarpedText from "./WarpedText";
 import VideoBezel from "./VideoBezel";
 
 export default function ProjectWheels({
@@ -46,7 +45,7 @@ export default function ProjectWheels({
     const element = root.current!;
     const cards = Array.from(element.querySelectorAll<HTMLElement>("[data-video]"));
     const icons = Array.from(element.querySelectorAll<HTMLElement>("[data-software]"));
-    const captions = Array.from(element.querySelectorAll<HTMLElement>("[data-tool-caption]"));
+    const captions = Array.from(element.closest('.work-scene')!.querySelectorAll<HTMLElement>("[data-tool-caption]"));
     const videos = Array.from(element.querySelectorAll<HTMLVideoElement>("video"));
     const centerTitle = element.closest('.work-scene')!.querySelector<HTMLElement>('.project-metadata')!;
     const activeLogoGroup = element.querySelector<HTMLElement>('.software-wheel')!;
@@ -111,7 +110,6 @@ export default function ProjectWheels({
         icons[i].style.setProperty('--light-angle',`${135-d*40}deg`);
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
-        captions[i].style.transform = `translate3d(0, ${d * 100}%, 0)`;
         captions[i].style.opacity = String(focus);
         captions[i].style.visibility = distance < 1.5 ? "visible" : "hidden";
       });
@@ -136,28 +134,6 @@ export default function ProjectWheels({
     if(assetsReady())hydrate();
     resize();
     const unsubscribe = engine.subscribe(render);
-    const toolkit=element.querySelector<HTMLElement>('.tool-caption')!;
-    // Convert viewport bounds to the translated wheel's local coordinate space.
-    // This follows the primary slab, including its real 3D orbit and hover tilt.
-    const captionHome=toolkit.parentElement!;
-    document.body.appendChild(toolkit);toolkit.classList.add('toolkit-viewport');
-    let previousCaption='';
-    const stopCaption=subscribeTicker(()=>{
-      const hidden=!!element.closest('[inert]')||engine.read().handoff>=1||engine.view!=='work'||document.documentElement.dataset.loading==='true'||document.documentElement.dataset.storyTransition==='true';
-      toolkit.style.visibility=hidden?'hidden':'visible';toolkit.setAttribute('aria-hidden',String(hidden));toolkit.style.opacity=String(1-engine.read().handoff);
-      if(hidden)return;
-      const frame=engine.read();let weight=0,x=0,y=0;
-      icons.forEach((icon,i)=>{
-        const d=reelOffset(i,frame.currentScroll,projects.length),w=Math.exp(-8*d*d);
-        if(w<.001)return;
-        const cube=icon.querySelector<HTMLElement>('[data-orbit-cube]');if(!cube)return;
-        const box=cube.getBoundingClientRect();weight+=w;x+=(box.left+box.width/2)*w;y+=(box.bottom+(mobile?22:Math.max(12,innerWidth*.052-box.height/2)))*w;
-      });
-      if(!weight)return;x/=weight;y/=weight;
-      const key=`${x.toFixed(2)},${y.toFixed(2)}`;
-      if(key===previousCaption)return;
-      previousCaption=key;toolkit.style.left=`${x}px`;toolkit.style.top=`${y}px`;toolkit.style.transform='translate3d(-50%,0,0)';
-    });
     const stopExpansion = subscribeTicker((_now,dt)=>{
       const target=options.current.expanded?1:0,previous=expandProgress.current;
       if(previous===target)return;
@@ -172,8 +148,6 @@ export default function ProjectWheels({
       window.removeEventListener("portfolio-assets-ready",hydrate);
       unsubscribe();
       stopExpansion();
-      stopCaption();
-      captionHome.appendChild(toolkit);toolkit.classList.remove('toolkit-viewport');
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       videos.forEach((video) => video.pause());
@@ -219,14 +193,6 @@ export default function ProjectWheels({
             <SoftwareTile software={project.tools[0].id} tools={project.tools} />
           </div>
         ))}
-        <div className="tool-caption">
-          {projects.map((project, i) => (
-            <div key={project.id} className="tool-caption-slot" data-tool-caption={i} aria-hidden={i !== index}>
-              <span className="micro-label"><WarpedText>THE TOOLKIT</WarpedText></span>
-              <span><WarpedText>{project.tools.map(tool => tool.label).join(" + ")}</WarpedText></span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

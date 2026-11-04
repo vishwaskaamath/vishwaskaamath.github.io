@@ -148,6 +148,14 @@ export default function Portfolio() {
         reducedMotion={reducedMotion}
         onBurst={burst}
       />
+      <div className="tool-caption toolkit-viewport work-toolkit-static" aria-hidden={engine.view !== 'work'}>
+        {projects.map((project, i) => (
+          <div key={project.id} className="tool-caption-slot" data-tool-caption={i} aria-hidden={i !== index}>
+            <span className="micro-label"><WarpedText>THE TOOLKIT</WarpedText></span>
+            <span><WarpedText>{project.tools.map(tool => tool.label).join(" + ")}</WarpedText></span>
+          </div>
+        ))}
+      </div>
       </div>
       <StoryNavigation engine={engine}/>
       <StoryStage engine={engine}/>

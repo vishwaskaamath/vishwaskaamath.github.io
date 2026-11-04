@@ -2105,6 +2105,8 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .story-transition-canvas,.loading-screen{z-index:999999!important;}
 html[data-loading="true"] .tool-caption.toolkit-viewport,
 html[data-story-transition="true"] .tool-caption.toolkit-viewport{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
+.work-toolkit-static{position:absolute!important;left:71.8vw!important;top:calc(50vh + 96px)!important;transform:translateX(-50%)!important;width:max-content;text-align:center;pointer-events:none;z-index:25;}
+.work-scene[style*="display: none"] .work-toolkit-static{visibility:hidden;}
 @media(max-width:470px){.workflow-hardware-stage .hardware-dock{grid-template-columns:repeat(2,100px);gap:30px 42px;}.workflow-hardware-stage .hardware-tool{width:100px;height:100px;}.inspection-tags{gap:7px}.inspection-tags span{font-size:9px;}}
 
 .hardware-glyph .adobe-symbol{color:var(--tool-brand)!important}
