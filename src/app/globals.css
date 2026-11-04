@@ -2120,4 +2120,14 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .video-card .video-surface,.video-card video{border-radius:inherit!important;width:100%;height:100%;object-fit:cover;}
 
 .software-ai .tile-emblem{display:grid;place-items:center}.software-ai .adobe-symbol{display:block;width:max-content;line-height:1;letter-spacing:-.055em;color:#FF9A00!important;transform:translateX(-.02em)}
-.software-ai .tile-rim{border-color:#F97316}.software-ai{background:#261002}
+.software-cube .software-ai{background:#330000;border-color:#747474;}
+.software-cube .software-ai .tile-rim{border-color:#ffffff14;}
+.software-cube .software-ai .tile-hover-rim{display:none;}
+
+/* Resolve artwork already has its own rounded icon: remove the extra chassis. */
+.software-cube-davinci .software-cube-body{box-shadow:none;}
+.software-cube-davinci .software-tile{background:transparent;border:0;box-shadow:none;}
+[data-theme="light"] .software-cube-davinci .software-tile{box-shadow:none;}
+.software-cube-davinci .tile-rim,.software-cube-davinci .tile-spotlight,.software-cube-davinci .tile-hover-rim,.software-cube-davinci .tile-brand,.software-cube-davinci .tile-screw{display:none;}
+.software-cube-davinci .tile-emblem{transform:translateZ(14px);}
+.software-cube-davinci .official-tool-logo{width:100%;height:100%;object-fit:contain;transform:scale(1.1);filter:drop-shadow(0 14px 18px #000a);}
