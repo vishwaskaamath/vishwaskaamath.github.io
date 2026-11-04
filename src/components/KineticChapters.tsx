@@ -27,10 +27,11 @@ const modules=[
 const toolIds=['pr','ae','ps','figma','blender','davinci','handbrake','ai'];
 const clamp=(n:number)=>Math.max(0,Math.min(1,n));
 const tickerCopy='AVAILABLE FOR FREELANCE & CREATIVE DIRECTION ✳ BENGALURU, IN ✳ ';
+let emailCopiedThisSession=false;
 
 export default function KineticChapters({engine}:{engine:ScrollPhysics}){
- const root=useRef<HTMLDivElement>(null),[copied,setCopied]=useState(false),[copyError,setCopyError]=useState(false);
- const pointer=useRef({x:0,y:0,row:-1,tool:-1,contact:false});
+ const root=useRef<HTMLDivElement>(null),[copied,setCopied]=useState(emailCopiedThisSession),[copyError,setCopyError]=useState(false);
+ const pointer=useRef({x:0,y:0,row:-1,tool:-1});
  useLayoutEffect(()=>{
   const el=root.current!,story=el.closest<HTMLElement>('.story-stage')!;
   const rows=Array.from(el.querySelectorAll<HTMLElement>('.kinetic-discipline'));
@@ -38,14 +39,13 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
   const dock=el.querySelector<HTMLElement>('.hardware-dock')!;
   const stage=el.querySelector<HTMLElement>('.workflow-hardware-stage')!, trace=el.querySelector<SVGPathElement>('.workflow-trace path')!;
   const preview=el.querySelector<HTMLElement>('.discipline-preview')!,video=preview.querySelector('video')!;
-  const contact=el.querySelector<HTMLElement>('.story-contact')!,portal=el.querySelector<HTMLElement>('.copy-orbit')!;
   const ticker=el.querySelector<HTMLElement>('.contact-ticker-track')!;
   const hudName=el.querySelector<HTMLElement>('[data-module-name]')!,hudTags=Array.from(el.querySelectorAll<HTMLElement>('[data-module-tag]'));
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  let height=innerHeight,width=innerWidth,rowsY:number[]=[],dockY=0,dockHeight=1,contactY=0,contactX=0,centers:{x:number;y:number;h:number}[]=[];
-  let active=-1,decodeAt=0,lastPreview=-1,px=0,py=0,cx=0,cy=0,visible=0,tickerX=0,tickerWidth=1,lastScroll=0,speed=0;
+  let height=innerHeight,width=innerWidth,rowsY:number[]=[],dockY=0,dockHeight=1,centers:{x:number;y:number;h:number}[]=[];
+  let active=-1,decodeAt=0,lastPreview=-1,px=0,py=0,visible=0,tickerX=0,tickerWidth=1,lastScroll=0,speed=0;
   const scales=modules.map(()=>1),lifts=modules.map(()=>0);
-  const measure=()=>{const origin=story.getBoundingClientRect().top;const d=dock.getBoundingClientRect(),c=contact.getBoundingClientRect();height=innerHeight;width=innerWidth;rowsY=rows.map(row=>row.getBoundingClientRect().top-origin);dockY=d.top-origin;dockHeight=d.height;contactY=c.top-origin;contactX=c.left;centers=tiles.map(tile=>{const r=tile.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top-origin+r.height/2,h:r.height};});tickerWidth=ticker.scrollWidth/2;};
+  const measure=()=>{const origin=story.getBoundingClientRect().top;const d=dock.getBoundingClientRect();height=innerHeight;width=innerWidth;rowsY=rows.map(row=>row.getBoundingClientRect().top-origin);dockY=d.top-origin;dockHeight=d.height;centers=tiles.map(tile=>{const r=tile.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top-origin+r.height/2,h:r.height};});tickerWidth=ticker.scrollWidth/2;};
   const resize=new ResizeObserver(measure);resize.observe(story);window.addEventListener('resize',measure);document.fonts.ready.then(()=>{if(el.isConnected)measure();});measure();
   const stop=subscribeTicker((now,dt)=>{
    const frame=engine.read(),scroll=frame.storyScrollY,shift=height-scroll,m=pointer.current;
@@ -75,11 +75,10 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
    if(dockVisible)tiles.forEach((tile,i)=>{const dist=Math.abs(i-active),goal=dist===0?1.22:dist===1?1.07:1;scales[i]=damp(scales[i],goal,12,dt);lifts[i]=damp(lifts[i],dist===0?-16:dist===1?-6:0,12,dt);const bob=motion?Math.sin(now*.0013+i*.8)*4:0;const nx=m.tool===i?Math.max(-1,Math.min(1,(m.x-centers[i].x)/65)):0,ny=m.tool===i?Math.max(-1,Math.min(1,(m.y-centers[i].y-shift)/65)):0;tile.style.transform=`translate3d(0,${lifts[i]+bob}px,0) rotateX(${-ny*10}deg) rotateY(${nx*12}deg) scale(${scales[i]})`;tile.dataset.active=String(i===active);});
    const delta=Math.abs(scroll-lastScroll)/Math.max(dt,.001);lastScroll=scroll;speed=damp(speed,Math.min(delta,1800),8,dt);
    if(motion)tickerX=(tickerX+dt*(30+speed*.12))%Math.max(1,tickerWidth);ticker.style.transform=`translate3d(${-tickerX}px,0,0)`;
-   cx=damp(cx,m.x-contactX,18,dt);cy=damp(cy,m.y-(contactY+shift),18,dt);portal.style.transform=`translate3d(${cx}px,${cy}px,0) translate(-50%,-50%) scale(${m.contact?1:0})`;
   });
   return()=>{stop();video.pause();resize.disconnect();window.removeEventListener('resize',measure);};
  },[engine]);
- const copy=async()=>{try{await navigator.clipboard.writeText(profile.email);setCopied(true);setCopyError(false);}catch{setCopyError(true);}};
+ const copy=async()=>{try{await navigator.clipboard.writeText(profile.email);emailCopiedThisSession=true;setCopied(true);setCopyError(false);}catch{setCopyError(true);}};
  return <div ref={root} className="kinetic-chapters" onPointerMove={e=>{pointer.current.x=e.clientX;pointer.current.y=e.clientY;}}>
   <section className="story-capabilities story-chapter kinetic-capabilities" aria-labelledby="capabilities-title">
    <LiquidDivider engine={engine}/>
@@ -102,11 +101,10 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
   </section>
   <section className="story-contact story-chapter kinetic-contact" aria-labelledby="contact-title">
    <div className="contact-ticker" aria-label={tickerCopy}><div className="contact-ticker-track" aria-hidden="true">{[0,1].map(i=><span key={i}>{tickerCopy.repeat(2)}</span>)}</div></div>
-   <div className="contact-copy-zone" onPointerEnter={e=>{if(e.pointerType==='mouse')pointer.current.contact=true;}} onPointerLeave={()=>pointer.current.contact=false}>
+   <div className="contact-copy-zone">
     <h2 id="contact-title"><button onClick={copy} aria-label="Copy email address"><WarpedText radius={130} smoothing={.1}>LET'S TALK</WarpedText></button></h2>
     <button className="copy-email" onClick={copy}><span>{copied?'COPIED ✓':profile.email}</span><b aria-hidden="true">↗</b></button>
    </div>
-   <div className="copy-orbit" data-copied={copied} aria-hidden="true"><span>{copied?'COPIED ✓':'CLICK TO\nCOPY EMAIL'}</span><i/><i/><i/><i/></div>
    <span className="copy-feedback" role="status">{copyError?'Copy unavailable — use EMAIL below.':copied?'Email address copied.':''}</span>
    <div className="contact-links"><a href={`mailto:${profile.email}`}>EMAIL ↗</a><a href="https://www.instagram.com/sydorm_/" target="_blank" rel="noreferrer">INSTAGRAM ↗</a><a href="https://www.linkedin.com/in/vishwas-kamath-717016369/" target="_blank" rel="noreferrer">LINKEDIN ↗</a></div>
    <div className="contact-bottom"><span>VISHWAS KAMATH © {new Date().getFullYear()}<br/>BENGALURU, IN</span><button onClick={()=>engine.onBoundary?.()}>BACK TO REEL ↑</button></div>

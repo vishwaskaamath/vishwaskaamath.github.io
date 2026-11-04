@@ -1717,7 +1717,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .chapter-top>span:last-child { font:9px monospace; letter-spacing:.1em; color:#f3efe680; }
 .story-intro { min-height:155vh; background:linear-gradient(135deg,#151416,#09090b 75%); overflow:hidden; }
 .story-intro:before { content:''; position:absolute; width:65vw; height:65vw; border:1px solid #f3efe60a; border-radius:50%; left:62%; top:15%; pointer-events:none; }
-.story-intro h2 { position:relative; font-size:clamp(4.5rem,10vw,9.5rem); line-height:.9; letter-spacing:.01em; padding-top:3vw; height:calc(clamp(4.5rem,10vw,9.5rem) * 1.84 + 3vw); }
+.story-intro h2 { position:relative; font-size:clamp(5.2rem,11.2vw,10.8rem); line-height:.9; letter-spacing:.01em; padding-top:3vw; height:calc(clamp(5.2rem,11.2vw,10.8rem) * 1.84 + 3vw); }
 .story-intro h2>span { margin-left:9vw; }
 .intro-star { display:inline-block; font:normal .68em sans-serif; color:#e8997f; margin-left:5vw; vertical-align:middle; transform:rotate(-15deg); }
 .intro-copy { max-width:800px; margin:5vw 0 7vw auto; font-size:clamp(1.2rem,1.8vw,2rem); line-height:1.65; }
@@ -1809,7 +1809,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 [data-theme="light"] .manifesto-node rect { fill:#f3efe6; }
 [data-theme="light"] .manifesto-node text { fill:#111113; }
 @media(max-width:759px) {
- .story-intro h2 { font-size:clamp(5rem,20vw,5.6rem); height:calc(clamp(4.5rem,10vw,9.5rem) * 1.84 + 3vw); }
+ .story-intro h2 { font-size:clamp(5.3rem,21vw,6.3rem); height:calc(clamp(5.3rem,21vw,6.3rem) * 1.84 + 3vw); }
  .manifesto-editorial { max-width:100%; }
  .about-manifesto .scroll-manifesto { font-size:clamp(1.65rem,6.4vw,2.1rem); }
  .manifesto-sticker { font-size:.62rem; padding:5px 9px; }
