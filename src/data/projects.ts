@@ -1,9 +1,9 @@
 export type Software = "ae" | "pr" | "figma" | "ps" | "jitter" | "davinci" | "ai";
 export type Tool = { id: Software; short: string; label: string; color: string };
 export const toolCatalog: Record<Software, Tool> = {
-  ae: { id: 'ae', short: 'Ae', label: 'After Effects', color: '#D291FF' },
-  pr: { id: 'pr', short: 'Pr', label: 'Premiere Pro', color: '#9999FF' },
-  ps: { id: 'ps', short: 'Ps', label: 'Photoshop', color: '#31A8FF' },
+  ae: { id: 'ae', short: 'Ae', label: 'After Effects', color: '#d896ff' },
+  pr: { id: 'pr', short: 'Pr', label: 'Premiere Pro', color: '#a389ff' },
+  ps: { id: 'ps', short: 'Ps', label: 'Photoshop', color: '#53c6ff' },
   figma: { id: 'figma', short: 'Figma', label: 'Figma', color: '#70efcd' },
   jitter: { id: 'jitter', short: 'Jitter', label: 'Jitter', color: '#d3ef8a' },
   davinci: { id: 'davinci', short: 'Da', label: 'DaVinci Resolve', color: '#10B981' },
