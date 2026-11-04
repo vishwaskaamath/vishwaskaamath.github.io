@@ -2095,3 +2095,10 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 [data-theme="light"] .inspection-tags span{border-color:#11111330;background:#11111308;}
 @media(max-width:1000px){.workflow-hardware-stage .hardware-dock{display:grid;grid-template-columns:repeat(4,clamp(88px,12vw,112px));gap:24px;}.workflow-hardware-stage .hardware-tool{width:clamp(88px,12vw,112px);height:clamp(88px,12vw,112px);}.workflow-heading{align-items:flex-start;flex-direction:column;gap:0;}.workflow-status{margin-bottom:28px;}.kinetic-workflow{padding-top:70px;padding-bottom:70px;}}
 @media(max-width:470px){.workflow-hardware-stage .hardware-dock{grid-template-columns:repeat(2,100px);gap:30px 42px;}.workflow-hardware-stage .hardware-tool{width:100px;height:100px;}.workflow-status{font-size:8px;}.inspection-tags{gap:7px}.inspection-tags span{font-size:9px;}}
+
+.hardware-glyph .adobe-symbol{color:var(--tool-brand)!important}
+.software-wheel .software-pr .adobe-symbol{color:#9999FF!important}.software-wheel .software-ae .adobe-symbol{color:#D291FF!important}.software-wheel .software-ps .adobe-symbol{color:#31A8FF!important}
+.official-tool-logo{width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 6px 12px #0007)}
+.tile-emblem .official-tool-logo{width:52%;height:52%}
+.hardware-tool:nth-child(1){--tool-brand:#9999FF!important}.hardware-tool:nth-child(2){--tool-brand:#D291FF!important}.hardware-tool:nth-child(3){--tool-brand:#31A8FF!important}.hardware-tool:nth-child(8){--tool-brand:#FF9A00!important}
+.hardware-tool:nth-child(1) .hardware-face{background:#13092b;border-color:#7C3AED}.hardware-tool:nth-child(2) .hardware-face{background:#160829;border-color:#A855F7}.hardware-tool:nth-child(3) .hardware-face{background:#04182b;border-color:#0078D4}.hardware-tool:nth-child(8) .hardware-face{background:#261002;border-color:#F97316}
