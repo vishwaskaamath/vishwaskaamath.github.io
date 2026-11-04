@@ -6,7 +6,7 @@ import { damp, subscribeTicker } from "@/lib/masterTicker";
 import type { WheelDrag } from "@/hooks/useProjectWheel";
 import { projects } from "@/data/projects";
 import { reelOffset, type ReelFrame, type ScrollPhysics } from "@/lib/scrollPhysics";
-import SoftwareTile from "./SoftwareTile";
+import EditTimeline,{editCraft} from "./EditTimeline";
 import WarpedText from "./WarpedText";
 import VideoBezel from "./VideoBezel";
 
@@ -72,7 +72,7 @@ export default function ProjectWheels({
       if (lastIndex !== active) {
         playback(active);
         lastIndex = active;
-        element.querySelector('.software-wheel')?.setAttribute('aria-label', `Creative tools for ${projects[active].shortTitle}`);
+        element.querySelector('.software-wheel')?.setAttribute('aria-label', `Edit sequence for ${projects[active].shortTitle}`);
         cards.forEach((card, i) => {
           const nearby = Math.abs(reelOffset(i, active, projects.length)) <= 1;
           card.classList.toggle('is-active', i === active);
@@ -107,7 +107,7 @@ export default function ProjectWheels({
         cards[i].style.zIndex = `${Math.round(10 - distance * 3 + focus*p*30)}`;
         const iconFade = mobile ? Math.max(0,1-distance) : Math.max(0,1-Math.pow(distance,1.5)*.55);
         const iconX=mobile?d*90:(1-Math.cos(theta))*width*.34-(1-focus)*p*width*.10;
-        icons[i].style.transform = `translate3d(${iconX}px, ${mobile?0:Math.sin(theta)*innerHeight*.52}px, 0) translate(-50%, -50%) rotateZ(${mobile?d*15:d*34+torque(scrollVelocity*4,10)}deg) scale(${.72+.28*Math.exp(-2*d*d)})`;
+        icons[i].style.transform = `translate3d(${iconX}px, ${mobile?0:Math.sin(theta)*innerHeight*.44}px, 0) translate(-50%, -50%) rotateZ(${mobile?d*15:d*34}deg) scale(${.72+.28*Math.exp(-2*d*d)})`;
         icons[i].style.setProperty('--light-angle',`${135-d*40}deg`);
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
@@ -150,7 +150,7 @@ export default function ProjectWheels({
       icons.forEach((icon,i)=>{
         const d=reelOffset(i,frame.currentScroll,projects.length),w=Math.exp(-8*d*d);
         if(w<.001)return;
-        const cube=icon.querySelector<HTMLElement>('[data-orbit-cube]');if(!cube)return;
+        const cube=icon.querySelector<HTMLElement>('[data-edit-sequence]');if(!cube)return;
         const box=cube.getBoundingClientRect();weight+=w;x+=(box.left+box.width/2)*w;y+=(box.bottom+(mobile?22:Math.max(12,innerWidth*.052-box.height/2)))*w;
       });
       if(!weight)return;x/=weight;y/=weight;
@@ -213,17 +213,17 @@ export default function ProjectWheels({
           );
         })}
       </div>
-      <div className="software-wheel" aria-label={`Creative tools for ${projects[index].shortTitle}`}>
+      <div className="software-wheel" aria-label={`Edit sequence for ${projects[index].shortTitle}`}>
         {projects.map((project, i) => (
           <div key={project.id} className="software-position" data-software={i} aria-hidden={i !== index}>
-            <SoftwareTile software={project.tools[0].id} tools={project.tools} />
+            <EditTimeline project={project} index={i} />
           </div>
         ))}
         <div className="tool-caption">
           {projects.map((project, i) => (
             <div key={project.id} className="tool-caption-slot" data-tool-caption={i} aria-hidden={i !== index}>
-              <span className="micro-label"><WarpedText>THE TOOLKIT</WarpedText></span>
-              <span><WarpedText>{project.tools.map(tool => tool.label).join(" + ")}</WarpedText></span>
+              <span className="micro-label"><WarpedText>EDIT TELEMETRY</WarpedText></span>
+              <span><WarpedText>{editCraft(project)}</WarpedText></span>
             </div>
           ))}
         </div>
