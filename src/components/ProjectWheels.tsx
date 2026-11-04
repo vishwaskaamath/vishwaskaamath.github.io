@@ -57,7 +57,7 @@ export default function ProjectWheels({
     let lastPaused = true;
 
     const playback = (active: number) => {
-      const isPaused = options.current.paused || document.hidden || engine.read().handoff>=1 || !assetsReady();
+      const isPaused = options.current.paused || document.hidden || engine.read().handoff>=1 || !assetsReady() || engine.view!=='work' || Math.abs(engine.read().scrollVelocity)>=.08 || Math.abs(reelOffset(active,engine.read().currentScroll,projects.length))>=.35;
       videos.forEach(video=>video.pause());
       videos.forEach((video, i) => {
         if (i === active && !isPaused) void video.play().catch(() => {});
@@ -66,6 +66,7 @@ export default function ProjectWheels({
       lastPaused = isPaused;
     };
     const render = (frame: ReelFrame) => {
+      if(engine.view!=='work'){videos.forEach(video=>video.pause());lastPaused=true;return;}
       const p = expandProgress.current;
       const { currentScroll, scrollVelocity, index: active } = frame;
       if (lastIndex !== active) {
@@ -82,7 +83,7 @@ export default function ProjectWheels({
           icons[i].setAttribute('aria-hidden', String(i !== active));
           captions[i].setAttribute('aria-hidden', String(i !== active));
         });
-      } else if (lastPaused !== (options.current.paused || document.hidden || frame.handoff>=1 || !assetsReady())) playback(active);
+      } else if (lastPaused !== (options.current.paused || document.hidden || frame.handoff>=1 || !assetsReady() || engine.view!=='work' || Math.abs(scrollVelocity)>=.08 || Math.abs(reelOffset(active,currentScroll,projects.length))>=.35)) playback(active);
       element.style.setProperty("--reel-glitch", `${Math.min(0.15, Math.abs(scrollVelocity) * 0.06)}`);
       centerTitle.style.transform = `translate3d(calc(-50% + ${mobile ? 0 : p*16.5}vw), -50%, 0)`;
       activeLogoGroup.style.transform = `translate3d(${mobile ? 0 : p*12.5}vw,0,0)`;
@@ -91,7 +92,7 @@ export default function ProjectWheels({
         const d = reelOffset(i, currentScroll, projects.length);
         const distance = Math.abs(d);
         const theta = d * .68;
-        const visible = distance < 2;
+        const visible = distance < 1.45;
         const focus = Math.exp(-8*d*d);
         const fade = Math.max(0,1-Math.pow(distance,1.5)*.55);
         const scale = .64+.36*Math.exp(-1.8*d*d);

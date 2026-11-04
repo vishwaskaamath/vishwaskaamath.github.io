@@ -9,9 +9,10 @@ export default function StoryStage({engine}:{engine:ScrollPhysics}){
  useLayoutEffect(()=>{
   const el=root.current!,work=document.querySelector<HTMLElement>('.work-scene')!,videoWheel=work.querySelector<HTMLElement>('.video-wheel')!,software=work.querySelector<HTMLElement>('.software-wheel')!,title=work.querySelector<HTMLElement>('.project-metadata')!;
   let height=innerHeight;let lastHidden=false;
-  const measure=()=>{height=innerHeight;engine.configureStory(el.offsetHeight,height);engine.invalidate();};
+  const measure=()=>{height=innerHeight;if(el.offsetHeight>0)engine.configureStory(el.offsetHeight,height);engine.invalidate();};
   const observer=new ResizeObserver(measure);observer.observe(el);window.addEventListener('resize',measure);document.fonts.ready.then(()=>{if(el.isConnected)measure();});measure();
   const update=()=>{const f=engine.read(),p=f.handoff;
+   el.style.display=engine.view==='about'?'':'none';work.style.display=engine.view==='work'?'':'none';
    el.style.transform=`translate3d(0,${height-f.storyScrollY}px,0)`;
    el.style.visibility=f.storyScrollY>0?'visible':'hidden';el.inert=f.storyScrollY<=0;
    videoWheel.style.translate=`${-12*p}vw ${-8*p}vh`;videoWheel.style.opacity=String(1-p);

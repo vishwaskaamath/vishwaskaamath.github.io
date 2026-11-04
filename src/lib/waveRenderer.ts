@@ -3,7 +3,7 @@ export type RibbonDynamics={mouseX:number;mouseY:number;energy:number;palette?:r
 const rgb=(hex:string)=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
 /** Soft volumetric field, without contour lines, mesh strokes, or per-frame blur filters. */
 export function createWaveRenderer(canvas:HTMLCanvasElement){
- const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return null;
+ const ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});if(!ctx)return null;
  const fog=document.createElement('canvas'),f=fog.getContext('2d')!;
  let width=1,height=1,colors=[[139,92,246],[16,185,129],[0,184,201]];
  const watermark=document.createElement('canvas'),wc=watermark.getContext('2d')!;let watermarkKey='';
@@ -15,7 +15,7 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
  const draw=(time:number,_pulses:ContourPulse[]=[],light=false,d:RibbonDynamics={mouseX:width/2,mouseY:height/2,energy:0})=>{
   const dt=d.dt??1/60,k=1-Math.exp(-2.4*dt),palette=d.palette??['#8B5CF6','#10B981','#00B8C9'];
   colors=colors.map((c,i)=>c.map((v,j)=>v+(rgb(palette[i])[j]-v)*k));
-  ctx.globalCompositeOperation='source-over';ctx.fillStyle=light?'#F3EFE6':'#08080b';ctx.fillRect(0,0,width,height);
+  ctx.globalCompositeOperation='source-over';ctx.fillStyle=light?'#F3EFE6':'#09090b';ctx.fillRect(0,0,width,height);
   f.clearRect(0,0,fog.width,fog.height);f.globalCompositeOperation='screen';
   flowSpeed+=(.12+Math.min(1,Math.abs(d.velocity??0))*.08-flowSpeed)*(1-Math.exp(-2*dt));flow+=dt*flowSpeed;
   const energy=Math.min(3,d.energy),mx=d.mouseX/width-.5,my=d.mouseY/height-.5;
@@ -45,11 +45,11 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
   ribbonMouseX+=(d.mouseX-ribbonMouseX)*cursorLerp;ribbonMouseY+=(d.mouseY-ribbonMouseY)*cursorLerp;
   ctx.shadowBlur=0;ctx.lineCap='round';ctx.lineJoin='round';
   ctx.save();ctx.globalAlpha=d.ribbonAlpha??1;
-  const paths:Path2D[]=[];
-  for(let i=0;i<16;i++){
-   const points:{x:number;y:number}[]=[],v=i/15*2-1;
-   for(let j=0;j<=90;j++){
-    const x=j*width/90,u=x/width,twist=u*Math.PI*3.4-flow;
+  const paths:Path2D[]=[],groups=[new Path2D(),new Path2D(),new Path2D()];
+  for(let i=0;i<12;i++){
+   const points:{x:number;y:number}[]=[],v=i/11*2-1;
+   for(let j=0;j<=36;j++){
+    const x=j*width/36,u=x/width,twist=u*Math.PI*3.4-flow;
     const baseY=height*.5+(d.story?( .5-u)*height*.18:0)+Math.sin(u*Math.PI*2.1-flow)*Math.min(100,height*.11)+v*Math.sin(twist)*Math.min(70,height*.075);
     const dx=x-ribbonMouseX,dy=baseY-ribbonMouseY;
     const gaussianX=Math.exp(-(dx*dx)/(2*165*165)),gaussianY=Math.exp(-(dy*dy)/(2*140*140));
@@ -59,8 +59,9 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
    const path=new Path2D();path.moveTo(points[0].x,points[0].y);
    for(let j=1;j<points.length-1;j++){const p=points[j],next=points[j+1];path.quadraticCurveTo(p.x,p.y,(p.x+next.x)/2,(p.y+next.y)/2);}
    const tail=points[points.length-1];path.lineTo(tail.x,tail.y);paths.push(path);
-   const edge=Math.abs(v);ctx.strokeStyle=`rgba(${edge>.8?'255,115,62':'255,77,28'},${.3+edge*.35})`;ctx.lineWidth=.9+edge*.3;ctx.stroke(path);
+   groups[Math.min(2,Math.floor(i/4))].addPath(path);
   }
+  groups.forEach((path,i)=>{ctx.strokeStyle=['rgba(165,38,10,.4)','rgba(255,77,28,.55)','rgba(255,115,62,.65)'][i];ctx.lineWidth=.9+i*.15;ctx.stroke(path);});
   // The full cached spline is stroked: only a continuous gradient window moves.
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.shadowBlur=0;
   for(let i=0;i<4;i++){

@@ -6,7 +6,6 @@ import { SoftwareIcon } from './SoftwareIcon';
 export default function SoftwareCube3D({tool}: {tool: Tool}) {
   return <div className="software-cube" data-orbit-cube={tool.id} style={{'--brand-glow':tool.color} as CSSProperties}>
     <div className="software-cube-body">
-      {[20,16,12,8,4].map(depth=><div key={depth} className="software-backplate" style={{transform:`translateZ(-${depth}px)`}} aria-hidden="true"/>)}
       <SoftwareIcon software={tool.id}/>
     </div>
   </div>;

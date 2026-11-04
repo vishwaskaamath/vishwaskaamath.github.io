@@ -21,7 +21,7 @@ export function SoftwareIcon({ software }: { software: Software }) {
 }
 
 const brandAssets:Record<string,string>={figma:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/figma/figma-original.svg',blender:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/blender/blender-original.svg',davinci:'https://upload.wikimedia.org/wikipedia/commons/4/4d/DaVinci_Resolve_Studio.png',handbrake:'/logos/handbrake.png'};
-export function SoftwareEmblem({software}: {software: string}) { return <>{brandAssets[software] ? <img className="official-tool-logo" src={brandAssets[software]} alt="" draggable={false} onError={e=>{const fallback=`/logos/${software}.png`;if(e.currentTarget.getAttribute('src')!==fallback)e.currentTarget.src=fallback;}}/> : software === "jitter" ? (
+export function SoftwareEmblem({software}: {software: string}) { return <>{brandAssets[software] ? <img decoding="async" loading="eager" className="official-tool-logo" src={brandAssets[software]} alt="" draggable={false} onError={e=>{const fallback=`/logos/${software}.png`;if(e.currentTarget.getAttribute('src')!==fallback)e.currentTarget.src=fallback;}}/> : software === "jitter" ? (
         <svg viewBox="0 0 100 100" className="jitter-symbol" aria-hidden="true">
           <path
             d="M26 23v34c0 17 10 25 25 25s25-10 25-25V23M40 23v34c0 7 3 11 11 11s11-5 11-11V23"
