@@ -2147,14 +2147,9 @@ html[data-story-transition="true"] .tool-caption.toolkit-viewport{opacity:0!impo
 
 /* Match the Photoshop and After Effects tile faces to their app colors. */
 .software-cube .software-ps{background:#001e36;}
-.software-cube .software-ae{background:linear-gradient(145deg,#15151c 0%,#0b0b0f 100%);}
+.software-cube .software-ae{background:#00005b;}
 .software-wheel .software-ae .adobe-symbol{color:#9999ff!important;}
 .workflow-hardware-stage .hardware-tool:nth-child(2){--tool-brand:#9999ff!important;}
 .workflow-hardware-stage .hardware-tool:nth-child(2) .hardware-face{background:#00005b;}
 .workflow-hardware-stage .hardware-tool:nth-child(3) .hardware-face{background:#001e36;}
 .workflow-hardware-stage .hardware-tool:nth-child(8) .hardware-glyph .adobe-symbol{display:block;width:max-content;transform:translate(-.14em,-.04em);}
-.work-scene{--right-axis-x:73.5vw;}
-.software-wheel{left:var(--right-axis-x);top:calc(50vh - 12px);width:136px;}
-.software-position{left:0;top:0;width:136px;height:136px;aspect-ratio:auto;margin-left:-68px;margin-top:-68px;}
-.software-position .software-orbit-stage>.software-cube{left:50%;top:50%;width:124px;height:124px;margin-left:-62px;margin-top:-62px;}
-.work-toolkit-static{left:var(--right-axis-x)!important;top:calc(50vh + 88px)!important;}

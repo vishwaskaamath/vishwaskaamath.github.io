@@ -5,7 +5,20 @@ import { toolCatalog, type Software, type Tool } from '@/data/projects';
 import { subscribeTicker, damp } from '@/lib/masterTicker';
 import SoftwareCube3D from './SoftwareCube3D';
 
-const RESTING_PHASE = -0.55;
+type Pose = { x: number; y: number; scale: number; angle: number };
+
+function restingPose(index: number, count: number): Pose {
+  if (count === 2) {
+    return index === 0
+      ? { x: -24, y: -16, scale: .84, angle: -6 }
+      : { x: 28, y: 18, scale: .76, angle: 7 };
+  }
+  return [
+    { x: -28, y: -18, scale: .78, angle: -8 },
+    { x: 28, y: -6, scale: .73, angle: 6 },
+    { x: 0, y: 26, scale: .68, angle: 2 },
+  ][index] ?? { x: 0, y: 26 + (index - 2) * 16, scale: .68, angle: 2 };
+}
 
 export default function SoftwareTile({
   software,
@@ -21,9 +34,12 @@ export default function SoftwareTile({
     let mouseX = -10000;
     let mouseY = -10000;
     let blend = 0;
-    let phase = RESTING_PHASE;
+    let phase = Math.PI / 2;
     let tiltX = 0;
     let tiltY = 0;
+    let cubeSize = el.clientWidth;
+    const resize = new ResizeObserver(() => { cubeSize = el.clientWidth; });
+    resize.observe(el);
 
     const move = (event: PointerEvent) => {
       mouseX = event.clientX;
@@ -53,7 +69,6 @@ export default function SoftwareTile({
       // Damping is time-correct so the same hover gesture feels consistent at 60–240 Hz.
       blend = damp(blend, hovering ? 1 : 0, 3.7, dt);
       if (hovering && count > 1) phase += dt * .85 * blend;
-      else phase = damp(phase, RESTING_PHASE, 3.7, dt);
       tiltX = damp(tiltX, hovering ? -dy / 120 * 16 : 0, 10, dt);
       tiltY = damp(tiltY, hovering ? dx / 120 * 16 : 0, 10, dt);
 
@@ -63,16 +78,28 @@ export default function SoftwareTile({
           cube.style.zIndex = '30';
           cube.style.filter = 'none';
         } else {
+          const rest = restingPose(index, count);
           const angle = phase + index * Math.PI * 2 / count;
-          const depth = Math.cos(angle);
-          const depthNorm = (depth + 1) * .5;
-          const x = Math.sin(angle) * 24;
-          const y = -depth * 5;
-          const scale = .82 + .18 * depthNorm;
-          cube.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale}) rotateZ(${Math.sin(angle) * 5}deg)`;
-          cube.style.zIndex = String(Math.round(50 + depth * 30));
-          cube.style.opacity = String(.45 + .55 * depthNorm);
-          cube.style.filter = `brightness(${.65 + .35 * depthNorm})`;
+          const depth = Math.sin(angle);
+          const baseScale = count >= 3 ? .72 : .80;
+          // Wider than the visible face at either depth-swap turnaround.
+          const radiusX = Math.max(66, cubeSize * (count >= 3 ? .74 : .45));
+          const radiusY = Math.max(42, cubeSize * (count >= 3 ? .74 : .29));
+          const orbitScale = baseScale * (.85 + .22 * (depth + 1) * .5);
+          const x = rest.x * (1 - blend) + Math.cos(angle) * radiusX * blend;
+          const y = rest.y * (1 - blend) + Math.sin(angle) * radiusY * blend;
+          const scale = rest.scale * (1 - blend) + orbitScale * blend;
+          const rotation = rest.angle * (1 - blend) + Math.cos(angle) * 7 * blend;
+          const layer = (1 - blend) * (count - index) + blend * depth;
+          const brightness = .72 + .32 * (
+            (depth + 1) * .5 * blend + (1 - blend) * (index === 0 ? 1 : .4)
+          );
+
+          // All orbiting faces stay in one plane. Layer swaps happen at the
+          // outside turnaround, avoiding intersecting 3D planes.
+          cube.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale}) rotateZ(${rotation}deg)`;
+          cube.style.zIndex = String(Math.round(50 + layer * 25));
+          cube.style.filter = `brightness(${brightness})`;
         }
         cube.style.setProperty('--tile-light', String(blend));
         cube.style.setProperty('--light-x', `${50 + Math.max(-1, Math.min(1, dx / 120)) * 50}%`);
@@ -81,6 +108,7 @@ export default function SoftwareTile({
     });
     return () => {
       stop();
+      resize.disconnect();
       window.removeEventListener('pointermove', move);
       window.removeEventListener('blur', leave);
     };
