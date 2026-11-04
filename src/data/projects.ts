@@ -88,8 +88,8 @@ export const projects: Project[] = [
     shortTitle: "Art that is Music",
     role: "VIDEO EDITING",
     year: "2026",
-    software: "pr",
-    tools: [toolCatalog.pr, toolCatalog.ae, toolCatalog.ps],
+    software: "ae",
+    tools: [toolCatalog.ae, toolCatalog.pr, toolCatalog.ps],
     video: "/media/music.mp4",
     poster: "/media/music.jpg",
     color: "#8ebbd3",
@@ -143,14 +143,14 @@ export const projects: Project[] = [
     "shortTitle": "Iconic",
     "role": "VIDEO EDITING",
     "year": "2026",
-    "software": "pr",
+    "software": "ps",
     "video": "/media/iconic.mp4",
     "poster": "/media/iconic.jpg",
     "color": "#b7adff",
     accentPalette: ['#A855F7', '#3B82F6', '#D95635'],
     "kind": "GAMING EDIT",
     "description": "A cinematic tribute to an iconic weapon in gaming.",
-    tools: [toolCatalog.pr, toolCatalog.ae]
+    tools: [toolCatalog.ps, toolCatalog.pr]
   },
   {
     "id": "oscar",
