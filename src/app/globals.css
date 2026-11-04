@@ -2118,14 +2118,18 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .video-card .video-aperture{inset:12px!important;border-radius:6% / 8%!important;overflow:hidden!important;}
 .video-card .video-surface,.video-card video{border-radius:inherit!important;width:100%;height:100%;object-fit:cover;}
 
-.software-ai .tile-emblem{display:grid;place-items:center}.software-ai .adobe-symbol{display:block;width:max-content;line-height:1;letter-spacing:-.055em;color:#FF9A00!important;transform:translateX(-.02em)}
-.software-ai .tile-rim{border-color:#F97316}.software-ai{background:#261002}
-
-/* Match the supplied app artwork and let Resolve's color mark stand on its own. */
-.hardware-glyph .official-tool-logo[src$="/illustrator.png"],.hardware-glyph .official-tool-logo[src$="/premiere.png"]{width:100%;height:100%;border-radius:20%;}
-.software-ai .official-tool-logo,.software-pr .official-tool-logo{width:72%;height:72%;border-radius:19%;}
-.software-cube-davinci .software-backplate,.software-cube-davinci .tile-rim,.software-cube-davinci .tile-spotlight,.software-cube-davinci .tile-hover-rim,.software-cube-davinci .tile-screw,.software-cube-davinci .tile-brand{display:none;}
-.software-cube-davinci .software-tile{background:transparent;border:0;box-shadow:none;}
-.software-cube-davinci .tile-emblem{transform:translateZ(16px);}
-.software-cube-davinci .official-tool-logo{width:96%;height:96%;mix-blend-mode:screen;filter:drop-shadow(0 14px 18px #0009);}
+/* One dark glass chassis; Adobe brand color lives in the glyph, bevel and glow. */
+.software-pr{--tile-brand:#9999FF}.software-ae{--tile-brand:#D291FF}.software-ps{--tile-brand:#31A8FF}.software-ai{--tile-brand:#FF9A00}.software-davinci{--tile-brand:#5ccad0}
+.software-cube .software-tile{background:linear-gradient(145deg,#15151c 0%,#0b0b0f 100%);border:1px solid #f3efe630;box-shadow:inset 0 1px 1px #ffffff2c,0 12px 20px #000b;}
+.software-cube .tile-rim{border:1px solid color-mix(in srgb,var(--tile-brand,#aaa) 40%,transparent);background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--tile-brand,#aaa) 14%,transparent),transparent 72%);}
+.software-cube .adobe-symbol{display:block;width:max-content;line-height:1;letter-spacing:-.055em;color:var(--tile-brand)!important;transform:translateY(-2%);text-shadow:0 1px 0 #ffffff55,0 7px 15px #0009;}
+.software-cube .tile-brand{color:color-mix(in srgb,var(--tile-brand,#aaa) 66%,#f3efe6);}
+.software-cube-davinci .software-tile{background:linear-gradient(145deg,#15151c,#0b0b0f);border:1px solid #f3efe630;box-shadow:inset 0 1px 1px #ffffff2c,0 12px 20px #000b;}
+.software-cube-davinci .tile-rim,.software-cube-davinci .tile-brand{display:block;}
+.software-cube-davinci .tile-spotlight,.software-cube-davinci .tile-hover-rim,.software-cube-davinci .tile-screw{display:none;}
+.software-cube-davinci .official-tool-logo,.hardware-tool[data-tool="davinci"] .official-tool-logo{width:100%;height:100%;object-fit:contain;transform:scale(1.22);clip-path:circle(27% at 50% 50%);mix-blend-mode:screen;filter:none;}
+.hardware-tool[data-tool="davinci"] .hardware-reflection{display:none;}
+.workflow-hardware-stage .hardware-face{background:linear-gradient(145deg,#15151c,#0b0b0f);border:1px solid color-mix(in srgb,var(--tool-brand) 40%,transparent);box-shadow:inset 0 0 0 3px #0b0b0f,inset 0 0 28px color-mix(in srgb,var(--tool-brand) 14%,transparent),0 16px 24px #0006;}
+.workflow-hardware-stage .hardware-glyph .adobe-symbol{color:var(--tool-brand)!important;display:block;width:max-content;line-height:1;transform:translateY(-2%);text-shadow:0 1px 0 #ffffff55,0 7px 15px #0009;}
+.hardware-brand{position:absolute;left:4%;right:4%;bottom:8%;z-index:2;transform:translateZ(18px);color:color-mix(in srgb,var(--tool-brand) 65%,#f3efe6);font:600 6px/1 var(--mono);letter-spacing:.08em;text-align:center;pointer-events:none;white-space:nowrap;}
 @media(min-width:760px){.video-wheel{width:clamp(390.31px,28.97796vw,520.42px);}}

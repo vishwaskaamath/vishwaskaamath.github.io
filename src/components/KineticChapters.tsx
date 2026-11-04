@@ -93,8 +93,8 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
    <LiquidDivider engine={engine} dark/>
    <header className="workflow-heading"><div><span className="chapter-kicker">[ 03 / THE STACK ]</span><h2 id="workflow-title">INSIDE THE<br/>WORKFLOW.</h2></div></header>
    <div className="workflow-hardware-stage">
-    <div className="hardware-dock" onPointerLeave={()=>pointer.current.tool=-1}>{modules.map((tool,i)=><button className="hardware-tool" key={tool[0]} aria-label={tool[1]} style={{'--tool-brand':tool[2]} as CSSProperties} onPointerEnter={()=>pointer.current.tool=i} onFocus={()=>pointer.current.tool=i} onBlur={()=>pointer.current.tool=-1} onClick={()=>pointer.current.tool=i}>
-     <i className="hardware-reflection"/>{[4,8,11,14].map(z=><i className="hardware-depth" key={z} style={{transform:`translateZ(${-z}px)`}}/>)}<span className="hardware-face"/><span className="hardware-glyph"><SoftwareEmblem software={toolIds[i]}/></span>
+    <div className="hardware-dock" onPointerLeave={()=>pointer.current.tool=-1}>{modules.map((tool,i)=><button className="hardware-tool" data-tool={toolIds[i]} key={tool[0]} aria-label={tool[1]} style={{'--tool-brand':tool[2]} as CSSProperties} onPointerEnter={()=>pointer.current.tool=i} onFocus={()=>pointer.current.tool=i} onBlur={()=>pointer.current.tool=-1} onClick={()=>pointer.current.tool=i}>
+     <i className="hardware-reflection"/>{[4,8,11,14].map(z=><i className="hardware-depth" key={z} style={{transform:`translateZ(${-z}px)`}}/>)}<span className="hardware-face"/><span className="hardware-glyph"><SoftwareEmblem software={toolIds[i]}/></span><span className="hardware-brand">{tool[1]}</span>
     </button>)}</div>
     <svg className="workflow-trace" width="100%" height="85" aria-hidden="true"><path fill="none" stroke="var(--brand-color)" strokeWidth="2"/></svg>
     <div className="inspection-deck" aria-label="Active workflow module"><div className="inspection-name"><strong data-module-name>PREMIERE PRO</strong></div><div className="inspection-tags">{[0,1,2].map(i=><span data-module-tag key={i}>{modules[0][3].split(' • ')[i]}</span>)}</div></div>

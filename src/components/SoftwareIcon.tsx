@@ -22,7 +22,7 @@ export function SoftwareIcon({ software }: { software: Software }) {
   );
 }
 
-const brandAssets:Record<string,string>={pr:'/logos/premiere.png',ai:'/logos/illustrator.png',figma:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/figma/figma-original.svg',blender:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/blender/blender-original.svg',davinci:'https://upload.wikimedia.org/wikipedia/commons/4/4d/DaVinci_Resolve_Studio.png',handbrake:'/logos/handbrake.png'};
+const brandAssets:Record<string,string>={figma:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/figma/figma-original.svg',blender:'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/blender/blender-original.svg',davinci:'https://upload.wikimedia.org/wikipedia/commons/4/4d/DaVinci_Resolve_Studio.png',handbrake:'/logos/handbrake.png'};
 export function SoftwareEmblem({software}: {software: string}) { return <>{brandAssets[software] ? <img decoding="async" loading="eager" className="official-tool-logo" src={brandAssets[software]} alt="" draggable={false} onError={e=>{const fallback=`/logos/${software}.png`;if(e.currentTarget.getAttribute('src')!==fallback)e.currentTarget.src=fallback;}}/> : software === "jitter" ? (
         <svg viewBox="0 0 100 100" className="jitter-symbol" aria-hidden="true">
           <path
