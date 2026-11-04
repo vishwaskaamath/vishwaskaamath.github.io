@@ -99,7 +99,7 @@ export default function ProjectMetadata({
           <div className="title-slot cinema-title-slot" data-title-slot={i} key={project.id} aria-hidden={i!==index} style={{visibility:i===index?'visible':'hidden'}}>
             <h1 className="project-title">{project.title.map((line,j)=><span className={`title-solid ${j===1?'title-line-secondary':''}`} key={j}><WarpedText>{line}</WarpedText></span>)}</h1>
             <div className="metadata-slot cinema-metadata-row"><span className="role-badge"><WarpedText>{project.role}</WarpedText></span><span className="project-year">{project.year}</span></div>
-            <button className="view-project-button" onPointerDown={(event)=>{event.stopPropagation();dragRef.current.wasDragged=false;}} onMouseDown={(event)=>event.stopPropagation()} onClick={()=>{if(!dragRef.current.wasDragged)onView();}} tabIndex={i===index?0:-1}>{project.website ? "Watch walkthrough" : "View project"}</button>
+            {!project.website && <button className="view-project-button" onPointerDown={(event)=>{event.stopPropagation();dragRef.current.wasDragged=false;}} onMouseDown={(event)=>event.stopPropagation()} onClick={()=>{if(!dragRef.current.wasDragged)onView();}} tabIndex={i===index?0:-1}>View project</button>}
             {project.website && <a className="view-project-button website-project-link" href={project.website} target="_blank" rel="noopener noreferrer" onPointerDown={event=>{event.stopPropagation();dragRef.current.wasDragged=false;}} onClick={event=>{if(dragRef.current.wasDragged)event.preventDefault();}} tabIndex={i===index?0:-1}>Visit website ↗</a>}
           </div>
         ))}

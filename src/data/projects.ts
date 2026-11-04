@@ -1,4 +1,4 @@
-export type Software = "ae" | "pr" | "figma" | "ps" | "jitter";
+export type Software = "ae" | "pr" | "figma" | "ps" | "jitter" | "davinci" | "ai";
 export type Tool = { id: Software; short: string; label: string; color: string };
 export const toolCatalog: Record<Software, Tool> = {
   ae: { id: 'ae', short: 'Ae', label: 'After Effects', color: '#d896ff' },
@@ -6,6 +6,8 @@ export const toolCatalog: Record<Software, Tool> = {
   ps: { id: 'ps', short: 'Ps', label: 'Photoshop', color: '#53c6ff' },
   figma: { id: 'figma', short: 'Figma', label: 'Figma', color: '#70efcd' },
   jitter: { id: 'jitter', short: 'Jitter', label: 'Jitter', color: '#d3ef8a' },
+  davinci: { id: 'davinci', short: 'Da', label: 'DaVinci Resolve', color: '#10B981' },
+  ai: { id: 'ai', short: 'Ai', label: 'Illustrator', color: '#FF9A00' },
 };
 export type Project = {
   id: string;
@@ -35,8 +37,8 @@ export const projects: Project[] = [
     shortTitle: "SaaS in Motion",
     role: "MOTION GRAPHICS",
     year: "2026",
-    software: "ae",
-    tools: [toolCatalog.ae, toolCatalog.figma],
+    software: "ai",
+    tools: [toolCatalog.ai, toolCatalog.ae],
     video: "/media/pocket.mp4",
     poster: "/media/pocket.jpg",
     color: "#b7adff",
@@ -52,8 +54,8 @@ export const projects: Project[] = [
     shortTitle: "Cyberpunk 2077",
     role: "VIDEO EDITING",
     year: "2026",
-    software: "pr",
-    tools: [toolCatalog.pr, toolCatalog.ae],
+    software: "davinci",
+    tools: [toolCatalog.davinci],
     video: "/media/nightcity.mp4",
     poster: "/media/nightcity.jpg",
     color: "#d5ef72",
@@ -160,14 +162,14 @@ export const projects: Project[] = [
     "shortTitle": "Oscar Piastri",
     "role": "VIDEO EDITING",
     "year": "2026",
-    "software": "pr",
+    "software": "davinci",
     "video": "/media/oscar.mp4",
     "poster": "/media/oscar.jpg",
     "color": "#b7adff",
     accentPalette: ['#FF870F', '#DF4128', '#9760C9'],
     "kind": "MOTORSPORT EDIT",
     "description": "A fast-paced motorsport edit built around Oscar Piastri.",
-    tools: [toolCatalog.pr, toolCatalog.ae]
+    tools: [toolCatalog.davinci]
   },
   {
     "id": "induction",

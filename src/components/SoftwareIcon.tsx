@@ -6,6 +6,8 @@ const labels: Record<Software, string> = {
   ps: "Photoshop",
   figma: "Figma",
   jitter: "Jitter",
+  davinci: "DaVinci Resolve",
+  ai: "Illustrator",
 };
 export function SoftwareIcon({ software }: { software: Software }) {
   return (
