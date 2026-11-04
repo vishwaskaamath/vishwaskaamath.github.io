@@ -143,7 +143,7 @@ export default function ProjectWheels({
     document.body.appendChild(toolkit);toolkit.classList.add('toolkit-viewport');
     let previousCaption='';
     const stopCaption=subscribeTicker(()=>{
-      const hidden=!!element.closest('[inert]')||engine.read().handoff>=1;
+      const hidden=!!element.closest('[inert]')||engine.read().handoff>=1||engine.view!=='work'||document.documentElement.dataset.loading==='true'||document.documentElement.dataset.storyTransition==='true';
       toolkit.style.visibility=hidden?'hidden':'visible';toolkit.setAttribute('aria-hidden',String(hidden));toolkit.style.opacity=String(1-engine.read().handoff);
       if(hidden)return;
       const frame=engine.read();let weight=0,x=0,y=0;

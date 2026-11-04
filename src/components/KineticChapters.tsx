@@ -91,7 +91,7 @@ export default function KineticChapters({engine}:{engine:ScrollPhysics}){
   <div className="discipline-preview" aria-hidden="true"><video muted loop playsInline preload="none"/><i/></div>
   <section className="story-workflow story-chapter kinetic-workflow" aria-labelledby="workflow-title">
    <LiquidDivider engine={engine} dark/>
-   <header className="workflow-heading"><div><h2 id="workflow-title">INSIDE THE<br/>WORKFLOW.</h2></div></header>
+   <header className="workflow-heading"><div><span className="chapter-kicker">[ 03 / PIPELINE ]</span><h2 id="workflow-title">INSIDE THE<br/>WORKFLOW.</h2></div><p className="workflow-editorial">Every project moves through one connected pipeline—narrative assembly and <strong>rhythm cuts</strong> in Premiere, <strong>motion systems</strong> and compositing in After Effects, <strong>3D forms</strong> in Blender, and <strong>interactive interfaces</strong> in Figma. The timeline changes with the brief, but the focus on pacing, weight, and visual clarity stays the same.</p></header>
    <div className="workflow-hardware-stage">
     <div className="hardware-dock" onPointerLeave={()=>pointer.current.tool=-1}>{modules.map((tool,i)=><button className="hardware-tool" key={tool[0]} aria-label={tool[1]} style={{'--tool-brand':tool[2]} as CSSProperties} onPointerEnter={()=>pointer.current.tool=i} onFocus={()=>pointer.current.tool=i} onBlur={()=>pointer.current.tool=-1} onClick={()=>pointer.current.tool=i}>
      <i className="hardware-reflection"/>{[4,8,11,14].map(z=><i className="hardware-depth" key={z} style={{transform:`translateZ(${-z}px)`}}/>)}<span className="hardware-face"/><span className="hardware-glyph"><SoftwareEmblem software={toolIds[i]}/></span>

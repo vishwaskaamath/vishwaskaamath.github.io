@@ -1855,7 +1855,7 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .kinetic-capabilities .capabilities-trail-anchor { display:inline-block; position:relative; width:.13em; height:.13em; margin:0 0 .035em .035em; border-radius:0; background:#ff4d1c; vertical-align:baseline; }
 .kinetic-capabilities .capabilities-trail-anchor::after { display:none; }
 .manifesto-trail { pointer-events:none; }
-.manifesto-trail svg { overflow:hidden; }
+.manifesto-trail svg { overflow:visible !important; clip-path:none !important; }
 .discipline-rows { width:100%; }
 .kinetic-discipline { display:grid; grid-template-columns:40px minmax(0,1fr) minmax(180px,25%) 30px; align-items:center; gap:24px; min-height:150px; padding:28px 5vw; border-top:1px solid #11111326; transition:background .25s,color .25s; overflow:hidden; }
 .kinetic-discipline:last-child { border-bottom:1px solid #11111326; }
@@ -2078,6 +2078,10 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 /* Workflow hardware stage: isolated from the Work wheel and other chapters. */
 .kinetic-workflow{min-height:82vh;display:flex;flex-direction:column;justify-content:center;padding:7vh 6vw 8vh;}
 .workflow-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;}
+.workflow-heading{align-items:flex-end;width:100%;max-width:1280px;margin:0 auto 48px;padding-bottom:28px;border-bottom:1px solid rgba(243,239,230,.1);gap:4vw;}
+.workflow-heading h2{margin-bottom:0;}
+.workflow-editorial{max-width:460px;margin:0 0 .2em;font-size:clamp(.92rem,1.05vw,1.08rem);line-height:1.65;color:rgba(243,239,230,.72);font-weight:400;}
+.workflow-editorial strong{font-weight:500;color:#F3EFE6;}
 .kinetic-workflow h2{margin:20px 0 38px;font-size:clamp(3.5rem,6.5vw,7.5rem);}
 .workflow-hardware-stage{--brand-color:#9999ff;--tile-x:50%;position:relative;isolation:isolate;}
 .workflow-hardware-stage:before{content:"";position:absolute;inset:-220px -3vw -110px;z-index:-1;pointer-events:none;background:radial-gradient(380px circle at var(--tile-x) 50%,color-mix(in srgb,var(--brand-color) 18%,transparent),transparent 75%);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 25%,#000 75%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 25%,#000 75%,transparent);transition:background .4s;}
@@ -2096,6 +2100,11 @@ html.ribbon-cursor-enabled[data-wheel-dragging="true"] *, html.ribbon-cursor-ena
 .software-pr{--brand:#9999FF;background-color:#140a38}.software-ae{--brand:#D291FF;background-color:#180830}.software-ps{--brand:#31A8FF;background-color:#061e36}
 [data-theme="light"] .inspection-tags span{border-color:#11111330;background:#11111308;}
 @media(max-width:1000px){.workflow-hardware-stage .hardware-dock{display:grid;grid-template-columns:repeat(4,clamp(88px,12vw,112px));gap:24px;}.workflow-hardware-stage .hardware-tool{width:clamp(88px,12vw,112px);height:clamp(88px,12vw,112px);}.workflow-heading{align-items:flex-start;flex-direction:column;gap:0;}.kinetic-workflow{padding-top:70px;padding-bottom:70px;}}
+@media(max-width:1000px){.workflow-heading{gap:24px}.workflow-editorial{max-width:600px}}
+.manifesto-trail{overflow:visible!important;z-index:35;pointer-events:none;}
+.story-transition-canvas,.loading-screen{z-index:999999!important;}
+html[data-loading="true"] .tool-caption.toolkit-viewport,
+html[data-story-transition="true"] .tool-caption.toolkit-viewport{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
 @media(max-width:470px){.workflow-hardware-stage .hardware-dock{grid-template-columns:repeat(2,100px);gap:30px 42px;}.workflow-hardware-stage .hardware-tool{width:100px;height:100px;}.inspection-tags{gap:7px}.inspection-tags span{font-size:9px;}}
 
 .hardware-glyph .adobe-symbol{color:var(--tool-brand)!important}

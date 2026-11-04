@@ -15,7 +15,7 @@ export default function StoryNavigation({engine}:{engine:ScrollPhysics}){
   const stamps=new Map<string,HTMLCanvasElement>();
   const bake=()=>{width=innerWidth;height=innerHeight;c.width=width;c.height=height;stamps.clear();for(const word of ['ABOUT','WORK'])for(const light of [false,true]){const stamp=document.createElement('canvas');stamp.width=width;stamp.height=height;const s=stamp.getContext('2d')!;s.font=`700 ${Math.round(Math.min(width*.36,height*.58))}px "Bebas Neue", sans-serif`;s.fillStyle=light?'#F3EFE6':'#111113';s.fillText(word,width*.035,height*.95);stamps.set(word+light,stamp);}};
   bake();document.fonts.load('700 100px "Bebas Neue"').then(()=>{if(c.isConnected)bake();});window.addEventListener('resize',bake);
-  navigate.current=view=>{if(active||view===engine.view||main.dataset.cinema!=='closed')return;active=true;destination=view;elapsed=0;swapped=false;buffer=0;engine.locked=true;main.inert=true;c.style.visibility='visible';};
+  navigate.current=view=>{if(active||view===engine.view||main.dataset.cinema!=='closed')return;active=true;main.dataset.storyTransition='true';document.documentElement.dataset.storyTransition='true';destination=view;elapsed=0;swapped=false;buffer=0;engine.locked=true;main.inert=true;c.style.visibility='visible';};
   const open=()=>navigate.current('about');window.addEventListener('portfolio:story',open);engine.onBoundary=()=>navigate.current('work');
   const sync=()=>{const about=engine.view==='about';button.current!.querySelector('.portal-label')!.textContent=about?'BACK TO REEL':'ABOUT & CONTACT';button.current!.querySelector('.portal-arrow')!.textContent=about?'↑':'↓';hud.current!.dataset.view=engine.view;};
   const off=engine.subscribe(sync);
@@ -28,9 +28,9 @@ export default function StoryNavigation({engine}:{engine:ScrollPhysics}){
    for(let col=0;col<16;col++)for(let row=0;row<10;row++){const threshold=col/15*.42+(9-row)/9*.48+((col*3)%4)*.035;const local=clamp((wave-threshold)/.14);const fill=uncover?1-ease(local):out(local);if(fill>0)ctx.fillRect(col*cw-.5,row*ch+(cover?ch*(1-fill):0)-.5,cw+1,ch*fill+1);}
    const enter=out((elapsed-140)/280),exit=ease((elapsed-780)/600),offset=elapsed<780?140*(1-enter):-180*exit;
    ctx.globalCompositeOperation='source-atop';ctx.globalAlpha=elapsed<780?enter:1-exit;const stamp=stamps.get(destination.toUpperCase()+light);if(stamp)ctx.drawImage(stamp,0,offset);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
-   if(elapsed>=1380){active=false;ctx.clearRect(0,0,width,height);c.style.visibility='hidden';engine.locked=false;main.inert=false;button.current?.focus({preventScroll:true});}
+   if(elapsed>=1380){active=false;ctx.clearRect(0,0,width,height);c.style.visibility='hidden';delete main.dataset.storyTransition;delete document.documentElement.dataset.storyTransition;engine.locked=false;main.inert=false;button.current?.focus({preventScroll:true});}
   });
-  return()=>{off();stop();engine.onBoundary=null;engine.locked=false;main.inert=false;window.removeEventListener('portfolio:story',open);window.removeEventListener('resize',bake);};
+  return()=>{off();stop();engine.onBoundary=null;engine.locked=false;main.inert=false;delete main.dataset.storyTransition;delete document.documentElement.dataset.storyTransition;window.removeEventListener('portfolio:story',open);window.removeEventListener('resize',bake);};
  },[engine,theme]);
  return <><div ref={hud} className="reel-scroll-prompt story-portal"><button ref={button} onClick={()=>navigate.current(engine.view==='work'?'about':'work')} onPointerMove={e=>{if(e.pointerType!=='mouse')return;const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.translate=`${(e.clientX-r.left-r.width/2)*.12}px ${(e.clientY-r.top-r.height/2)*.18}px`;}} onPointerLeave={e=>{e.currentTarget.style.translate='0 0';}}><span className="portal-label">ABOUT & CONTACT</span><span className="portal-arrow" aria-hidden="true">↓</span></button></div><canvas ref={canvas} className="story-transition-canvas" aria-hidden="true"/></>;
 }
