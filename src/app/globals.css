@@ -2159,8 +2159,16 @@ html[data-story-transition="true"] .tool-caption.toolkit-viewport{opacity:0!impo
  --spread:28vw;
  --card-w:clamp(380px,22vw,560px);
  --tile-size:clamp(169px,11.45vw,208px);
- --arc-rotate:9deg;
- --perspective:1400px;
+ /* Subtle: 1100px/12deg/-60px/2deg/1.04; medium: 1000px/20deg/-80px/3deg/1.05;
+    strong: 900px/22deg/-90px/4deg/1.06 (perspective/rotation/depth/roll/scale). */
+ --perspective:1000px;
+ --arc-rotate:20deg;
+ --arc-depth:-80px;
+ --arc-tilt-z:3deg;
+ --arc-lift:0px;
+ --arc-scale-comp:1.05;
+ perspective:var(--perspective);
+ transform-style:preserve-3d;
 }
 @media(min-width:768px) {
  .work-scene .video-wheel{left:calc(50vw - var(--spread) - var(--card-w) / 2);top:50vh;width:var(--card-w);}
@@ -2169,9 +2177,15 @@ html[data-story-transition="true"] .tool-caption.toolkit-viewport{opacity:0!impo
  .work-scene .software-wheel{left:calc(50vw + var(--spread));top:50vh;width:var(--tile-size);margin-left:0;}
  .work-scene .work-toolkit-static{left:calc(50vw + var(--spread))!important;top:calc(50vh + var(--tile-size) / 2 + 40px)!important;}
  .work-scene .software-wheel .adobe-symbol{font-size:clamp(58px,6.45vw,94px);}
+ /* Each orbit has local perspective to preserve its calibrated screen axis. */
+ .work-scene .video-card,.work-scene .software-position{transform-style:preserve-3d;}
+ .work-scene .video-card .video-aperture{border-radius:7% / 10%!important;}
+ .work-scene .video-card .crt-shading{background:linear-gradient(90deg,#ffffff16,transparent 38%,#0005);box-shadow:inset -22px 0 34px #0005;border-radius:inherit;}
+ .work-scene .software-wheel .software-cube-body{box-shadow:-10px 14px 28px #0009,0 5px 0 #15151b,inset -2px 0 2px #ffffff38,inset 0 1px 0 #ffffff20;}
+ .work-scene .software-wheel .software-cube-davinci .software-cube-body{box-shadow:none;}
 }
 @media(max-width:767px) {
- .work-scene{--card-w:min(76vw,380px);--tile-size:clamp(72px,20vw,106px);--arc-rotate:0deg;}
+ .work-scene{--card-w:min(76vw,380px);--tile-size:clamp(72px,20vw,106px);--arc-rotate:0deg;--arc-depth:0px;--arc-tilt-z:0deg;--arc-scale-comp:1;perspective:none;}
  .work-scene .video-wheel{left:calc(50vw - var(--card-w) / 2);top:27svh;width:var(--card-w);}
  .work-scene .video-card{aspect-ratio:16 / 10;transform-origin:center;}
  .work-scene .project-metadata{left:50vw;top:53svh;width:86vw;display:grid;place-items:center;}
