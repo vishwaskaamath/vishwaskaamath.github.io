@@ -2195,3 +2195,14 @@ html[data-story-transition="true"] .tool-caption.toolkit-viewport{opacity:0!impo
  .work-scene .software-wheel .adobe-symbol{font-size:clamp(32px,9vw,46px);}
  .work-scene .cinema-metadata-row,.work-scene .view-project-button{margin-top:8px;}
 }
+
+/* Elliptical travel: subtle rx 9vw / ry 34vh / tilt 25deg;
+   medium 14vw / 38vh / 40deg; strong 17vw / 40vh / 45deg. */
+.work-scene{--arc-rx:14vw;--arc-ry:38vh;--arc-cx-left:8vw;--arc-cx-right:92vw;--arc-tilt-max:40deg;--arc-corner-scale:.8;--arc-corner-opacity:.45;--arc-depth:0px;--arc-rotate:0deg;--arc-scale-comp:1;perspective:none;transform-style:flat;overflow:hidden;}
+.work-scene .video-card,.work-scene .software-position{perspective:none;transform-style:flat;}
+@media(min-width:768px){
+.work-scene{--card-w:clamp(380px,27vw,690px);--tile-size:clamp(130px,9vw,230px);}
+.work-scene .video-wheel{left:calc(var(--arc-cx-left) + var(--arc-rx) - var(--card-w)/2);top:51vh;}
+.work-scene .software-wheel{left:calc(var(--arc-cx-right) - var(--arc-rx));top:51vh;}
+.work-scene .work-toolkit-static{left:calc(var(--arc-cx-right) - var(--arc-rx))!important;top:calc(51vh + var(--tile-size)/2 + 40px)!important;}
+}

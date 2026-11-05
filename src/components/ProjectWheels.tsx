@@ -53,6 +53,7 @@ export default function ProjectWheels({
     let gap = 0;
     let width = 0;
     let hudFloor=90,iconSize=208;
+    let arc={rx:14,ry:38,tilt:40,scale:.8,opacity:.45};
     let lastIndex = -1;
     let lastPaused = true;
 
@@ -91,27 +92,24 @@ export default function ProjectWheels({
       projects.forEach((_, i) => {
         const d = reelOffset(i, currentScroll, projects.length);
         const distance = Math.abs(d);
-        const theta = d * .68;
-        const visible = distance < 1.45;
+        const theta = d * Math.PI / 2;
+        const visible = distance < 1.3;
         const focus = Math.exp(-8*d*d);
-        const fade = Math.max(0,1-Math.pow(distance,1.5)*.55);
-        const scale = .64+.36*Math.exp(-1.8*d*d);
+        const fade = distance<=1?1-(1-arc.opacity)*distance:arc.opacity*Math.max(0,1-(distance-1)/.3);
+        const scale = 1-(1-arc.scale)*Math.min(1,distance);
         const torque=(value:number,limit:number)=>Math.max(-limit,Math.min(limit,value));
         const pushX = mobile ? 0 : p*width*(focus*.015-(1-focus)*.045);
         const pushY = mobile ? 0 : Math.tanh(d*3)*(1-focus)*p*innerHeight*.14;
-        const x=mobile?d*gap:(Math.cos(theta)-1)*width*.26;
-        const y=mobile?0:Math.sin(theta)*innerHeight*.64;
-        const arcY=mobile?'0deg':`calc(9deg * ${1-focus} + var(--arc-rotate) * ${focus})`;
-        const bank=mobile?torque(d*3,4):torque(-d*10+torque(scrollVelocity*-1.5,3),12);
-        cards[i].style.transform = `translate3d(${x+pushX}px, calc(${y+pushY}px - var(--arc-lift)), 0) translateY(-50%) perspective(var(--perspective)) translateZ(var(--arc-depth)) rotateY(${arcY}) rotateZ(calc(${bank}deg - var(--arc-tilt-z) * ${focus})) scale(calc(${scale*(1+p*focus*(mobile?.05:.68))} * var(--arc-scale-comp)))`;
-        cards[i].style.opacity = `${Math.max(0, fade)}`;
-        cards[i].style.visibility = visible ? "visible" : "hidden";
-        cards[i].style.zIndex = `${Math.round(10 - distance * 3 + focus*p*30)}`;
-        const iconFade = mobile ? Math.max(0,1-distance) : Math.max(0,1-Math.pow(distance,1.5)*.55);
-        const iconX=mobile?d*90:(1-Math.cos(theta))*width*.34-(1-focus)*p*width*.10-(1-focus)*width*.025;
-        const iconY=mobile?0:Math.max(Math.sin(theta)*innerHeight*.64,hudFloor+iconSize*.7-innerHeight*.5);
-        const iconBank=mobile?torque(d*3,4):torque(d*10+torque(scrollVelocity*2,3),12);
-        icons[i].style.transform = `translate3d(${iconX}px, calc(${iconY}px - var(--arc-lift)), 0) translate(-50%, -50%) perspective(var(--perspective)) translateZ(var(--arc-depth)) rotateY(calc(-1 * ${arcY})) rotateZ(calc(${iconBank}deg + var(--arc-tilt-z) * ${focus})) scale(calc(${.72+.28*Math.exp(-2*d*d)} * var(--arc-scale-comp)))`;
+        const rx=width*arc.rx/100*(mobile?.5:1),ry=innerHeight*arc.ry/100;
+        const x=(Math.cos(theta)-1)*rx,y=Math.sin(theta)*ry;
+        const tilt=Math.max(-90,Math.min(90,d*90))*arc.tilt/90*(mobile?.5:1);
+        cards[i].style.transform=`translate3d(${x+pushX}px,${y+pushY}px,0) translateY(-50%) rotateZ(${-tilt}deg) scale(${scale*(1+p*focus*(mobile?.05:.68))})`;
+        cards[i].style.opacity=String(fade);cards[i].style.visibility=visible?'visible':'hidden';
+        cards[i].style.zIndex=String(Math.round(10-distance*3+focus*p*30));
+        const iconFade=fade;
+        const iconX=(1-Math.cos(theta))*rx;
+        const iconY=Math.max(y,hudFloor+iconSize*.65-innerHeight*.51);
+        icons[i].style.transform=`translate3d(${iconX}px,${iconY}px,0) translate(-50%,-50%) rotateZ(${tilt}deg) scale(${scale})`;
         icons[i].style.setProperty('--light-angle',`${135-d*40}deg`);
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
@@ -122,6 +120,9 @@ export default function ProjectWheels({
     const resize = () => {
       width = innerWidth;
       mobile = width < 768;
+      const css=getComputedStyle(element.closest('.work-scene')!);
+      const value=(name:string,fallback:number)=>parseFloat(css.getPropertyValue(name))||fallback;
+      arc={rx:value('--arc-rx',14),ry:value('--arc-ry',38),tilt:value('--arc-tilt-max',40),scale:value('--arc-corner-scale',.8),opacity:value('--arc-corner-opacity',.45)};
       hudFloor=(document.querySelector('.minimal-hud')?.getBoundingClientRect().bottom??64)+24;
       iconSize=activeLogoGroup.offsetWidth;
       const angle = (18 * Math.PI) / 180;
