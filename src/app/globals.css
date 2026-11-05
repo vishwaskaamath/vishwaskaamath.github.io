@@ -2163,7 +2163,7 @@ html[data-story-transition="true"] .tool-caption.toolkit-viewport{opacity:0!impo
  --perspective:1400px;
 }
 @media(min-width:768px) {
- .work-scene .video-wheel{left:calc(50vw - var(--spread) - var(--card-w) / 2);top:50vh;width:var(--card-w);}
+ .work-scene .video-wheel{left:calc(50vw - var(--spread) - var(--card-w) / 2 - 1.5vw);top:50vh;width:var(--card-w);}
  .work-scene .video-card{aspect-ratio:16 / 10;transform-origin:center;}
  .work-scene .project-metadata{left:50vw;top:50vh;width:20vw;display:grid;place-items:center;}
  .work-scene .software-wheel{left:calc(50vw + var(--spread));top:50vh;width:var(--tile-size);margin-left:0;}
