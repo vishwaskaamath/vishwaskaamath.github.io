@@ -2153,3 +2153,31 @@ html[data-story-transition="true"] .tool-caption.toolkit-viewport{opacity:0!impo
 .workflow-hardware-stage .hardware-tool:nth-child(2) .hardware-face{background:#00005b;}
 .workflow-hardware-stage .hardware-tool:nth-child(3) .hardware-face{background:#001e36;}
 .workflow-hardware-stage .hardware-tool:nth-child(8) .hardware-glyph .adobe-symbol{display:block;width:max-content;transform:translate(-.14em,-.04em);}
+
+/* Symmetric hero axes; captions hang below without changing hardware centers. */
+.work-scene {
+ --spread:28vw;
+ --card-w:clamp(380px,22vw,560px);
+ --tile-size:clamp(169px,11.45vw,208px);
+ --arc-rotate:9deg;
+ --perspective:1400px;
+}
+@media(min-width:768px) {
+ .work-scene .video-wheel{left:calc(50vw - var(--spread) - var(--card-w) / 2);top:50vh;width:var(--card-w);}
+ .work-scene .video-card{aspect-ratio:16 / 10;transform-origin:center;}
+ .work-scene .project-metadata{left:50vw;top:50vh;width:20vw;display:grid;place-items:center;}
+ .work-scene .software-wheel{left:calc(50vw + var(--spread));top:50vh;width:var(--tile-size);margin-left:0;}
+ .work-scene .work-toolkit-static{left:calc(50vw + var(--spread))!important;top:calc(50vh + var(--tile-size) / 2 + 40px)!important;}
+ .work-scene .software-wheel .adobe-symbol{font-size:clamp(58px,6.45vw,94px);}
+}
+@media(max-width:767px) {
+ .work-scene{--card-w:min(76vw,380px);--tile-size:clamp(72px,20vw,106px);--arc-rotate:0deg;}
+ .work-scene .video-wheel{left:calc(50vw - var(--card-w) / 2);top:27svh;width:var(--card-w);}
+ .work-scene .video-card{aspect-ratio:16 / 10;transform-origin:center;}
+ .work-scene .project-metadata{left:50vw;top:53svh;width:86vw;display:grid;place-items:center;}
+ .work-scene .project-title{font-size:clamp(1.7rem,7vw,2.8rem);line-height:.96;}
+ .work-scene .software-wheel{left:50vw;top:76svh;width:var(--tile-size);margin-left:0;}
+ .work-scene .work-toolkit-static{left:50vw!important;top:calc(76svh + var(--tile-size) / 2 + 18px)!important;}
+ .work-scene .software-wheel .adobe-symbol{font-size:clamp(32px,9vw,46px);}
+ .work-scene .cinema-metadata-row,.work-scene .view-project-button{margin-top:8px;}
+}

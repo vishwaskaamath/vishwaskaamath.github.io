@@ -99,14 +99,14 @@ export default function ProjectWheels({
         const pushX = mobile ? 0 : p*width*(focus*.015-(1-focus)*.045);
         const pushY = mobile ? 0 : Math.tanh(d*3)*(1-focus)*p*innerHeight*.14;
         const x=mobile?d*gap:(Math.cos(theta)-1)*width*.26;
-        const y=mobile?distance*22:Math.sin(theta)*innerHeight*.54;
-        cards[i].style.transform = `translate3d(${x+pushX}px, ${y+pushY}px, 0) translateY(-50%) rotateZ(${mobile?d*7:-d*28+torque(scrollVelocity*-2.5,6)}deg) scale(${scale*(1+p*focus*(mobile?.05:.68))})`;
+        const y=mobile?0:Math.sin(theta)*innerHeight*.64;
+        cards[i].style.transform = `translate3d(${x+pushX}px, ${y+pushY}px, 0) translateY(-50%) perspective(var(--perspective)) rotateY(${mobile?'0deg':'var(--arc-rotate)'}) rotateZ(${mobile?torque(d*3,4):torque(-d*10+torque(scrollVelocity*-1.5,3)-2*focus,12)}deg) scale(${scale*(1+p*focus*(mobile?.05:.68))})`;
         cards[i].style.opacity = `${Math.max(0, fade)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
         cards[i].style.zIndex = `${Math.round(10 - distance * 3 + focus*p*30)}`;
         const iconFade = mobile ? Math.max(0,1-distance) : Math.max(0,1-Math.pow(distance,1.5)*.55);
         const iconX=mobile?d*90:(1-Math.cos(theta))*width*.34-(1-focus)*p*width*.10;
-        icons[i].style.transform = `translate3d(${iconX}px, ${mobile?0:Math.sin(theta)*innerHeight*.52}px, 0) translate(-50%, -50%) rotateZ(${mobile?d*15:d*34+torque(scrollVelocity*4,10)}deg) scale(${.72+.28*Math.exp(-2*d*d)})`;
+        icons[i].style.transform = `translate3d(${iconX}px, ${mobile?0:Math.sin(theta)*innerHeight*.64}px, 0) translate(-50%, -50%) perspective(var(--perspective)) rotateY(${mobile?'0deg':'calc(-1 * var(--arc-rotate))'}) rotateZ(${mobile?torque(d*3,4):torque(d*10+torque(scrollVelocity*2,3)+2*focus,12)}deg) scale(${.72+.28*Math.exp(-2*d*d)})`;
         icons[i].style.setProperty('--light-angle',`${135-d*40}deg`);
         icons[i].style.opacity = `${iconFade}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
@@ -116,7 +116,7 @@ export default function ProjectWheels({
     };
     const resize = () => {
       width = innerWidth;
-      mobile = width < 760;
+      mobile = width < 768;
       const angle = (18 * Math.PI) / 180;
       // Keep the existing orbital spacing based on the original 32vw × 36vh
       // footprint; only the rendered desktop cards are now five percent smaller.

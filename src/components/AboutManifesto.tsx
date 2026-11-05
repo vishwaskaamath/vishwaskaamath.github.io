@@ -20,10 +20,13 @@ export default function AboutManifesto({engine}:{engine:ScrollPhysics}){
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   let paragraphY=0,paragraphHeight=1,trailY=0,trailHeight=1,height=innerHeight,length=1,previous='',maxDraw=0;
   const render=()=>{
+   if(engine.view!=='about') { maxDraw=0;previous='';return; }
    const scroll=engine.read().storyScrollY,top=height-scroll+paragraphY;
    const p=motion.matches?1:clamp01((height*.82-top)/Math.max(1,paragraphHeight));
    const pathTop=height-scroll+trailY;
    const rawProgress=(height*.82-pathTop)/Math.max(1,trailHeight);
+   // Replay when returning above the trail; retain the finished stroke below it.
+   if(rawProgress<=0)maxDraw=0;
    const draw=motion.matches?1:(maxDraw=Math.max(maxDraw,clamp01(rawProgress)));
    const key=`${p.toFixed(5)}:${draw.toFixed(5)}:${theme.current}`;if(key===previous)return;previous=key;
    words.forEach((word,i)=>word.style.color=wordRevealColor(i,words.length,p,theme.current==='light'));
@@ -37,6 +40,9 @@ export default function AboutManifesto({engine}:{engine:ScrollPhysics}){
    labels.forEach((label,i)=>label.dataset.visible=String(draw>=nodes[i].at));
   };
   const measure=()=>{
+   // Work hides the story with display:none. Never replace the live SVG geometry
+   // with zero-size measurements from that hidden tree.
+   if(!trail.getClientRects().length || trail.getBoundingClientRect().width<1)return;
    height=innerHeight;const origin=story.getBoundingClientRect().top,p=paragraph.getBoundingClientRect(),t=trail.getBoundingClientRect();
    paragraphY=p.top-origin;paragraphHeight=p.height;trailY=t.top-origin;
    const a=anchor.getBoundingClientRect(),lastWord=words[words.length-1].getBoundingClientRect();
