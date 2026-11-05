@@ -27,7 +27,7 @@ export default function WavyBackground({reducedMotion,paused=false,dragRef,engin
    const activeTool=tools.find(el=>el.dataset.active==='true');
    const brand=activeTool?activeTool.style.getPropertyValue('--tool-brand').trim():'';
    const palette=about?(chapter?.workflow?[brand||'#a855f7','#38bdf8','#f97316']:['#FF4D1C','#702633','#18564e']):projects[frame.index]?.accentPalette;
-   const dynamics={mouseX:x,mouseY:y,energy,palette,dt:frameDt,velocity:about?storyVelocity:frame.scrollVelocity,label:`${String(frame.index+1).padStart(2,'0')} // ${projects[frame.index].shortTitle.toUpperCase()}`,story:about,storyProgress:about?frame.progress:0,ribbonAlpha:about?.45:1,alignment:about?0:(1-Math.pow(1-frame.heroProgress,3))*(1-frame.handoff)};
+   const dynamics={mouseX:x,mouseY:y,energy,palette,dt:frameDt,velocity:about?storyVelocity:frame.scrollVelocity,label:`${String(frame.index+1).padStart(2,'0')} // ${projects[frame.index].shortTitle.toUpperCase()}`,story:about,storyProgress:about?frame.progress:0,ribbonAlpha:about?.45:1};
    renderer.draw(phaseRef.current,pulses,themeRef.current==='light',dynamics);
 
   };

@@ -1,41 +1,52 @@
-export const WHEEL_SENSITIVITY=.0025;
-export const SNAP_IDLE_MS=120;
-export const PROJECT_TRAVEL=400;
-export const modulo=(v:number,n:number)=>((v%n)+n)%n;
-export function reelOffset(i:number,s:number,n:number){return modulo(s-i+n/2,n)-n/2;}
-export type ReelFrame={currentScroll:number;targetScroll:number;scrollVelocity:number;index:number;deltaMs:number;settled:boolean;virtualScrollY:number;storyScrollY:number;progress:number;handoff:number;heroProgress:number};
-type Listener=(f:ReelFrame)=>void;
+export const WHEEL_SENSITIVITY = 0.0025;
+
+export const SNAP_IDLE_MS = 120;
+export const PROJECT_TRAVEL = 400;
+export const modulo = (value:number,count:number)=>((value%count)+count)%count;
+/** Infinite reel: advancing through projects moves the upper preview down. */
+export function reelOffset(index:number,scroll:number,_count:number){return modulo(scroll-index+_count/2,_count)-_count/2;}
+export type ReelFrame={currentScroll:number;targetScroll:number;scrollVelocity:number;index:number;deltaMs:number;settled:boolean;virtualScrollY:number;storyScrollY:number;progress:number;handoff:number};
+type Listener=(frame:ReelFrame)=>void;
 export class ScrollPhysics {
- view:'work'|'about'='work';locked=false;onBoundary:(()=>void)|null=null;overshoot=0;
- currentScroll=0;targetScroll=0;
- private reel=0;private reelTarget=0;private velocity=0;private height=800;private storyHeight=0;private last:number|null=null;private dirty=true;private reduced=false;
- private listeners=new Set<Listener>();
- private frame:ReelFrame={currentScroll:0,targetScroll:0,scrollVelocity:0,index:0,deltaMs:1000/60,settled:true,virtualScrollY:0,storyScrollY:0,progress:0,handoff:0,heroProgress:0};
+ private dragging=false;private dirty=true;private lastInput=-Infinity;private lastFrame:number|null=null;private listeners=new Set<Listener>();
+ view:'work'|'about'='work';locked=false;onBoundary:(()=>void)|null=null;overshoot=0;private savedReel=0;
+ currentScroll=0;targetScroll=0;private springVelocity=0;private storyHeight=0;private viewportHeight=800;
+ private frame:ReelFrame={currentScroll:0,targetScroll:0,scrollVelocity:0,index:0,deltaMs:1000/60,settled:true,virtualScrollY:0,storyScrollY:0,progress:0,handoff:0};
  constructor(readonly count:number){}
- get pinDistance(){return this.reduced?0:this.height*1.4;}
  get reelEnd(){return (this.count-1)*PROJECT_TRAVEL;}
- get maxScroll(){return this.pinDistance+Math.max(this.height,this.storyHeight);}
+ get maxScroll(){return this.view==='work'?this.reelEnd:Math.max(0,this.storyHeight-this.viewportHeight);}
  invalidate=()=>{this.dirty=true;};read=()=>this.frame;
- subscribe=(fn:Listener)=>{this.listeners.add(fn);fn(this.frame);return()=>{this.listeners.delete(fn);};};
- configureStory(height:number,viewport:number){const oldPin=this.pinDistance,oldHeight=this.height;this.storyHeight=height>0?height:this.storyHeight;this.height=Math.max(1,viewport);if(oldHeight!==this.height){const remap=(v:number)=>v<=oldPin&&oldPin>0?v/oldPin*this.pinDistance:this.pinDistance+(v-oldPin);this.currentScroll=remap(this.currentScroll);this.targetScroll=remap(this.targetScroll);}this.invalidate();}
- setView(view:'work'|'about'){this.currentScroll=this.targetScroll=view==='work'?0:this.pinDistance+this.height;this.invalidate();this.advance(performance.now(),this.reduced);}
- scrollTo(y:number,_now=performance.now()){if(this.locked)return;this.targetScroll=Math.max(0,Math.min(this.maxScroll,y));this.invalidate();}
- wheel(delta:number,now:number){this.scrollTo(this.targetScroll+delta,now);}
+ subscribe=(listener:Listener)=>{this.listeners.add(listener);listener(this.frame);return()=>{this.listeners.delete(listener);};};
+ setView(view:'work'|'about'){if(view===this.view)return;if(this.view==='work')this.savedReel=this.currentScroll;this.view=view;this.currentScroll=this.targetScroll=view==='work'?this.savedReel:0;this.overshoot=0;this.springVelocity=0;this.dragging=false;this.lastInput=performance.now();this.invalidate();this.advance(performance.now(),true);}
+ configureStory(height:number,viewport:number){this.storyHeight=Math.max(0,height);this.viewportHeight=Math.max(1,viewport);if(this.view==='about'){this.targetScroll=Math.min(this.targetScroll,this.maxScroll);this.currentScroll=Math.min(this.currentScroll,this.maxScroll);}this.invalidate();}
+ scrollTo(y:number,now=performance.now()){if(this.locked)return;this.targetScroll=this.view==='work'?y:Math.max(0,Math.min(this.maxScroll,y));this.lastInput=now;this.invalidate();}
  add(delta:number,now:number){this.wheel(delta*PROJECT_TRAVEL,now);}
- beginDrag(){}
- endDrag(velocity:number,now:number){this.wheel(-velocity*7.2,now);}
- select(index:number,_now:number){const turn=Math.round((this.reel-index)/this.count);this.reelTarget=index+turn*this.count;this.invalidate();}
- step(direction:number,now:number){this.wheel(direction*this.height*.7,now);}
+ wheel(delta:number,now:number){if(this.locked)return;if(this.view==='about'){if(delta<0&&this.currentScroll<=1){this.overshoot+=Math.abs(delta);this.invalidate();if(this.overshoot>=120)this.onBoundary?.();return;}this.overshoot=0;}this.scrollTo(this.targetScroll+delta,now);}
+ beginDrag(){this.dragging=true;}
+ endDrag(velocity:number,now:number){this.dragging=false;this.scrollTo(this.targetScroll-velocity*7.2,now);if(this.view==='work')this.targetScroll=Math.round(this.targetScroll/PROJECT_TRAVEL)*PROJECT_TRAVEL;}
+ select(index:number,now:number){const turn=Math.round((this.currentScroll/PROJECT_TRAVEL-index)/this.count);this.scrollTo((index+turn*this.count)*PROJECT_TRAVEL,now);}
+ step(direction:number,now:number){this.wheel((this.view==='work'?PROJECT_TRAVEL:this.viewportHeight*.7)*direction,now);}
  advance(now:number,reducedMotion=false,frameDt?:number){
-  const dt=frameDt??(this.last===null?1/60:Math.min(.05,(now-this.last)/1000));this.last=now;
-  if(this.reduced!==reducedMotion){const old=this.pinDistance;this.reduced=reducedMotion;this.currentScroll=Math.max(0,this.currentScroll-old+this.pinDistance);this.targetScroll=Math.max(0,this.targetScroll-old+this.pinDistance);this.dirty=true;}
-  const before=this.currentScroll,oldReel=this.reel;
-  this.currentScroll=reducedMotion?this.targetScroll:this.currentScroll+(this.targetScroll-this.currentScroll)*(1-Math.exp(-5*dt));
-  if(Math.abs(this.currentScroll-this.targetScroll)<.01)this.currentScroll=this.targetScroll;
-  if(reducedMotion){this.reel=this.reelTarget;this.velocity=0;}else{const steps=Math.max(1,Math.ceil(dt*240)),step=dt/steps;for(let i=0;i<steps;i++){this.velocity+=((this.reelTarget-this.reel)*120-this.velocity*18)*step;this.reel+=this.velocity*step;}if(Math.abs(this.reel-this.reelTarget)<.0001&&Math.abs(this.velocity)<.0001){this.reel=this.reelTarget;this.velocity=0;}}
-  const storyScrollY=Math.max(0,this.currentScroll-this.pinDistance),handoff=Math.min(1,storyScrollY/this.height);
-  this.view=handoff>=1?'about':'work';
-  this.frame={currentScroll:this.reel,targetScroll:this.reelTarget,scrollVelocity:this.velocity,index:modulo(Math.round(this.reel),this.count),deltaMs:dt*1000,settled:this.currentScroll===this.targetScroll&&this.reel===this.reelTarget,virtualScrollY:Math.max(0,storyScrollY-this.height),storyScrollY,progress:this.currentScroll/Math.max(1,this.maxScroll),handoff,heroProgress:reducedMotion?1:Math.min(1,this.currentScroll/this.pinDistance)};
-  if(this.dirty||before!==this.currentScroll||oldReel!==this.reel){this.dirty=false;this.listeners.forEach(fn=>fn(this.frame));}return this.frame;
+  const dt=frameDt??(this.lastFrame!==null?Math.min((now-this.lastFrame)/1000,.05):1/60);
+  if(!this.dragging&&now-this.lastInput>=SNAP_IDLE_MS&&this.view==='work')this.targetScroll=Math.round(this.targetScroll/PROJECT_TRAVEL)*PROJECT_TRAVEL;
+  const before=this.currentScroll;
+  if(reducedMotion){this.currentScroll=this.targetScroll;this.springVelocity=0;}
+  else if(this.view==='work'){
+   // Small integration steps keep the same weighted spring stable at every refresh rate.
+   const steps=Math.max(1,Math.ceil(dt/(1/240))),step=dt/steps;
+   for(let i=0;i<steps;i++){
+    const force=(this.targetScroll-this.currentScroll)*120;
+    this.springVelocity+=(force-this.springVelocity*18)*step;
+    this.currentScroll+=this.springVelocity*step;
+   }
+   if(Math.abs(this.targetScroll-this.currentScroll)<.01&&Math.abs(this.springVelocity)<.05){this.currentScroll=this.targetScroll;this.springVelocity=0;}
+  }else{
+   this.currentScroll+=(this.targetScroll-this.currentScroll)*(1-Math.exp(-10*dt));
+   if(Math.abs(this.targetScroll-this.currentScroll)<.01)this.currentScroll=this.targetScroll;
+  }
+  const reel=(this.view==='work'?this.currentScroll:this.savedReel)/PROJECT_TRAVEL,target=(this.view==='work'?this.targetScroll:this.savedReel)/PROJECT_TRAVEL;
+  const storyScrollY=this.view==='about'?this.viewportHeight+this.currentScroll:0;
+  this.frame={currentScroll:reel,targetScroll:target,scrollVelocity:reducedMotion?0:this.view==='work'?this.springVelocity/PROJECT_TRAVEL:target-reel,index:modulo(Math.round(reel),this.count),deltaMs:dt*1000,settled:this.currentScroll===this.targetScroll,virtualScrollY:this.currentScroll,storyScrollY,progress:this.view==='about'?(this.maxScroll?this.currentScroll/this.maxScroll:0):modulo(reel,this.count)/this.count,handoff:this.view==='about'?1:0};
+  this.lastFrame=now;if(this.dirty||before!==this.currentScroll){this.dirty=false;this.listeners.forEach(listener=>listener(this.frame));}return this.frame;
  }
 }
