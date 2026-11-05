@@ -1,5 +1,5 @@
 import type {ContourPulse} from './contourPulse';
-export type RibbonDynamics={mouseX:number;mouseY:number;energy:number;palette?:readonly string[];dt?:number;velocity?:number;label?:string;storyProgress?:number;ribbonAlpha?:number;story?:boolean};
+export type RibbonDynamics={mouseX:number;mouseY:number;energy:number;palette?:readonly string[];dt?:number;velocity?:number;label?:string;storyProgress?:number;ribbonAlpha?:number;story?:boolean;alignment?:number};
 const rgb=(hex:string)=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
 /** Soft volumetric field, without contour lines, mesh strokes, or per-frame blur filters. */
 export function createWaveRenderer(canvas:HTMLCanvasElement){
@@ -50,11 +50,12 @@ export function createWaveRenderer(canvas:HTMLCanvasElement){
    const points:{x:number;y:number}[]=[],v=i/11*2-1;
    for(let j=0;j<=36;j++){
     const x=j*width/36,u=x/width,twist=u*Math.PI*3.4-flow;
-    const baseY=height*.5+(d.story?( .5-u)*height*.18:0)+Math.sin(u*Math.PI*2.1-flow)*Math.min(100,height*.11)+v*Math.sin(twist)*Math.min(70,height*.075);
+    const flat=1-(d.alignment??0);
+    const baseY=height*.5+flat*((d.story?( .5-u)*height*.18:0)+Math.sin(u*Math.PI*2.1-flow)*Math.min(100,height*.11)+v*Math.sin(twist)*Math.min(70,height*.075));
     const dx=x-ribbonMouseX,dy=baseY-ribbonMouseY;
     const gaussianX=Math.exp(-(dx*dx)/(2*165*165)),gaussianY=Math.exp(-(dy*dy)/(2*140*140));
     const bend=dy/Math.sqrt(dy*dy+3600)*gaussianX*gaussianY*48;
-    points.push({x,y:baseY+bend});
+    points.push({x,y:baseY+bend*flat});
    }
    const path=new Path2D();path.moveTo(points[0].x,points[0].y);
    for(let j=1;j<points.length-1;j++){const p=points[j],next=points[j+1];path.quadraticCurveTo(p.x,p.y,(p.x+next.x)/2,(p.y+next.y)/2);}

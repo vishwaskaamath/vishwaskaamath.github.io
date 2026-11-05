@@ -49,6 +49,9 @@ export default function ProjectWheels({
     const videos = Array.from(element.querySelectorAll<HTMLVideoElement>("video"));
     const centerTitle = element.closest('.work-scene')!.querySelector<HTMLElement>('.project-metadata')!;
     const activeLogoGroup = element.querySelector<HTMLElement>('.software-wheel')!;
+    const toolkit=element.closest('.work-scene')!.querySelector<HTMLElement>('.work-toolkit-static')!;
+    let alignLeft=0,alignRight=0;
+    let rightEdges:number[]=[],rightCenters:number[]=[],rightY:number[]=[];
     let mobile = false;
     let gap = 0;
     let width = 0;
@@ -68,6 +71,8 @@ export default function ProjectWheels({
       if(engine.view!=='work'){videos.forEach(video=>video.pause());lastPaused=true;return;}
       const p = expandProgress.current;
       const { currentScroll, scrollVelocity, index: active } = frame;
+      const alignment=1-Math.pow(1-frame.heroProgress,3);
+      toolkit.style.translate=mobile?'none':`${((rightEdges[active]??alignRight)+(rightCenters[active]??0))*alignment}px 0`;
       if (lastIndex !== active) {
         playback(active);
         lastIndex = active;
@@ -98,17 +103,19 @@ export default function ProjectWheels({
         const torque=(value:number,limit:number)=>Math.max(-limit,Math.min(limit,value));
         const pushX = mobile ? 0 : p*width*(focus*.015-(1-focus)*.045);
         const pushY = mobile ? 0 : Math.tanh(d*3)*(1-focus)*p*innerHeight*.14;
-        const x=mobile?d*gap:(Math.cos(theta)-1)*width*.26;
-        const y=mobile?0:Math.sin(theta)*innerHeight*.64;
-        cards[i].style.transform = `translate3d(${x+pushX}px, ${y+pushY}px, 0) translateY(-50%) perspective(var(--perspective)) rotateY(${mobile?'0deg':'var(--arc-rotate)'}) rotateZ(${mobile?torque(d*3,4):torque(-d*10+torque(scrollVelocity*-1.5,3)-2*focus,12)}deg) scale(${scale*(1+p*focus*(mobile?.05:.68))})`;
-        cards[i].style.opacity = `${Math.max(0, fade)}`;
+        const retreat=1+alignment*.1*(1-focus),flat=1-alignment*focus;
+        const x=mobile?d*gap:(Math.cos(theta)-1)*width*.26*retreat+alignLeft*alignment*focus;
+        const y=mobile?(1-alignment)*18:Math.sin(theta)*innerHeight*.64*retreat;
+        cards[i].style.transform = `translate3d(${x+pushX}px, ${y+pushY}px, 0) translateY(-50%) perspective(var(--perspective)) rotateY(${mobile?'0deg':`calc(var(--arc-rotate) * ${flat})`}) rotateZ(${(mobile?torque(d*3,4):torque(-d*10+torque(scrollVelocity*-1.5,3)-2*focus,12))*flat}deg) scale(${scale*(1+p*focus*(mobile?.05:.68))*(1-.04*alignment*focus)})`;
+        cards[i].style.opacity = `${Math.max(0, fade)*(1-alignment*.3*(1-focus))*(mobile?.75+.25*alignment:1)}`;
         cards[i].style.visibility = visible ? "visible" : "hidden";
         cards[i].style.zIndex = `${Math.round(10 - distance * 3 + focus*p*30)}`;
         const iconFade = mobile ? Math.max(0,1-distance) : Math.max(0,1-Math.pow(distance,1.5)*.55);
-        const iconX=mobile?d*90:(1-Math.cos(theta))*width*.34-(1-focus)*p*width*.10;
-        icons[i].style.transform = `translate3d(${iconX}px, ${mobile?0:Math.sin(theta)*innerHeight*.64}px, 0) translate(-50%, -50%) perspective(var(--perspective)) rotateY(${mobile?'0deg':'calc(-1 * var(--arc-rotate))'}) rotateZ(${mobile?torque(d*3,4):torque(d*10+torque(scrollVelocity*2,3)+2*focus,12)}deg) scale(${.72+.28*Math.exp(-2*d*d)})`;
+        const iconX=mobile?d*90:(1-Math.cos(theta))*width*.34*retreat-(1-focus)*p*width*.10+(rightEdges[i]??alignRight)*alignment*focus;
+        icons[i].style.transform = `translate3d(${iconX}px, ${mobile?(1-alignment)*24:Math.sin(theta)*innerHeight*.64*retreat-(rightY[i]??0)*alignment*focus}px, 0) translate(-50%, -50%) perspective(var(--perspective)) rotateY(${mobile?'0deg':`calc(-1 * var(--arc-rotate) * ${flat})`}) rotateZ(${(mobile?torque(d*3,4):torque(d*10+torque(scrollVelocity*2,3)+2*focus,12))*flat}deg) scale(${.72+.28*Math.exp(-2*d*d)})`;
+        icons[i].dataset.alignment=String(alignment*focus);
         icons[i].style.setProperty('--light-angle',`${135-d*40}deg`);
-        icons[i].style.opacity = `${iconFade}`;
+        icons[i].style.opacity = `${iconFade*(1-alignment*.3*(1-focus))*(mobile?.75+.25*alignment:1)}`;
         icons[i].style.visibility = visible ? "visible" : "hidden";
         captions[i].style.opacity = String(focus);
         captions[i].style.visibility = distance < 1.5 ? "visible" : "hidden";
@@ -117,6 +124,21 @@ export default function ProjectWheels({
     const resize = () => {
       width = innerWidth;
       mobile = width < 768;
+      const videoBox=element.querySelector<HTMLElement>('.video-wheel')!.getBoundingClientRect();
+      if(videoBox.width<1)return;
+      const textBox=centerTitle.getBoundingClientRect(),iconBox=activeLogoGroup.getBoundingClientRect();
+      const gapSize=width*.035;
+      alignLeft=width*.5-textBox.width/2-gapSize-videoBox.width*.96/2-(videoBox.left+videoBox.width/2);
+      alignRight=width*.5+textBox.width/2+gapSize+iconBox.width/2-iconBox.left;
+      rightEdges=[];rightCenters=[];rightY=[];
+      projects.forEach(project=>{
+        const count=project.tools.length,w=iconBox.width;
+        const poses=count===1?[[0,0,1]]:count===2?[[-24,-16,.84],[28,18,.76]]:[[-28,-18,.78],[28,-6,.73],[0,26,.68]];
+        const left=Math.min(...poses.map(([x,y,s])=>x-w*s/2)),right=Math.max(...poses.map(([x,y,s])=>x+w*s/2));
+        const top=Math.min(...poses.map(([x,y,s])=>y-w*s/2)),bottom=Math.max(...poses.map(([x,y,s])=>y+w*s/2));
+        rightEdges.push(width*.5+textBox.width/2+gapSize-iconBox.left-left);
+        rightCenters.push((left+right)/2);rightY.push((top+bottom)/2);
+      });
       const angle = (18 * Math.PI) / 180;
       // Keep the existing orbital spacing based on the original 32vw × 36vh
       // footprint; only the rendered desktop cards are now five percent smaller.
@@ -131,6 +153,7 @@ export default function ProjectWheels({
     const visibility = () => playback(engine.read().index);
     const hydrate = () => {videos.forEach((video,i)=>{video.src=assetUrl(projects[i].video);video.poster=assetUrl(projects[i].poster);});engine.invalidate();};
     window.addEventListener('portfolio-assets-ready',hydrate);
+    document.fonts.ready.then(()=>{if(element.isConnected)resize();});
     if(assetsReady())hydrate();
     resize();
     const unsubscribe = engine.subscribe(render);
@@ -143,11 +166,15 @@ export default function ProjectWheels({
       if(expandProgress.current===target)refreshGeometry();
     });
     window.addEventListener("resize", resize);
+    const layoutObserver=new ResizeObserver(resize);
+    layoutObserver.observe(element);
+    layoutObserver.observe(centerTitle);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       window.removeEventListener("portfolio-assets-ready",hydrate);
       unsubscribe();
       stopExpansion();
+      layoutObserver.disconnect();
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       videos.forEach((video) => video.pause());

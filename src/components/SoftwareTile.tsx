@@ -54,7 +54,9 @@ export default function SoftwareTile({
 
     const stop = subscribeTicker((_now, dt) => {
       if (document.hidden || el.closest('[inert]')) return;
-      const active = el.closest('[data-software]')?.getAttribute('aria-hidden') === 'false';
+      const slot=el.closest<HTMLElement>('[data-software]');
+      const alignment=Number(slot?.dataset.alignment??0),flat=1-alignment;
+      const active = slot?.getAttribute('aria-hidden') === 'false';
       let dx = 0;
       let dy = 0;
       let hovering = false;
@@ -62,7 +64,7 @@ export default function SoftwareTile({
         const rect = el.getBoundingClientRect();
         dx = mouseX - (rect.left + rect.width / 2);
         dy = mouseY - (rect.top + rect.height / 2);
-        hovering = Math.hypot(dx, dy) < 120;
+        hovering = alignment<.001 && Math.hypot(dx, dy) < 120;
       }
 
       // The phase is parked whenever the cursor leaves the active logo group.
@@ -74,7 +76,7 @@ export default function SoftwareTile({
 
       cubes.forEach((cube, index) => {
         if (count === 1) {
-          cube.style.transform = `translate3d(0,0,0) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+          cube.style.transform = `translate3d(0,0,0) rotateX(${tiltX*flat}deg) rotateY(${tiltY*flat}deg)`;
           cube.style.zIndex = '30';
           cube.style.filter = 'none';
         } else {
@@ -97,7 +99,7 @@ export default function SoftwareTile({
 
           // All orbiting faces stay in one plane. Layer swaps happen at the
           // outside turnaround, avoiding intersecting 3D planes.
-          cube.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale}) rotateZ(${rotation}deg)`;
+          cube.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale}) rotateZ(${rotation*flat}deg)`;
           cube.style.zIndex = String(Math.round(50 + layer * 25));
           cube.style.filter = `brightness(${brightness})`;
         }
