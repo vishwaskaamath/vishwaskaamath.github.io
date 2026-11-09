@@ -20,7 +20,7 @@ import LoadingScreen from "./LoadingScreen";
 import KineticPill from "./KineticPill";
 import { useRouter } from "next/navigation";
 import { useShell } from "./SiteShell";
-import { assetsReady } from "@/lib/assetPreloader";
+import { assetsReady, preloadAssets } from "@/lib/assetPreloader";
 import { pageReturn, RESUME_EVENT } from "@/lib/pageReturn";
 import { ArrowUpRight } from "lucide-react";
 
@@ -172,12 +172,24 @@ export default function Portfolio() {
 
   // The intro loader runs once per visit; coming back from the résumé page
   // (assets already loaded) skips it.
+  // ?skipintro (used for layout screenshots) loads the assets in the
+  // background without the intro animation.
   useEffect(() => {
-    if (!assetsReady()) setLoading(true);
+    if (assetsReady()) return;
+    if (new URLSearchParams(location.search).has("skipintro"))
+      void preloadAssets();
+    else setLoading(true);
   }, []);
 
   // Back from the résumé: land on the same Work project or About position.
+  // (?about=<scroll> opens About at that point; used for layout screenshots.)
   useEffect(() => {
+    const deep = new URLSearchParams(location.search).get("about");
+    if (deep !== null && !pageReturn.pending) {
+      pageReturn.pending = true;
+      pageReturn.view = "about";
+      pageReturn.scroll = Number(deep) || 0;
+    }
     if (!pageReturn.pending) return;
     pageReturn.pending = false;
     const { view, index: at, scroll } = pageReturn;

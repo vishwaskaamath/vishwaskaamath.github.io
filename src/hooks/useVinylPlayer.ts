@@ -96,7 +96,7 @@ export function useVinylPlayer(suspended = false, reducedMotion = false) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [volume, setVolumeState] = useState(0.2);
-  const [fx, setFx] = useState({ slowed: true, lofi: true, dust: true });
+  const [fx, setFx] = useState({ slowed: true, lofi: true, dust: false });
   const [durations, setDurations] = useState<Record<string, number>>({});
   const deck = useRef<Deck>({
     speed: 0,
@@ -131,7 +131,7 @@ export function useVinylPlayer(suspended = false, reducedMotion = false) {
     /** FX bay switches. */
     slowed: true,
     lofi: true,
-    dust: true,
+    dust: false,
   });
   control.current.suspended = suspended;
   control.current.reducedMotion = reducedMotion;

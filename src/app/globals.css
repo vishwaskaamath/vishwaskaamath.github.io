@@ -4966,3 +4966,43 @@ img[src*="/media/mono/induction"] {
   scale: 1.12;
   transform-origin: 50% 51%;
 }
+
+/* ---------- Above 1920px: the landing scales up as a whole ----------
+   Every landing size below is capped in px, so on 1440p and 4K screens the
+   hero stayed 1920-sized and drifted off balance. Past 1920px wide the same
+   proportions continue (each value = its 1920px size as vw), so 2560x1440
+   reads exactly like 1920x1080. 1920 and smaller are untouched. */
+@media (min-width: 1921px) {
+  .work-scene {
+    --title-w: 20vw;
+    --hero-gap: 6.5vw;
+    --card-w: 23vw;
+    --tile-size: 12.5vw;
+  }
+  .work-scene .project-metadata .project-title {
+    font-size: 3.637vw !important;
+  }
+  .work-scene .project-metadata .cinema-metadata-row,
+  .work-scene .project-metadata .project-meta-row,
+  .work-scene .project-year {
+    font-size: 0.594vw !important;
+  }
+  .work-scene .view-project-button {
+    font-size: 0.78vw !important;
+  }
+  .work-scene .toolkit-viewport .micro-label {
+    font-size: 0.58vw !important;
+  }
+  .work-scene .toolkit-viewport .tool-caption-slot > span:last-child {
+    font-size: 0.759vw !important;
+  }
+  .work-scene .software-wheel .adobe-symbol {
+    font-size: 4.896vw !important;
+  }
+  .work-scene .tile-brand {
+    font-size: 0.365vw !important;
+  }
+  .work-scene .work-toolkit-static {
+    top: calc(50vh + var(--tile-size) / 2 + 2.083vw) !important;
+  }
+}
