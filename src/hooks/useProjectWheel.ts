@@ -1,79 +1,182 @@
 "use client";
-import { useMasterTicker } from './useMasterTicker';
+import { useMasterTicker } from "./useMasterTicker";
+import { logoWheel } from "@/lib/logoWheel";
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { setGeometryMoving } from "@/lib/geometryCache";
 import { ScrollPhysics } from "@/lib/scrollPhysics";
 
-export type WheelDrag = { isDragging: boolean; lastY: number; distance: number; velocity: number; wasDragged: boolean; pointerId: number };
+export type WheelDrag = {
+  isDragging: boolean;
+  lastY: number;
+  distance: number;
+  velocity: number;
+  wasDragged: boolean;
+  pointerId: number;
+};
 
-export function useProjectWheel(count: number, disabled: boolean, reducedMotion: boolean) {
+export function useProjectWheel(
+  count: number,
+  disabled: boolean,
+  reducedMotion: boolean,
+) {
   const engine = useMemo(() => new ScrollPhysics(count), [count]);
   const index = useRef(0);
-  const dragRef = useRef<WheelDrag>({isDragging:false,lastY:0,distance:0,velocity:0,wasDragged:false,pointerId:-1});
+  const dragRef = useRef<WheelDrag>({
+    isDragging: false,
+    lastY: 0,
+    distance: 0,
+    velocity: 0,
+    wasDragged: false,
+    pointerId: -1,
+  });
   const options = useRef({ disabled, reducedMotion });
   options.current = { disabled, reducedMotion };
 
-  const select = useCallback((next: number, force = false) => {
-    if (options.current.disabled && !force) return;
-    engine.select(next, performance.now());
-  }, [engine]);
+  const select = useCallback(
+    (next: number, force = false) => {
+      if (options.current.disabled && !force) return;
+      engine.select(next, performance.now());
+    },
+    [engine],
+  );
 
   useMasterTicker((now, dt) => {
-    const current = options.current.disabled ? engine.read() : engine.advance(now, options.current.reducedMotion, dt);
+    const current = options.current.disabled
+      ? engine.read()
+      : engine.advance(now, options.current.reducedMotion, dt);
     setGeometryMoving(!options.current.disabled && !current.settled);
     index.current = current.index;
   });
 
   useEffect(() => {
-
     const drag = dragRef.current;
     const blocked = (target: EventTarget | null) =>
-      target instanceof Element && !!target.closest("dialog,input,textarea,select,[contenteditable='true']");
+      target instanceof Element &&
+      !!target.closest("dialog,input,textarea,select,[contenteditable='true']");
 
     const wheel = (event: WheelEvent) => {
-      if (options.current.disabled || engine.locked || event.ctrlKey || blocked(event.target)) return;
+      // Over the workflow logo wheel the page never scrolls: the wheel turns
+      // the ring instead (0.45 of a slot per mouse notch, proportionally less
+      // for small trackpad deltas; it snaps to a logo once it goes quiet).
+      if (logoWheel.hovering && engine.view === "about") {
+        event.preventDefault();
+        event.stopPropagation();
+        logoWheel.target +=
+          Math.sign(event.deltaY) *
+          Math.min(0.45, Math.abs(event.deltaY) * 0.0045);
+        logoWheel.lastInput = performance.now();
+        return;
+      }
+      if (
+        options.current.disabled ||
+        engine.locked ||
+        event.ctrlKey ||
+        blocked(event.target)
+      )
+        return;
       event.preventDefault();
-      engine.wheel(event.deltaY * (event.deltaMode===1?16:event.deltaMode===2?innerHeight:1), performance.now());
+      engine.wheel(
+        event.deltaY *
+          (event.deltaMode === 1
+            ? 16
+            : event.deltaMode === 2
+              ? innerHeight
+              : 1),
+        performance.now(),
+      );
     };
     const key = (event: KeyboardEvent) => {
-      if (options.current.disabled || engine.locked || blocked(event.target)) return;
-      if(event.target instanceof Element && event.target.closest('button,a')&&!['Home','End','PageDown','PageUp'].includes(event.key))return;
-      if(['Home','End','PageDown','PageUp',' '].includes(event.key)){event.preventDefault();if(event.key==='Home')engine.scrollTo(0);else if(event.key==='End')engine.scrollTo(engine.maxScroll);else engine.wheel((event.key==='PageUp'||event.shiftKey?-1:1)*innerHeight*.8,performance.now());return;}
-      if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(event.key)) {
+      if (options.current.disabled || engine.locked || blocked(event.target))
+        return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest("button,a") &&
+        !["Home", "End", "PageDown", "PageUp"].includes(event.key)
+      )
+        return;
+      if (["Home", "End", "PageDown", "PageUp", " "].includes(event.key)) {
         event.preventDefault();
-        engine.step(["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1, performance.now());
+        if (event.key === "Home") engine.scrollTo(0);
+        else if (event.key === "End") engine.scrollTo(engine.maxScroll);
+        else
+          engine.wheel(
+            (event.key === "PageUp" || event.shiftKey ? -1 : 1) *
+              innerHeight *
+              0.8,
+            performance.now(),
+          );
+        return;
+      }
+      if (
+        ["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(event.key)
+      ) {
+        event.preventDefault();
+        engine.step(
+          ["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1,
+          performance.now(),
+        );
       }
     };
     const start = (event: PointerEvent) => {
       if (!event.isPrimary || event.button !== 0) return;
-      drag.wasDragged = false; drag.distance = 0;
-      if (options.current.disabled || engine.locked || blocked(event.target)) return;
-      if (event.target instanceof Element && event.target.closest("button:not(.video-hit),a,[role='button']:not(.video-hit)")) return;
-      drag.isDragging = true; drag.lastY = event.clientY; drag.velocity = 0; drag.pointerId = event.pointerId;
+      drag.wasDragged = false;
+      drag.distance = 0;
+      if (options.current.disabled || engine.locked || blocked(event.target))
+        return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest(
+          // [data-drag-own]: elements with their own drag (the UI lab's
+          // inspector and curve handles) never start a page drag.
+          "button:not(.video-hit),a,[role='button']:not(.video-hit),[data-drag-own]",
+        )
+      )
+        return;
+      drag.isDragging = true;
+      drag.lastY = event.clientY;
+      drag.velocity = 0;
+      drag.pointerId = event.pointerId;
       engine.beginDrag();
-      document.documentElement.dataset.wheelDragging = 'true';
+      document.documentElement.dataset.wheelDragging = "true";
     };
     const end = (event?: PointerEvent) => {
-      if (!drag.isDragging || (event && event.pointerId !== drag.pointerId)) return;
-      drag.isDragging = false; drag.wasDragged = drag.distance > 6;
+      if (!drag.isDragging || (event && event.pointerId !== drag.pointerId))
+        return;
+      drag.isDragging = false;
+      drag.wasDragged = drag.distance > 6;
       engine.endDrag(drag.wasDragged ? drag.velocity : 0, performance.now());
       delete document.documentElement.dataset.wheelDragging;
     };
     const move = (event: PointerEvent) => {
       if (!drag.isDragging || event.pointerId !== drag.pointerId) return;
-      if (options.current.disabled) { drag.velocity = 0; end(); return; }
+      if (options.current.disabled) {
+        drag.velocity = 0;
+        end();
+        return;
+      }
       const deltaY = event.clientY - drag.lastY;
-      drag.lastY = event.clientY; drag.distance += Math.abs(deltaY); drag.velocity = deltaY;
+      drag.lastY = event.clientY;
+      drag.distance += Math.abs(deltaY);
+      drag.velocity = deltaY;
       drag.wasDragged = drag.distance > 6;
       engine.add(-deltaY * 0.0025, performance.now());
       if (drag.wasDragged && event.cancelable) event.preventDefault();
     };
     const click = (event: MouseEvent) => {
-      if (drag.wasDragged && event.detail !== 0) { event.preventDefault(); event.stopImmediatePropagation(); }
+      if (drag.wasDragged && event.detail !== 0) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
     };
-    const ghost = (event: DragEvent) => { if ((event.target as Element)?.closest('.portfolio')) event.preventDefault(); };
-    const blur = () => { drag.velocity = 0; end(); };
+    const ghost = (event: DragEvent) => {
+      if ((event.target as Element)?.closest(".portfolio"))
+        event.preventDefault();
+    };
+    const blur = () => {
+      drag.velocity = 0;
+      end();
+    };
     const visibility = () => {
       if (document.hidden) blur();
     };
@@ -81,7 +184,7 @@ export function useProjectWheel(count: number, disabled: boolean, reducedMotion:
     window.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("keydown", key);
     window.addEventListener("pointerdown", start, true);
-    window.addEventListener("pointermove", move, {passive:false});
+    window.addEventListener("pointermove", move, { passive: false });
     window.addEventListener("pointerup", end);
     window.addEventListener("pointercancel", end);
     window.addEventListener("click", click, true);

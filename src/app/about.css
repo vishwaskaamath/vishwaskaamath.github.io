@@ -1,0 +1,1548 @@
+/* About & Contact view: tactile 3D scroll journey (StoryStage, TearReveal,
+   KineticChapters). Motion is written by the About loops; this file holds
+   layout and materials only. */
+
+/* ---------- Mask-rise display type (RevealText) ----------
+   Each word is a mask; its characters rise from below the baseline with a
+   short vertical stretch, staggered 18ms apart (--d), when the heading's
+   data-revealed flips (StoryStage). The hover warp lives on the inner
+   .warp-char, so the two transforms never collide. */
+.rise-line {
+  position: relative;
+  display: block;
+}
+.rise-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding: 0.08em 0.04em;
+  margin: -0.08em -0.04em;
+  white-space: nowrap;
+}
+.rise-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 110%, 0) scaleY(1.28) rotateZ(2deg);
+  transform-origin: 50% 100%;
+  transition:
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0ms),
+    opacity 0.35s ease var(--d, 0ms);
+}
+[data-revealed="true"] .rise-char {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scaleY(1) rotateZ(0deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise-char {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------- ACT 1: hero and spec table ---------- */
+.story-intro.story-chapter {
+  position: relative;
+  z-index: 3;
+}
+.story-intro h2.about-hero {
+  height: auto;
+  margin: 0;
+  padding-top: 4vw;
+  font-size: inherit;
+  line-height: 0.88;
+  letter-spacing: 0.005em;
+}
+.story-intro h2.about-hero > span {
+  margin-left: 0;
+}
+.hero-line {
+  font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  font-weight: 400;
+  line-height: 0.88;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.hero-solid {
+  font-size: clamp(3rem, 11vw, 11.5rem);
+  color: #f3efe6;
+}
+.hero-outline {
+  margin-top: 0.06em;
+  font-size: clamp(2.2rem, 7.4vw, 8rem);
+  color: transparent;
+  -webkit-text-stroke: 1.5px #ff4d1c;
+}
+.about-spec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 145px;
+  gap: 5vw;
+  align-items: center;
+  max-width: 1120px;
+  margin: 4.5vw 0 3vw;
+}
+.about-spec-table {
+  margin: 0;
+  border-top: 1px solid rgba(243, 239, 230, 0.12);
+}
+.about-spec-table > div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 18px;
+  align-items: baseline;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(243, 239, 230, 0.12);
+}
+.about-spec-table dt {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: rgba(243, 239, 230, 0.45);
+}
+.about-spec-table dd {
+  margin: 0;
+  font-family: var(--font-pally), sans-serif;
+  font-size: clamp(0.78rem, 1vw, 0.92rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #f3efe6;
+}
+/* ---------- ACT 1-2: skill stations on the marker runway ----------
+   One S-curve marker from "interface" into the full stop of "This is my
+   thing"; three skill stations (tilted clip + badge + display title +
+   sentence) alternate sides of it and pop in as the pen reaches the glowing
+   node beside each one. */
+.about-manifesto .manifesto-trail.runway {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  min-height: 82vh;
+  margin: 6vh 0 0;
+  padding: 20px 0 30px;
+  pointer-events: none;
+}
+.manifesto-trail > svg {
+  z-index: 1;
+  pointer-events: none;
+}
+.station-list {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 9vh;
+}
+.station {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: fit-content;
+  max-width: 760px;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(0.88);
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+.station-right {
+  margin-left: auto;
+}
+.station[data-visible="true"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+/* Tilted clip in a hardware frame; hover straightens it. */
+.station-video {
+  position: relative;
+  flex-shrink: 0;
+  width: 260px;
+  height: 156px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(243, 239, 230, 0.18);
+  border-radius: 14px;
+  background: #111;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75);
+  transform: rotate(var(--tilt));
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease;
+}
+.station-right .station-video {
+  border-color: rgba(255, 77, 28, 0.35);
+}
+.station-video:hover {
+  border-color: #ff4d1c;
+  transform: rotate(0deg) scale(1.06);
+}
+.station-video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.manifesto-trail .station-title {
+  margin: 8px 0 6px;
+  font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  font-size: clamp(2.6rem, 4.8vw, 4.4rem);
+  font-weight: 400;
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  color: #f3efe6;
+  white-space: nowrap;
+}
+.station-copy p {
+  max-width: 360px;
+  margin: 0;
+  font-family: var(--font-pally), Arial, sans-serif;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  color: rgba(243, 239, 230, 0.72);
+}
+/* Glowing node on the line and the tick that links it to the station. */
+.station-node {
+  fill: #09090b;
+  stroke: #ff4d1c;
+  stroke-width: 2;
+  transition: fill 0.3s ease;
+}
+.station-node[data-visible="true"] {
+  fill: #ff4d1c;
+  filter: drop-shadow(0 0 8px rgba(255, 77, 28, 0.9));
+}
+.station-tick {
+  fill: none;
+  stroke: #ff4d1c;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.45s ease 0.1s;
+}
+.station-tick[data-visible="true"] {
+  stroke-dashoffset: 0;
+}
+/* Narrow screens: clip above the copy, the line runs down the right edge. */
+@media (max-width: 899px) {
+  .station-list {
+    gap: 8vh;
+  }
+  .station {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    width: auto;
+    max-width: none;
+    padding-right: 30px;
+  }
+  .station-right {
+    margin-left: 0;
+  }
+  .station-right .station-video {
+    order: -1;
+  }
+  .manifesto-trail .station-title {
+    white-space: normal;
+  }
+}
+@media (max-width: 420px) {
+  .station-video {
+    width: 100%;
+    max-width: 260px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .station,
+  .station-video,
+  .station-tick {
+    transition: none;
+  }
+}
+
+/* ---------- ACT 3 opener: torn-paper cinema aperture ----------
+   Sits between the cream "This is my thing" and the dark workflow. The gap
+   is see-through, so the falling background runs right up to the torn
+   cream edge with no flat seams. */
+.tear-section {
+  position: relative;
+  z-index: 1;
+  height: 160vh;
+  margin-top: 0;
+}
+.tear-pin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  overflow: hidden;
+  will-change: transform;
+}
+.tear-reel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4vh;
+  overflow: hidden;
+  /* A soft dark pool behind the film; transparent at the edges. */
+  background: radial-gradient(
+    90% 46% at 50% 50%,
+    rgba(9, 9, 11, 0.62) 0%,
+    rgba(9, 9, 11, 0) 78%
+  );
+}
+/* Static angle (never re-rasterised) and the drag surface for the film. */
+.tear-strip-angle {
+  position: relative;
+  /* Wider than the screen so the tilted, paint-contained box never shows
+     a corner at either edge. */
+  margin: 0 -6vw;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  transform: rotate(-2.2deg) translateZ(0);
+  will-change: transform;
+  contain: layout paint;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+.tear-strip-angle[data-dragging="true"] {
+  cursor: grabbing;
+}
+/* The track only ever translates on X (StoryStage). */
+.tear-strip {
+  position: relative;
+  display: flex;
+  gap: 1.2vw;
+  width: max-content;
+  padding: 3.4vh 1.2vw;
+  background: #0d0c0f;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  contain: layout style paint;
+}
+/* Sprocket holes along both edges of the film. */
+.tear-strip::before,
+.tear-strip::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.1vh;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(243, 239, 230, 0.75) 0px,
+    rgba(243, 239, 230, 0.75) 12px,
+    transparent 12px,
+    transparent 28px
+  );
+  background-size: 28px 100%;
+  background-repeat: repeat-x;
+  border-radius: 2px;
+}
+.tear-strip::before {
+  top: 1.1vh;
+}
+.tear-strip::after {
+  bottom: 1.1vh;
+}
+.tear-frame {
+  position: relative;
+  flex: none;
+  width: calc(34vh * 1.6);
+  height: 34vh;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #111;
+}
+.tear-frame img {
+  display: block;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tear-frame figcaption {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: #f3efe6;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+.tear-caption {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0 6vw;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: rgba(243, 239, 230, 0.6);
+}
+.tear-caption span {
+  color: #ff4d1c;
+}
+/* ---------- ACT 2: "This is my thing" ---------- */
+.story-capabilities.kinetic-capabilities {
+  position: relative;
+  z-index: 2;
+  margin-top: 0;
+}
+.kinetic-capabilities h2.sliced-heading .rise-line {
+  display: block;
+}
+.kinetic-capabilities .kinetic-discipline {
+  border-top: 1px solid rgba(9, 9, 11, 0.15);
+}
+.kinetic-capabilities .kinetic-discipline:last-child {
+  border-bottom: 1px solid rgba(9, 9, 11, 0.15);
+}
+/* Waving flag card beside the active discipline row. JS sets the rippling
+   outline (clip on the body, strokes on the frame) every frame it shows. */
+.discipline-floating-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 310px;
+  height: 195px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  filter: drop-shadow(0 22px 30px rgba(9, 9, 11, 0.28));
+  will-change: transform, opacity;
+  transition:
+    opacity 0.22s ease,
+    visibility 0.22s ease;
+}
+.discipline-floating-preview.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+.flag-frame {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.flag-frame path {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+/* Double border: ink on the edge, an orange print offset behind it. */
+.flag-edge-accent {
+  stroke: #ff4d1c;
+  transform: translate(5px, 5px);
+}
+.flag-edge-ink {
+  stroke: #09090b;
+}
+.flag-body {
+  position: absolute;
+  inset: 0;
+  background: #111;
+}
+/* One preloaded loop per row, stacked; the hovered row's is shown. */
+.flag-body video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+.flag-body video[data-active="true"] {
+  opacity: 1;
+}
+
+/* ---------- ACT 3: 3D software orbit ---------- */
+.workflow-hardware-stage .hardware-dock {
+  position: relative;
+  display: block;
+  height: clamp(190px, 17vw, 240px);
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  perspective: 1100px;
+  transform-style: preserve-3d;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+.workflow-hardware-stage .hardware-dock:active {
+  cursor: grabbing;
+}
+.workflow-hardware-stage .hardware-tool {
+  --tile: clamp(88px, 6.8vw, 112px);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  flex: none;
+  width: var(--tile);
+  height: var(--tile);
+  margin: calc(var(--tile) / -2) 0 0 calc(var(--tile) / -2);
+}
+
+/* ---------- ACT 4: brutalist contact finale ---------- */
+.kinetic-contact .contact-ticker {
+  top: 26px;
+}
+/* Copy-email capsule: dark pill with an orange action pill; on hover the
+   orange floods out of the action across the whole capsule. */
+.email-capsule {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  height: 60px;
+  margin: 0 auto 3vh;
+  padding: 6px 6px 6px 28px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: #09090b;
+  color: #f3efe6;
+  box-shadow: 0 18px 40px rgba(9, 9, 11, 0.18);
+  cursor: pointer;
+  isolation: isolate;
+}
+.email-capsule-flood {
+  position: absolute;
+  top: 50%;
+  right: 30px;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  border-radius: 50%;
+  background: #ff4d1c;
+  transform: scale(0);
+  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
+  pointer-events: none;
+}
+.email-capsule-address {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-pally), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.email-capsule-action {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 22px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ff4d1c;
+  color: #f3efe6;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
+}
+/* Both labels stack in a 1-line window; copying rolls to the second. */
+.email-capsule-roll {
+  display: grid;
+  height: 1.2em;
+  line-height: 1.2em;
+  overflow: hidden;
+}
+.email-capsule-roll > span {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  text-align: center;
+  transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.email-capsule-roll > span + span {
+  transform: translateY(110%);
+}
+.email-capsule[data-copied="true"] .email-capsule-roll > span:first-child {
+  transform: translateY(-110%);
+}
+.email-capsule[data-copied="true"] .email-capsule-roll > span + span {
+  transform: translateY(0);
+}
+.email-capsule:hover .email-capsule-flood,
+.email-capsule:focus-visible .email-capsule-flood {
+  transform: scale(22);
+}
+.email-capsule:hover .email-capsule-action,
+.email-capsule:focus-visible .email-capsule-action {
+  background: #f3efe6;
+  color: #09090b;
+}
+.email-capsule:focus-visible {
+  outline: 2px solid #ff4d1c;
+  outline-offset: 4px;
+}
+.kinetic-contact h2.talk-title {
+  margin: 1vh 0 3vh;
+  font-size: clamp(5.5rem, 15vw, 15rem);
+  line-height: 0.9;
+  perspective: 1100px;
+}
+.talk-title button {
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+.talk-tilt {
+  display: inline-block;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.talk-tilt {
+  white-space: nowrap;
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 759px) {
+  .story-intro h2.about-hero {
+    padding-top: 12vw;
+  }
+  .about-spec {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .about-spec-table > div {
+    grid-template-columns: 90px minmax(0, 1fr);
+  }
+  .tear-frame {
+    width: calc(26vh * 1.6);
+    height: 26vh;
+  }
+  .workflow-hardware-stage .hardware-tool {
+    --tile: 70px;
+  }
+  .kinetic-contact .contact-ticker {
+    top: 18px;
+  }
+  .email-capsule {
+    gap: 12px;
+    height: 54px;
+    max-width: 92vw;
+    padding-left: 18px;
+  }
+  .email-capsule-address {
+    font-size: 0.74rem;
+    letter-spacing: 0.01em;
+  }
+  .email-capsule-action {
+    height: 42px;
+    padding: 0 14px;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .email-capsule-flood,
+  .email-capsule-action,
+  .email-capsule-roll > span {
+    transition: none;
+  }
+}
+
+/* ---------- Workflow point-cloud stream ---------- */
+.workflow-stream {
+  position: absolute;
+  top: -10px;
+  left: -6vw;
+  z-index: -1;
+  width: 100vw;
+  height: 380px;
+  pointer-events: none;
+}
+
+/* ---------- Contact: orbit seal around LET'S TALK ---------- */
+.kinetic-contact h2.talk-title {
+  position: relative;
+}
+.talk-title > button {
+  position: relative;
+  z-index: 1;
+}
+.talk-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: min(84vw, 860px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  transform: translate(-50%, -50%) perspective(2600px) rotateX(62deg);
+  will-change: transform;
+}
+.talk-orbit svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: talk-orbit-spin 90s linear infinite;
+}
+.talk-orbit text {
+  font:
+    600 24px ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.32em;
+  fill: #09090b;
+  opacity: 0.22;
+}
+@keyframes talk-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .talk-orbit svg {
+    animation: none;
+  }
+}
+
+/* The wheel only steps the tools inside this box around the orbit (its
+   width is set from the orbit radius in KineticChapters). */
+.workflow-hardware-stage .hardware-dock.workflow-icons-dock {
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  height: clamp(250px, 22vw, 310px);
+  margin: 0 auto;
+  perspective: 1200px;
+}
+
+/* ---------- Workflow: centred spotlight + symmetric stream fade ---------- */
+/* The old glow followed --tile-x on a wider box and drifted off-centre. */
+.workflow-hardware-stage::before {
+  content: none;
+}
+/* Sits dead-centre in the ring, behind the front logo, in its brand colour. */
+.workflow-spotlight {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background-color: var(--spot, #9999ff);
+  opacity: 0.32;
+  filter: blur(48px);
+  transform: translate3d(-50%, -50%, -40px);
+  pointer-events: none;
+  transition: background-color 0.5s ease;
+}
+.workflow-stream {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 20%,
+    #000 80%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 20%,
+    #000 80%,
+    transparent 100%
+  );
+}
+
+/* ---------- Contact: room for the fixed BACK TO WORK button ---------- */
+.story-contact.kinetic-contact {
+  padding-bottom: 130px;
+}
+.kinetic-contact .contact-copy-zone {
+  margin-top: -48px;
+}
+
+/* ---------- Heading warp (lib/headingWarp) ---------- */
+.warp-char {
+  display: inline-block;
+  transform-origin: 50% 65%;
+}
+/* Discipline titles warp on hover instead of running a marquee. */
+.kinetic-discipline:hover .discipline-title-track,
+.kinetic-discipline:focus-visible .discipline-title-track {
+  animation: none;
+}
+
+/* ---------- "This is my thing": rows open into editorial boxes ---------- */
+.kinetic-capabilities .discipline-item:last-child {
+  border-bottom: 1px solid rgba(9, 9, 11, 0.15);
+}
+.kinetic-capabilities .kinetic-discipline:last-child {
+  border-bottom: 0;
+}
+.kinetic-discipline {
+  cursor: pointer;
+}
+.kinetic-discipline h3,
+.discipline-number,
+.discipline-arrow {
+  transition:
+    translate 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.3s ease,
+    background-color 0.3s ease,
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.discipline-arrow {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+/* Open row: orange index, title nudged right, arrow turned in an orange disc. */
+.discipline-item[data-open="true"] .discipline-number {
+  color: #ff4d1c;
+}
+.discipline-item[data-open="true"] .kinetic-discipline h3 {
+  translate: 12px 0;
+}
+.discipline-item[data-open="true"] .discipline-arrow {
+  background: #ff4d1c;
+  color: #f3efe6;
+  font-size: 18px;
+  transform: rotate(135deg);
+}
+.kinetic-discipline:focus-visible {
+  outline: 2px solid #ff4d1c;
+  outline-offset: -2px;
+}
+/* 0fr -> 1fr: the drawer grows to its content's height. */
+.discipline-drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  padding: 0 5vw;
+  transition: grid-template-rows 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.discipline-item[data-open="true"] .discipline-drawer {
+  grid-template-rows: 1fr;
+}
+.drawer-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.drawer-box {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.35fr 0.85fr;
+  align-items: center;
+  gap: 40px;
+  margin: 4px 0 24px;
+  padding: 32px 36px 32px 39px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #09090b;
+  color: #f3efe6;
+  box-shadow: 0 24px 50px rgba(9, 9, 11, 0.16);
+  clip-path: inset(0 0 100% 0 round 20px);
+  transition: clip-path 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.discipline-item[data-open="true"] .drawer-box {
+  clip-path: inset(0 0 0% 0 round 20px);
+}
+/* Orange accent bar on the inside left edge. */
+.drawer-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: #ff4d1c;
+}
+/* Copy, skills and clip rise into place 60ms apart. */
+.drawer-text,
+.drawer-skills,
+.drawer-video {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.4s ease;
+}
+.discipline-item[data-open="true"]
+  :is(.drawer-text, .drawer-skills, .drawer-video) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+.discipline-item[data-open="true"] .drawer-text {
+  transition-delay: 0.12s;
+}
+.discipline-item[data-open="true"] .drawer-skills {
+  transition-delay: 0.18s;
+}
+.discipline-item[data-open="true"] .drawer-video {
+  transition-delay: 0.24s;
+}
+.drawer-label {
+  margin: 0 0 10px;
+  font:
+    700 0.62rem/1 ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ff4d1c;
+}
+.drawer-text {
+  max-width: 62ch;
+  margin: 0 0 24px;
+  font-family: var(--font-pally), Arial, sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgba(243, 239, 230, 0.88);
+}
+.drawer-skills ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.drawer-skills li {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #f3efe6;
+  color: #09090b;
+  font-family: var(--font-pally), Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.drawer-skills li.is-accent {
+  background: #ff4d1c;
+  color: #f3efe6;
+}
+/* 16:9 reel frame: the row's clip plays here while the box is open. */
+.drawer-video {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid rgba(243, 239, 230, 0.14);
+  border-radius: 14px;
+  background: #111;
+}
+.drawer-video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (max-width: 899px) {
+  .drawer-box {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 26px 22px 26px 25px;
+  }
+}
+@media (max-width: 759px) {
+  .discipline-drawer {
+    padding: 0 6vw;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .discipline-drawer,
+  .drawer-box,
+  .drawer-text,
+  .drawer-skills,
+  .drawer-video {
+    transition: none;
+  }
+}
+
+/* ---------- Workflow: header, watermark, orbit, showcase bar ---------- */
+.kinetic-workflow .workflow-heading {
+  margin-bottom: 36px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.kinetic-workflow .workflow-heading h2 {
+  margin: 0;
+}
+/* Tool names in the copy: orange while that tool is in front; click to
+   turn the orbit to it. */
+.workflow-editorial .tool-word {
+  display: inline;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: #f3efe6;
+  cursor: pointer;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0% 1px
+    no-repeat;
+  transition:
+    color 0.35s ease,
+    text-shadow 0.35s ease,
+    background-size 0.35s ease;
+}
+.workflow-editorial .tool-word:hover {
+  background-size: 100% 1px;
+}
+.workflow-editorial .tool-word[data-active="true"] {
+  color: #ff4d1c;
+  text-shadow: 0 0 14px rgba(255, 77, 28, 0.55);
+  background-size: 100% 1px;
+}
+.workflow-editorial .tool-word:focus-visible {
+  outline: 2px solid #ff4d1c;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.workflow-orbit-zone {
+  position: relative;
+}
+/* Giant outline name of the tool in front, full-bleed behind the orbit. */
+.workflow-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 100vw;
+  height: clamp(7.5rem, 17vw, 17.5rem);
+  text-align: center;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  user-select: none;
+}
+.wm-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.wm-text {
+  display: block;
+  font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  font-size: clamp(6.5rem, 15vw, 15.5rem);
+  font-weight: 800;
+  font-synthesis: none;
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(243, 239, 230, 0.08);
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+/* The same outline in orange, masked to a glow behind the front tool. */
+.wm-glow {
+  -webkit-mask-image: radial-gradient(
+    300px 75% at 50% 52%,
+    #000 0%,
+    rgba(0, 0, 0, 0.6) 45%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    300px 75% at 50% 52%,
+    #000 0%,
+    rgba(0, 0, 0, 0.6) 45%,
+    transparent 100%
+  );
+}
+.wm-glow .wm-text {
+  -webkit-text-stroke-color: rgba(255, 77, 28, 0.22);
+}
+
+/* The orbit plane tips back so the whole ellipse reads in depth. */
+.orbit-plane {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(-10deg);
+}
+/* Flat track ring through every tool's centre (sized in KineticChapters),
+   with an orange arc glowing at the front. */
+.orbit-track {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) translateZ(-190px) rotateX(82deg);
+}
+.orbit-track svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.orbit-track-line,
+.orbit-track-glow,
+.orbit-track-arc {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.orbit-track-line {
+  stroke: rgba(243, 239, 230, 0.18);
+  stroke-width: 1px;
+}
+.orbit-track-glow {
+  stroke: rgba(255, 77, 28, 0.4);
+  stroke-width: 8px;
+  stroke-linecap: round;
+  filter: blur(4px);
+}
+.orbit-track-arc {
+  stroke: #ff4d1c;
+  stroke-width: 1.6px;
+  stroke-linecap: round;
+}
+
+/* Active tool showcase bar. */
+.tool-showcase {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 820px;
+  margin: 38px auto 0;
+  padding: 20px 28px;
+  border: 1px solid rgba(243, 239, 230, 0.12);
+  border-radius: 999px;
+  background: rgba(18, 18, 24, 0.82);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+.showcase-lead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.showcase-index {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ff4d1c;
+  color: #f3efe6;
+  font:
+    700 0.78rem/1 ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.04em;
+}
+.showcase-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.showcase-meta strong {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f3efe6;
+}
+.showcase-meta span {
+  overflow: hidden;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: rgba(243, 239, 230, 0.65);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.showcase-pills {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.showcase-pills li {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #f3efe6;
+  color: #09090b;
+  font:
+    700 0.68rem/1 ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .tool-showcase {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+    border-radius: 24px;
+  }
+  .showcase-meta span {
+    white-space: normal;
+  }
+  .showcase-pills {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---------- Pick-up marker (MarkerDraw) ---------- */
+.manifesto-trail > svg .manifesto-pen {
+  pointer-events: auto;
+  cursor: grab;
+}
+.manifesto-pen .pen-ping {
+  fill: none;
+  stroke: #ff4d1c;
+  stroke-width: 1.2;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pen-ping 2.4s ease-out infinite;
+}
+@keyframes pen-ping {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.6);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+.story-stage[data-marker="held"] .manifesto-pen {
+  visibility: hidden;
+}
+html[data-marker="held"] .ribbon-cursor {
+  opacity: 0;
+}
+/* Strokes, in stage coordinates so they scroll with the page. */
+.marker-ink {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke-width: 5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.marker-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 71;
+  display: none;
+  cursor: none;
+  touch-action: none;
+}
+.marker-surface[data-active="true"] {
+  display: block;
+}
+.marker-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10001;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+}
+.marker-cursor[data-visible="true"] {
+  opacity: 1;
+}
+/* The tip sits exactly on the pointer, angled like a held pen. */
+.marker-cursor svg {
+  display: block;
+  margin: -14.5px 0 0 -54px;
+  transform: rotate(-38deg);
+  transform-origin: 54px 14.5px;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+}
+.marker-hint {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10001;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #ff4d1c;
+  color: #f3efe6;
+  font:
+    700 0.62rem/1 ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.marker-hint[data-visible="true"] {
+  opacity: 1;
+}
+.marker-controls {
+  position: fixed;
+  left: 50%;
+  bottom: 92px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 7px 7px 16px;
+  border: 1px solid rgba(243, 239, 230, 0.14);
+  border-radius: 999px;
+  background: rgba(14, 14, 18, 0.9);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+  transform: translateX(-50%);
+  font:
+    700 0.64rem/1 ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    Consolas,
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f3efe6;
+  animation: marker-controls-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes marker-controls-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+}
+.marker-controls-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+.marker-controls-label i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4d1c;
+}
+.marker-controls button {
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(243, 239, 230, 0.1);
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.marker-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.marker-controls button.is-primary {
+  background: #ff4d1c;
+}
+.marker-controls button:focus-visible {
+  outline: 2px solid #ff4d1c;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .manifesto-pen .pen-ping {
+    animation: none;
+  }
+}
+
+/* Pull "Inside the workflow" up into the empty tail of the film aperture,
+   above it so its tool words stay clickable. */
+.tear-section {
+  margin-bottom: -18vh;
+}
+.story-workflow.kinetic-workflow {
+  position: relative;
+  z-index: 2;
+  padding-top: 2vh;
+}
+
+/* ---------- Workflow orbit: the logos ride on the ring ---------- */
+/* The track ring sits under the logos (a floor they glide on) instead of
+   running through their middles. */
+.orbit-track {
+  transform: translate(-50%, calc(-50% + clamp(50px, 3.9vw, 64px)))
+    translateZ(-190px) rotateX(82deg);
+}
+/* DaVinci Resolve's artwork is already its own rounded icon: drop the
+   hardware chassis around it, like the landing page does. */
+.hardware-tool[data-tool="davinci"] .hardware-face,
+.hardware-tool[data-tool="davinci"] .hardware-depth {
+  display: none;
+}
+.hardware-tool[data-tool="davinci"] .hardware-glyph {
+  inset: 0;
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.6));
+}
+.hardware-tool[data-tool="davinci"] .official-tool-logo {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.06);
+}
+
+/* ---------- Contact: bigger type, icon links, less dead space ---------- */
+.story-contact.kinetic-contact {
+  justify-content: flex-start;
+  padding-top: clamp(175px, 19vh, 220px);
+  padding-bottom: 120px;
+}
+.kinetic-contact h2.talk-title {
+  margin: 2vh 0 4vh;
+  font-size: clamp(6rem, 17vw, 21rem);
+}
+.talk-orbit {
+  width: min(84vw, 980px);
+}
+.email-capsule {
+  gap: 26px;
+  height: 76px;
+  padding: 8px 8px 8px 34px;
+}
+.email-capsule-address {
+  font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+}
+.email-capsule-action {
+  height: 60px;
+  padding: 0 28px;
+  font-size: 0.82rem;
+}
+.email-capsule-flood {
+  right: 36px;
+}
+.kinetic-contact .contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin: 5vh 0 7vh;
+}
+.kinetic-contact .contact-links a.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 58px;
+  padding: 0 22px 0 20px;
+  border: 1.5px solid rgba(17, 17, 19, 0.28);
+  border-bottom-width: 1.5px;
+  border-radius: 999px;
+  background: rgba(243, 239, 230, 0.5);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #111113;
+  font-family: var(--font-pally), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kinetic-contact .contact-links a.contact-link svg {
+  flex: none;
+  transition:
+    color 0.3s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kinetic-contact .contact-links a.contact-link svg:last-child {
+  opacity: 0.55;
+}
+.kinetic-contact .contact-links a.contact-link:is(:hover, :focus-visible) {
+  border-color: #111113;
+  background: #111113;
+  color: #f3efe6;
+  transform: translateY(-3px);
+}
+.kinetic-contact .contact-links a.contact-link:is(:hover, :focus-visible) svg {
+  color: #ff4d1c;
+}
+.kinetic-contact
+  .contact-links
+  a.contact-link:is(:hover, :focus-visible)
+  svg:last-child {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+.kinetic-contact .contact-bottom {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+.kinetic-contact .contact-bottom > button:last-child {
+  font-size: 12px;
+  padding: 12px 20px;
+}
+@media (max-width: 759px) {
+  .story-contact.kinetic-contact {
+    padding-top: 130px;
+  }
+  .email-capsule {
+    height: 62px;
+    padding-left: 20px;
+  }
+  .email-capsule-action {
+    height: 48px;
+    padding: 0 16px;
+  }
+  .kinetic-contact .contact-links a.contact-link {
+    height: 52px;
+    padding: 0 16px;
+    font-size: 0.85rem;
+  }
+}
+
+/* The pen is only a handle (and only pulses) while it rests in the cap. */
+.manifesto-trail > svg .manifesto-pen:not([data-docked="true"]) {
+  pointer-events: none;
+  cursor: default;
+}
+.manifesto-pen:not([data-docked="true"]) .pen-ping {
+  animation: none;
+  opacity: 0;
+}

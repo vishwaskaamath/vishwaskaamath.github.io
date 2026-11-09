@@ -2,12 +2,27 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
 
-const source = await readFile(new URL("../src/lib/scrollPhysics.ts", import.meta.url), "utf8");
-const { outputText } = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } });
-const { ScrollPhysics, reelOffset, modulo } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
-const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} should equal ${b}`);
+const source = await readFile(
+  new URL("../src/lib/scrollPhysics.ts", import.meta.url),
+  "utf8",
+);
+const { outputText } = ts.transpileModule(source, {
+  compilerOptions: {
+    target: ts.ScriptTarget.ES2022,
+    module: ts.ModuleKind.ES2022,
+  },
+});
+const { ScrollPhysics, reelOffset, modulo } = await import(
+  `data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`
+);
+const near = (a, b) =>
+  assert.ok(Math.abs(a - b) < 1e-8, `${a} should equal ${b}`);
 let passed = 0;
-const test = (label, run) => { run(); console.log(`PASS ${label}`); passed++; };
+const test = (label, run) => {
+  run();
+  console.log(`PASS ${label}`);
+  passed++;
+};
 
 test("a rapid burst retains every event and starts moving on the first frame", () => {
   const reel = new ScrollPhysics(5);
@@ -60,7 +75,9 @@ test("large positive and negative flings preserve turns and settle correctly", (
 test("all columns get the identical fractional position in the same tick", () => {
   const reel = new ScrollPhysics(5);
   const columns = [[], [], []];
-  const remove = columns.map((samples) => reel.subscribe((frame) => samples.push(frame)));
+  const remove = columns.map((samples) =>
+    reel.subscribe((frame) => samples.push(frame)),
+  );
   reel.wheel(300, 0);
   for (let t = 16; t <= 96; t += 16) reel.advance(t);
   columns[0].forEach((frame, i) => {
@@ -94,23 +111,25 @@ test("dot selection takes the nearest circular path and keyboard repeats queue f
 
 test("holding a drag disables idle snapping until release", () => {
   const reel = new ScrollPhysics(5);
-  reel.beginDrag(); reel.add(.63, 0);
-  near(reel.advance(5000).targetScroll, .63);
+  reel.beginDrag();
+  reel.add(0.63, 0);
+  near(reel.advance(5000).targetScroll, 0.63);
   reel.endDrag(-30, 5001);
   near(reel.targetScroll, 1);
-  for(let t=5016;t<7500;t+=16) reel.advance(t);
-  assert.equal(reel.read().index,1);
-  assert.equal(reel.read().settled,true);
+  for (let t = 5016; t < 7500; t += 16) reel.advance(t);
+  assert.equal(reel.read().index, 1);
+  assert.equal(reel.read().settled, true);
 });
 test("drag reversal and negative throws retain continuous wrapping", () => {
-  const reel=new ScrollPhysics(5);
-  reel.beginDrag(); reel.add(-.9,0);
-  const held=reel.advance(500);
-  near(held.targetScroll,4.1);
-  reel.endDrag(30,501);
-  near(reel.targetScroll,4);
-  for(let t=520;t<3000;t+=16)reel.advance(t);
-  assert.equal(reel.read().index,4);
+  const reel = new ScrollPhysics(5);
+  reel.beginDrag();
+  reel.add(-0.9, 0);
+  const held = reel.advance(500);
+  near(held.targetScroll, 4.1);
+  reel.endDrag(30, 501);
+  near(reel.targetScroll, 4);
+  for (let t = 520; t < 3000; t += 16) reel.advance(t);
+  assert.equal(reel.read().index, 4);
 });
 
 console.log(`${passed} scroll regression checks passed.`);

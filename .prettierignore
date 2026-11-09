@@ -1,0 +1,6 @@
+out/
+.next/
+node_modules/
+public/
+src/data/assetManifest.json
+package-lock.json

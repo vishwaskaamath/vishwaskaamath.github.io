@@ -1,0 +1,182 @@
+/* Cream chapters ("This is my thing", "Let's talk"): warm paper tone, grain
+   and the ink-line fields built by CreamField.tsx. */
+.story-capabilities,
+.story-contact {
+  isolation: isolate;
+}
+.story-capabilities {
+  --cream-top: #f3efe6;
+  background:
+    radial-gradient(90% 60% at 85% 10%, #fbf6ee 0%, transparent 60%),
+    linear-gradient(180deg, #f3efe6 0%, #ede4d5 100%);
+}
+.story-contact {
+  --cream-top: #efe7da;
+  background:
+    radial-gradient(70% 55% at 50% 42%, #faf5ec 0%, transparent 70%),
+    linear-gradient(180deg, #efe7da 0%, #f3efe6 100%);
+}
+.cream-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* Static SVG line art built by CreamField.tsx. Layers only ever move by
+   composited transforms: JS writes the scroll parallax on .cream-layer, CSS
+   animates the inner sway / breathing / waves. */
+.cream-layer {
+  position: absolute;
+  top: -140px;
+  left: -140px;
+  will-change: transform;
+}
+.cream-layer svg {
+  display: block;
+}
+.cream-sway {
+  animation: cream-sway 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.cream-sway-alt {
+  animation-duration: 13s;
+  animation-direction: alternate-reverse;
+}
+@keyframes cream-sway {
+  from {
+    transform: translate3d(-48px, 6px, 0);
+  }
+  to {
+    transform: translate3d(48px, -6px, 0);
+  }
+}
+.cream-breathe,
+.cream-wave {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: var(--ring-origin);
+  will-change: transform, opacity;
+}
+.cream-breathe {
+  animation: cream-breathe 7s ease-in-out infinite alternate;
+}
+.cream-breathe-1 {
+  animation-duration: 9.5s;
+  animation-delay: -4s;
+  animation-direction: alternate-reverse;
+}
+@keyframes cream-breathe {
+  from {
+    transform: scale(0.985) rotate(-1.2deg);
+  }
+  to {
+    transform: scale(1.03) rotate(1.2deg);
+  }
+}
+/* Ripples are born small and faint at the heading and fade as they spread. */
+.cream-wave {
+  opacity: 0;
+  animation: cream-wave 9s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+}
+@keyframes cream-wave {
+  0% {
+    transform: scale(0.08);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.cream-field:not([data-live="true"]) * {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cream-sway,
+  .cream-breathe {
+    animation: none;
+  }
+  .cream-wave {
+    display: none;
+  }
+}
+.cream-grain {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.06 0 0 0 0 0.05 0.9 0 0 0 -0.32'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")
+    0 0 / 220px;
+  /* Dark specks with alpha: normal blending, so the line layers below
+     never force a full-section re-blend. */
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Section seams: the film aperture, torn edges and orange rule join the
+   chapters directly, with no gaps. */
+/* No dead space under the last row: 36px, then cream paper teeth hang
+   below the section (transparent between them, over the falling background
+   and the film). The contour lines are clipped to the same teeth. */
+.story-capabilities.kinetic-capabilities {
+  min-height: 0 !important;
+  height: auto !important;
+  padding-bottom: 36px !important;
+  margin-bottom: 0 !important;
+  border-radius: 0;
+}
+.story-capabilities .cream-field,
+.story-capabilities .cream-grain {
+  bottom: -63px;
+  clip-path: var(--teeth-clip);
+}
+/* Overlaps the section by 1px so there is never a hairline seam. */
+.cream-teeth {
+  position: absolute;
+  left: 0;
+  bottom: -63px;
+  z-index: -2;
+  display: block;
+  width: 100%;
+  height: 64px;
+  background: transparent;
+  fill: #ede4d5;
+  pointer-events: none;
+}
+/* Torn paper seam where the dark runway (and the falling background behind
+   it) meets the cream chapter. */
+.cream-torn-top {
+  position: absolute;
+  top: -25px;
+  left: 0;
+  right: 0;
+  height: 26px;
+  background: #f3efe6;
+  pointer-events: none;
+}
+.story-workflow.kinetic-workflow {
+  margin-top: 0;
+  padding-bottom: 72px;
+}
+/* A razor 2px orange rule frames the top of the cream contact band. */
+.story-contact.kinetic-contact {
+  margin-top: 0;
+  border-top: 2px solid #ff4d1c;
+  /* Clip the ticker sideways but let the wave rise above the section. */
+  overflow: clip visible;
+}
+/* Fade the grain and lines in from the top edge of each cream chapter. */
+.cream-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 160px;
+  z-index: -1;
+  background: linear-gradient(var(--cream-top) 0%, transparent 100%);
+  pointer-events: none;
+}

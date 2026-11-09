@@ -1,9 +1,7 @@
 "use client";
-import { requestTick, cancelTick, getFrameDt } from '@/lib/masterTicker';
+import { requestTick, cancelTick, getFrameDt } from "@/lib/masterTicker";
 
 import { useCallback, useEffect, useRef } from "react";
-
-import { THEME_EVENT, type ThemeRef } from "@/lib/theme";
 
 type Particle = {
   x: number;
@@ -15,7 +13,7 @@ type Particle = {
   size: number;
 };
 /** One capped, DPR-aware canvas; no React renders in the animation loop. */
-export function useParticles(reducedMotion: boolean, themeRef: ThemeRef) {
+export function useParticles(reducedMotion: boolean) {
   const wakeRef = useRef<() => void>(() => {});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Particle[]>([]);
@@ -59,7 +57,7 @@ export function useParticles(reducedMotion: boolean, themeRef: ThemeRef) {
     };
     const draw = (now: number) => {
       raf = 0;
-      const dt = getFrameDt()*60;
+      const dt = getFrameDt() * 60;
       last = now;
       ctx.clearRect(0, 0, width, height);
       for (let i = particles.current.length - 1; i >= 0; i--) {
@@ -71,31 +69,33 @@ export function useParticles(reducedMotion: boolean, themeRef: ThemeRef) {
           particles.current.splice(i, 1);
           continue;
         }
-        ctx.fillStyle = `rgba(${themeRef.current === "light" ? "40,40,46" : "222,220,212"},${(p.life / p.max) * 0.6})`;
+        ctx.fillStyle = `rgba(222,220,212,${(p.life / p.max) * 0.6})`;
         ctx.fillRect(p.x, p.y, p.size, p.size);
       }
       if (particles.current.length) raf = requestTick(draw);
     };
     const wake = () => {
-      if (!raf && !document.hidden) { last = performance.now(); raf = requestTick(draw); }
+      if (!raf && !document.hidden) {
+        last = performance.now();
+        raf = requestTick(draw);
+      }
     };
     wakeRef.current = wake;
     const visibility = () => {
-      cancelTick(raf); raf = 0;
+      cancelTick(raf);
+      raf = 0;
       if (!document.hidden && particles.current.length) wake();
     };
     resize();
-    window.addEventListener(THEME_EVENT, wake);
     window.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       cancelTick(raf);
       wakeRef.current = () => {};
-      window.removeEventListener(THEME_EVENT, wake);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       particles.current = [];
     };
-  }, [reducedMotion, burst, themeRef]);
+  }, [reducedMotion, burst]);
   return { canvasRef, burst };
 }

@@ -1,107 +1,155 @@
 # Vishwas Kamath — motion portfolio
 
-A single-viewport portfolio built with Next.js App Router, React, TypeScript,
-Tailwind CSS 4, GSAP, and a custom HTML5 Canvas particle system.
+A single-page motion portfolio built with Next.js (App Router, static export),
+React 19, TypeScript and Tailwind CSS 4. All animation is hand-written canvas,
+SVG and WebGL; there is no animation library.
 
 ## Run locally
 
 ```bash
 npm install
-npm run dev
+npm run dev        # development server at http://127.0.0.1:3000
 ```
 
-Open http://127.0.0.1:3000. For deployment, `npm run build` creates a static site
-in `out/`, suitable for any static host. `npm run typecheck` checks TypeScript.
-`next start` is not used with static exports; serve `out/` with your static host.
-
-## Where to edit
-
-- `src/data/projects.ts`: five projects, display titles, role, year, descriptions,
-  software, media paths, and contact information.
-- `src/components/ProjectWheels.tsx`: continuous curved preview and software
-  wheels, persistent video elements, playback lifecycle, and click-to-enlarge.
-- `src/components/ProjectMetadata.tsx`: simultaneous masked title/role/year
-  reels, velocity-driven horizontal text slices, and stippled particle bursts.
-- `src/components/WavyBackground.tsx` and `src/lib/waveRenderer.ts`: GPU-meshed domain-warped contours at 12px spacing, with 3.5px slope-lit strokes and a separate 75-filament translucent silk ribbon. Both use the supplied sine/cosine formulas and advance by 0.012 per animation frame. The fast path uses a static mesh, time uniforms, and five WebGL draw calls at DPR 1. The Canvas 2D fallback uses 28px vertices, four connected opacity batches and one ribbon stroke. Fine grain stays at 0.04 opacity; hidden tabs pause and reduced motion freezes the texture. No photograph or background particles are used.
-- `src/hooks/useProjectWheel.ts`: unthrottled wheel input, continuous touch input,
-  keyboard/dot selection, and a single requestAnimationFrame clock.
-- `src/lib/scrollPhysics.ts`: every wheel event adds `deltaY * 0.0025`;
-  every animation frame lerps by `0.1`; 120ms of idle input rounds the target.
-  All three columns subscribe to the same continuous position. Current and
-  target coordinates rebase together modulo the project count, preserving
-  direction and travel through unlimited full turns. Settled subscribers sleep; semantic labels and pagination update through refs without React renders. No cooldowns or tween locks.
-  `node scripts/test-scroll-physics.mjs` checks input, snapping, seam continuity,
-  rapid reversal, and synchronization without a browser or extra dependencies.
-- `src/components/RibbonCursor.tsx` and `src/lib/lightTrail.ts`: raw-pointer head,
-  32 immutable path samples recorded every 3px, centripetal Catmull�Rom geometry,
-  age-based taper, and three additive glow passes without canvas shadow blur.
-  Coalesced pointer input preserves fast arcs; idle tails expire and rendering sleeps.
-  `node scripts/test-light-trail.mjs` checks circular fidelity and history limits.
-- `src/components/LoadingScreen.tsx`: 2.4-second figure-eight-to-ring intro,
-  followed by a 900ms expanding liquid SVG mask reveal. Counter updates bypass
-  React. The overlay unmounts on completion and reduced motion skips the intro.
-- `src/hooks/useParticles.ts`: capped particle pool, title bursts,
-  and expanding stippled rings. Canvas respects device pixel ratio and pauses
-  when the page is hidden.
-- `src/hooks/useAmbientAudio.ts`: original synthesized ambient pad. Sound starts
-  only after a user gesture; both audio controls share the same state.
-- `src/components/Overlay.tsx`: native accessible dialogs for films, About, Lab,
-  Studio, and Contact. Escape closes them and focus returns to the trigger.
-- `src/app/globals.css`: layout, materials, CRT-inspired shading, and responsive
-  styling. No WebGL dependency is needed for the 3D software tiles.
-  Desktop titles sit at the viewport's horizontal and vertical midpoint;
-  enlarged video and software wheels balance around it. Mobile uses a centered
-  vertical stack.
-- `src/app/fonts/Tanker-Regular.otf`: installed Tanker font, self-hosted through
-  `next/font/local` for the project titles. Its CSS variable is `--font-tanker`.
-
-## Controls
-
-Scroll, use arrow keys, swipe on touch, click a neighboring thumbnail, or use
-the project dots. The center preview expands on click. Project previews loop
-automatically without playback controls, status badges, or category labels.
-Background clicks produce expanding particle rings. Visitors who prefer reduced
-motion get immediate transitions, no particle effects, and initially paused
-previews.
-
-## Media and editable sample metadata
-
-The five films are web copies of the supplied files:
-
-| Portfolio title      | Original source                             |
-| -------------------- | ------------------------------------------- |
-| SaaS in Motion       | Iphone SaaS.mp4                             |
-| Cyberpunk 2077       | Cyberpunk 2077 (name it proffesionally).mp4 |
-| Spartan Protocol     | Dolce&Gabbana.mp4                           |
-| Art that is Music    | The Art That Is Music.mp4                   |
-| Urban Rhythm         | In Moe.mp4                                  |
-
-Display titles and the requested 2026 year are editable presentation metadata.
-Software lists reflect the portfolio review. No client affiliation
-is claimed. The original Videos folder is not modified or deployed. Only
-optimized copies and the supplied résumé are included in `public/`.
-The earlier supplied ocean photo remains in `public/media/ocean-background.jpg`
-as an unused asset. The current background is generated entirely in code.
-
-To regenerate web copies and still posters, install the optional FFmpeg binary
-with `node node_modules/ffmpeg-static/install.js`, then run:
+To check the production build locally (this is what Vercel will serve):
 
 ```bash
-node scripts/prepare-media.mjs "../Videos"
+npm run preview    # builds into out/ and serves it at http://localhost:3000
 ```
 
-The preparation script validates each film against the static host's per-file
-size limit. It is not part of the production build; prepared files are included.
+| Script                 | What it does                                |
+| ---------------------- | ------------------------------------------- |
+| `npm run dev`          | Development server with hot reload          |
+| `npm run build`        | Static export into `out/`                   |
+| `npm run serve`        | Serve an existing `out/` build on port 3000 |
+| `npm run preview`      | `build` + `serve`                           |
+| `npm run typecheck`    | TypeScript check                            |
+| `npm run format`       | Format `src/` and `scripts/` with Prettier  |
+| `npm run format:check` | Report files that are not formatted         |
 
-## Design
+`next start` does not work with static exports; use `npm run serve` instead.
 
-Inspired by the spatial wheel composition at https://carterogunsola.com/.
-All application source, software tiles, and interface details are implemented
-for this portfolio. The work uses the supplied media, not the reference site's
-project assets.
+## Deploying to Vercel
 
-### Cursor proximity deformation
-`WarpedText` splits accessible text into independently deformed glyphs with a 95px squared falloff and a velocity-driven SVG turbulence filter. `LiquidSurface` filters the original live DOM/video with a cached radial displacement texture; the 140px lens and directional wake follow local coordinates, including wheel rotation and scale. A neutral displacement field leaves the rest of the surface intact. Both use `lib/proximity.ts` for a shared read-then-write animation loop, suspend when idle, and respect reduced motion/touch input. Media intensity returns to exactly zero with 0.08 damping, removing the filter entirely at rest.
+The site is a static export (`output: "export"` in `next.config.ts`), so Vercel
+needs no extra configuration: import the repository, keep the **Next.js**
+framework preset and the default build command. Vercel serves the generated
+`out/` folder.
 
-### CRT casing and proximity lighting
-`CrtBezel` adds a matte, grain-textured SVG casing with a barrel-curved cavity, inset shadow, and double metallic rim. `bezelGeometry.ts` projects the pointer onto eight cubic boundary sections; a 150px field drives the white/mint specular streak and bounded 10px bloom. Above 50% intensity, a DPR-capped canvas emits short-lived outward rim specks. The frame passes through clicks, respects reduced motion, and shares the hover RAF sampler. Run `node scripts/test-bezel-geometry.mjs` to check projection accuracy and outward normals across desktop/mobile sizes.
+## Site structure
+
+1. **Loading screen** — `LoadingScreen.tsx`. Waits for fonts, every poster image
+   and the first project's preview clip (under 1 MB), then reveals the page.
+2. **Work view** — three synchronised columns driven by one scroll engine:
+   - `ProjectWheels.tsx`: curved column of CRT-framed video previews and the
+     software tiles column. Click the centre preview to enlarge it with sound.
+   - `ProjectMetadata.tsx`: title, role, year, and a **View project** button
+     (or **Visit website** when the project has a `website`).
+   - Input: wheel, touch drag, arrow keys, or click a neighbouring preview
+     (`useProjectWheel.ts`, `lib/scrollPhysics.ts`).
+   - Layout: the title sits on the viewport centre and the active video and
+     tile sit `--hero-gap` from it (`.work-scene` variables in `globals.css`).
+     Arc shape is set by `ARC_STEP` (curvature), `ARC_REACH` (neighbour
+     spacing) and `ARC_FOLLOW` (rotation along the rim) in `ProjectWheels.tsx`.
+   - Hover physics: on desktop, videos and tiles tilt towards the cursor on
+     damped springs, lift, and catch a highlight; flicking the reel makes them
+     sway and settle (`lib/tiltPhysics.ts`, tested by
+     `scripts/test-tilt-physics.mjs`).
+3. **Cinema player** — `CinemaPlayer.tsx`. Opens the full-length film
+   (`*-full.mp4`) with play/pause, seek, mute and Esc to close. The URL becomes
+   `?project=<slug>` so the browser back button closes it.
+4. **About & Contact view** — opened with the bottom button; transition in
+   `StoryNavigation.tsx`. Sections: `StoryStage.tsx` (intro),
+   `AboutManifesto.tsx` (scroll-revealed bio and drawn path),
+   `KineticChapters.tsx` (disciplines, workflow dock, contact). Scrolling up
+   past the top returns to the reel.
+5. **Always on screen** — `GlassHeader.tsx`: music button, scroll percentage,
+   light/dark toggle.
+6. **Vinyl music player** — the header button morphs into a working turntable
+   with a playlist (`VinylPlayer.tsx`, `Turntable.tsx`, styles in
+   `app/vinyl.css`). `hooks/useVinylPlayer.ts` ties the audio to the deck:
+   playback speed and pitch follow the platter (spin-up glide, pitch-down when
+   stopped), surface crackle and the needle-drop thump play only while the
+   stylus is in the groove, and changing songs lifts the arm, swaps the record
+   and drops the needle on the new one. Geometry and motor/arm physics live in
+   `lib/turntable.ts` (tested by `scripts/test-turntable.mjs`). The record
+   stops while a project film is playing.
+7. **Cream chapters** — `CreamField.tsx` (styles in `app/cream.css`) draws animated ink-line backdrops:
+   flowing engraved lines behind "This is my thing" and sound-wave rings
+   behind "Let's talk". Both react to the cursor and scroll speed and pause
+   off screen.
+8. **Effects** — `WavyBackground.tsx` + `lib/waveRenderer.ts` (WebGL contour
+   background with a Canvas 2D fallback), `RibbonCursor.tsx` (light-trail
+   cursor), `useParticles.ts` (particle bursts), `WarpedText.tsx` and
+   `LiquidSurface.tsx` (cursor-proximity distortion), `VideoBezel.tsx` /
+   `CinemaBezel.tsx` (CRT frames). Reduced-motion users get static versions.
+
+## Where to edit content
+
+- **Projects:** `src/data/projects.ts` → `projects`. Each entry has the title
+  lines, role, year, tools, preview/poster/full-film paths, background
+  `accentPalette`, description and optional `website`. Order here is reel
+  order; every preview and poster is loaded before the intro opens.
+- **Tools:** `toolCatalog` in the same file is the only place tool names, brand
+  colours and skill tags live. `workflowTools` sets which tools appear in the
+  About page dock and in what order.
+- **Songs:** `src/data/playlist.ts`. The five entries are placeholders that
+  all point at `/media/unrequited.mp3`; put real files in
+  `public/media/music/` and update each `title`, `artist`, `src` and record
+  `label` colour.
+- **Contact details:** `profile` in the same file; social links are in
+  `KineticChapters.tsx`.
+- **About copy:** `StoryStage.tsx` (intro) and `AboutManifesto.tsx` (bio).
+- **Fonts:** `src/app/fonts/` — Tanker (titles, `--font-tanker`), Pally (body,
+  `--font-pally`), Bebas Neue (transition lettering).
+
+## Media
+
+Web copies live in `public/media/`: `<id>.mp4` (short preview, ≤960px),
+`<id>-full.mp4` (cinema film), `<id>.jpg` (poster). Originals stay in
+`../Videos` and are never modified or deployed.
+
+| Project           | id          | Original file                               |
+| ----------------- | ----------- | ------------------------------------------- |
+| SaaS in Motion    | `pocket`    | Iphone SaaS.mp4                             |
+| Cyberpunk 2077    | `nightcity` | Cyberpunk 2077 (name it proffesionally).mp4 |
+| Spartan Protocol  | `dolce`     | Dolce&Gabbana.mp4                           |
+| Art that is Music | `music`     | The Art That Is Music.mp4                   |
+| Urban Rhythm      | `inmoe`     | In Moe.mp4                                  |
+| Artists in Motion | `artists`   | Artists.mp4                                 |
+| Iconic            | `iconic`    | IconicFinal.mp4                             |
+| Oscar Piastri     | `oscar`     | OCSAR.mp4                                   |
+| Induction         | `induction` | 2026-10-30 17-36-39.mp4                     |
+
+The loading screen (`lib/assetPreloader.ts`) waits for what the first screen
+shows: each wheel preview until it has a first frame, every poster, the
+software logos (`src/data/brandAssets.ts`) and the fonts. Every asset has a 3 s
+timeout, so one slow file can never hold the intro. Full films and the music
+track stream when played.
+All MP4s must be encoded with `-movflags +faststart` so they can start playing
+before they finish downloading.
+
+To regenerate media, install the FFmpeg binary once with
+`node node_modules/ffmpeg-static/install.js`, then:
+
+```bash
+node scripts/prepare-media.mjs "../Videos"     # previews + posters, first five projects
+node scripts/prepare-full-media.mjs            # full films, first five projects
+node scripts/prepare-added-media.mjs           # all files for the last four projects
+```
+
+`src/data/assetManifest.json` records each file's size; the media scripts
+update it automatically.
+
+## Tests
+
+Logic tests run in plain Node without a browser, e.g.
+`node scripts/test-asset-preloader.mjs`. `test-continuous-scroll`,
+`test-master-ticker` and `test-scroll-physics` predate the current spring-based
+scroll engine and currently fail; they need rewriting against it.
+
+## Design credit
+
+Spatial wheel composition inspired by https://carterogunsola.com/. All source,
+tiles and interface details are original to this portfolio and use only the
+supplied media.

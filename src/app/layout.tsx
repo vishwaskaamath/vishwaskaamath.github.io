@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import "./vinyl.css";
+import "./cream.css";
+import "./portal.css";
+import "./about.css";
+import "./loader.css";
+import "./resume.css";
+import SiteShell from "@/components/SiteShell";
 
 const tanker = localFont({
   src: "./fonts/Tanker-Regular.otf",
@@ -35,7 +42,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${tanker.variable} ${pally.variable}`}>
-      <body>{children}</body>
+      <body>
+        <SiteShell>{children}</SiteShell>
+      </body>
     </html>
   );
 }

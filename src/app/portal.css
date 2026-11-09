@@ -1,0 +1,181 @@
+/* Bottom-centre kinetic pill: "ABOUT & CONTACT" on the Work stage and
+   "BACK TO WORK" in the About view (StoryNavigation.tsx). */
+.reel-scroll-prompt.story-portal {
+  bottom: 3.4vh;
+  display: flex;
+  gap: 0;
+  z-index: 99950;
+  pointer-events: none;
+}
+
+.story-portal button.portal-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  height: 46px;
+  padding: 0 6px 0 22px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: #f3efe6;
+  color: #09090b;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  font-weight: 400;
+  cursor: pointer;
+  pointer-events: auto;
+  translate: none;
+  transform: translate3d(var(--mx, 0px), var(--my, 0px), 0);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.story-portal button.portal-pill:hover,
+.story-portal button.portal-pill:focus-visible {
+  background: #f3efe6;
+  color: #09090b;
+}
+.story-portal button.portal-pill:focus-visible {
+  outline: 2px solid #ff4d1c;
+  outline-offset: 4px;
+}
+
+/* Orange ink flood, anchored on the right circle. */
+.portal-flood {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ff4d1c;
+  pointer-events: none;
+  transform: scale(1);
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.portal-pill:is(:hover, :focus-visible) .portal-flood {
+  transform: scale(12);
+}
+
+/* Single-line label with a vertical slot roll. */
+.portal-title {
+  position: relative;
+  z-index: 2;
+  display: block;
+  height: 1.1em;
+  overflow: hidden;
+  font-family: var(--font-pally), sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.portal-roll {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.portal-roll .portal-label {
+  display: block;
+  height: 1.1em;
+  color: #09090b;
+}
+.portal-roll .portal-label + .portal-label {
+  color: #f3efe6;
+}
+.portal-pill:is(:hover, :focus-visible) .portal-roll {
+  transform: translateY(-50%);
+}
+
+/* Right orange circle with the dual-arrow waterfall. */
+.portal-circle {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #ff4d1c;
+  color: #f3efe6;
+  transition:
+    background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.portal-pill:is(:hover, :focus-visible) .portal-circle {
+  background: #f3efe6;
+  color: #09090b;
+  transform: scale(0.92);
+}
+.portal-arrows {
+  position: absolute;
+  inset: 0;
+  animation: portal-waterfall 2.4s infinite;
+}
+.portal-arrows svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* The second arrow waits one step above, out of view. */
+.portal-arrows svg + svg {
+  top: calc(50% - 24px);
+}
+/* Every 2.4s the centre arrow drops out and the waiting one drops into the
+   centre; the loop resets invisibly because the two arrows are identical. */
+@keyframes portal-waterfall {
+  0% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  22.9% {
+    transform: translateY(24px);
+  }
+  23%,
+  100% {
+    transform: translateY(0);
+  }
+}
+/* "Back to work" points and moves upward. */
+.story-portal[data-view="about"] .portal-arrows {
+  rotate: 180deg;
+}
+
+@media (max-width: 759px) {
+  .reel-scroll-prompt.story-portal {
+    bottom: 16px;
+  }
+  .story-portal button.portal-pill {
+    height: 44px;
+    gap: 12px;
+    padding-left: 18px;
+  }
+  .portal-title {
+    font-size: 0.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-arrows {
+    animation: none;
+  }
+  .story-portal button.portal-pill,
+  .portal-flood,
+  .portal-roll,
+  .portal-circle {
+    transition: none;
+  }
+}

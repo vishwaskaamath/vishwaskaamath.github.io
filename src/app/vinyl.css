@@ -1,0 +1,1273 @@
+/* Vinyl music player: header button, The Record Box panel and turntable. */
+/* ---------- Header music button (opens The Record Box) ---------- */
+/* Solid warm-cream pill with an electric-orange circle,
+the same on the
+   Work and About views. */
+.minimal-controls .vinyl-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  height: 44px;
+  padding: 0 6px;
+  overflow: hidden;
+  border: 1px solid rgba(9, 9, 11, 0.14);
+  border-radius: 999px;
+  background: #f3efe6;
+  color: #09090b;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transform: none;
+}
+.minimal-controls .vinyl-pill:hover {
+  transform: none;
+}
+.minimal-controls .vinyl-pill:focus-visible {
+  outline: 2px solid #ff4d1c;
+  outline-offset: 4px;
+}
+
+/* Orange ink flood, anchored on the right circle. */
+.vinyl-pill-flood {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ff4d1c;
+  pointer-events: none;
+  transform: scale(1);
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.vinyl-pill:is(:hover, :focus-visible) .vinyl-pill-flood {
+  transform: scale(14);
+}
+
+/* Left: spinning vinyl. */
+.vinyl-pill-disc {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(
+      circle,
+      #09090b 0 1.2px,
+      #1b1b20 1.5px 1.9px,
+      #09090b 2.2px 2.8px
+    ),
+    #09090b;
+  animation: vinyl-pill-spin 4s linear infinite;
+  animation-play-state: paused;
+}
+.is-playing .vinyl-pill-disc {
+  animation-play-state: running;
+}
+@keyframes vinyl-pill-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.vinyl-pill-disc i {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--label);
+}
+.vinyl-pill-disc i::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: #f3efe6;
+  transform: translate(-50%, -50%);
+}
+
+/* Centre: single-line title with a slot roll to "OPEN RECORD BOX". */
+.vinyl-pill-title {
+  position: relative;
+  z-index: 2;
+  display: block;
+  max-width: 150px;
+  height: 1.1em;
+  overflow: hidden;
+  font-family: var(--font-pally), sans-serif;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.vinyl-pill-roll {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vinyl-pill-roll > span {
+  display: block;
+  height: 1.1em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #09090b;
+}
+.vinyl-pill-roll > span + span {
+  color: #f3efe6;
+}
+.vinyl-pill:is(:hover, :focus-visible) .vinyl-pill-roll {
+  transform: translateY(-50%);
+}
+
+/* Right: orange circle with three equalizer bars. */
+.vinyl-pill-eq {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ff4d1c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition:
+    background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vinyl-pill-eq i {
+  width: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background: #f3efe6;
+  transition:
+    height 0.3s,
+    background-color 0.4s;
+}
+.is-playing .vinyl-pill-eq i {
+  animation: vinyl-pill-eq 0.9s ease-in-out infinite;
+}
+.is-playing .vinyl-pill-eq i:nth-child(2) {
+  animation-duration: 0.7s;
+  animation-delay: -0.3s;
+}
+.is-playing .vinyl-pill-eq i:nth-child(3) {
+  animation-duration: 1.05s;
+  animation-delay: -0.55s;
+}
+@keyframes vinyl-pill-eq {
+  0%,
+  100% {
+    height: 4px;
+  }
+  50% {
+    height: 13px;
+  }
+}
+.vinyl-pill:is(:hover, :focus-visible) .vinyl-pill-eq {
+  background: #f3efe6;
+  transform: scale(0.92);
+}
+.vinyl-pill:is(:hover, :focus-visible) .vinyl-pill-eq i {
+  background: #09090b;
+}
+
+@media (max-width: 759px) {
+  .vinyl-pill-title {
+    max-width: 96px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vinyl-pill-disc,
+  .vinyl-pill-eq i {
+    animation: none !important;
+  }
+  .vinyl-pill-flood,
+  .vinyl-pill-roll,
+  .vinyl-pill-eq {
+    transition: none;
+  }
+}
+
+/* ---------- The Record Box: obsidian hardware chassis ---------- */
+.vinyl-panel {
+  --obsidian: #09090b;
+  --cream: #f3efe6;
+  --electric: #ff4d1c;
+  --hair: rgba(243, 239, 230, 0.12);
+  --muted: rgba(243, 239, 230, 0.55);
+  --mono:
+    ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+  position: fixed;
+  inset: auto;
+  z-index: 99990;
+  isolation: isolate;
+  margin: 0;
+  padding: 0;
+  width: min(760px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  color: var(--cream);
+  background: linear-gradient(
+    165deg,
+    rgba(16, 16, 20, 0.96) 0%,
+    rgba(9, 9, 12, 0.99) 100%
+  );
+  border: 1px solid rgba(243, 239, 230, 0.12);
+  border-radius: 20px;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(22px) saturate(1.2);
+  font-family: var(--font-pally), sans-serif;
+  will-change: clip-path;
+}
+/* Ambient glow tinted by the current record's label colour. */
+.vinyl-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      55% 60% at 18% 0%,
+      color-mix(in srgb, var(--label) 20%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 45% at 100% 100%,
+      color-mix(in srgb, var(--label) 9%, transparent),
+      transparent 70%
+    );
+  transition: background 0.6s;
+  pointer-events: none;
+}
+.vinyl-panel button {
+  color: inherit;
+  cursor: pointer;
+}
+.vinyl-panel :focus-visible {
+  outline: 2px solid var(--electric);
+  outline-offset: 3px;
+}
+/* Content follows the outline in: staggered rise once the shape has opened. */
+.vinyl-head,
+.vinyl-deck-col,
+.vinyl-now,
+.vinyl-seek,
+.vinyl-transport,
+.vinyl-list {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vinyl-panel[data-state="open"]
+  :is(
+    .vinyl-head,
+    .vinyl-deck-col,
+    .vinyl-now,
+    .vinyl-seek,
+    .vinyl-transport,
+    .vinyl-list
+  ) {
+  opacity: 1;
+  transform: none;
+}
+.vinyl-panel[data-state="open"] .vinyl-deck-col {
+  transition-delay: 40ms;
+}
+.vinyl-panel[data-state="open"] .vinyl-now {
+  transition-delay: 90ms;
+}
+.vinyl-panel[data-state="open"] .vinyl-seek {
+  transition-delay: 130ms;
+}
+.vinyl-panel[data-state="open"] .vinyl-transport {
+  transition-delay: 170ms;
+}
+.vinyl-panel[data-state="open"] .vinyl-list {
+  transition-delay: 210ms;
+}
+.vinyl-panel[data-state="closing"]
+  :is(
+    .vinyl-head,
+    .vinyl-deck-col,
+    .vinyl-now,
+    .vinyl-seek,
+    .vinyl-transport,
+    .vinyl-list
+  ) {
+  transition-duration: 0.15s;
+  transition-delay: 0s;
+}
+
+/* ---------- Header telemetry bar ---------- */
+.vinyl-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 10px 20px;
+  border-bottom: 1px solid rgba(243, 239, 230, 0.06);
+}
+.vinyl-kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font: 600 10px var(--mono);
+  letter-spacing: 0.2em;
+  color: var(--cream);
+}
+.vinyl-kicker i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--electric);
+  box-shadow: 0 0 10px var(--electric);
+  animation: vinyl-led 2.2s ease-in-out infinite;
+}
+.vinyl-kicker i[data-live="true"] {
+  animation-duration: 0.9s;
+}
+@keyframes vinyl-led {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.vinyl-close {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(243, 239, 230, 0.14);
+  background: rgba(243, 239, 230, 0.03);
+  font: 600 8px var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
+}
+.vinyl-close:hover {
+  border-color: var(--electric);
+  color: var(--cream);
+  background: rgba(255, 77, 28, 0.08);
+}
+
+/* ---------- Layout ---------- */
+.vinyl-body {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: 26px;
+  padding: 18px 20px 20px;
+}
+.vinyl-side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ---------- Editorial track header ---------- */
+.vinyl-now h2 {
+  margin: 0 0 4px;
+  font:
+    400 clamp(26px, 2.6vw, 34px) / 0.95 var(--font-tanker),
+    Impact,
+    sans-serif;
+  letter-spacing: 0.03em;
+  color: var(--cream);
+  text-transform: uppercase;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.vinyl-now p {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: rgba(243, 239, 230, 0.55);
+}
+
+/* ---------- Hairline blade scrubber ---------- */
+.vinyl-seek {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  font: 10px var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.vinyl-seek output:last-child {
+  text-align: right;
+}
+.vinyl-scrub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 18px;
+}
+.vinyl-scrub::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      var(--electric) 0 calc(var(--p, 0) * 100%),
+      transparent calc(var(--p, 0) * 100%)
+    ),
+    rgba(243, 239, 230, 0.12);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+.vinyl-panel input.vinyl-range,
+.vinyl-panel input.vinyl-fader {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.vinyl-panel input.vinyl-range {
+  width: 100%;
+  height: 18px;
+}
+.vinyl-range::-webkit-slider-runnable-track {
+  height: 18px;
+  background: transparent;
+}
+.vinyl-range::-moz-range-track {
+  background: transparent;
+}
+.vinyl-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 3px;
+  height: 14px;
+  margin-top: 2px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--cream);
+  box-shadow:
+    0 0 10px var(--electric),
+    0 0 0 1px rgba(0, 0, 0, 0.45);
+  transition: transform 0.15s;
+}
+.vinyl-range::-moz-range-thumb {
+  width: 3px;
+  height: 14px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--cream);
+  box-shadow:
+    0 0 10px var(--electric),
+    0 0 0 1px rgba(0, 0, 0, 0.45);
+  transition: transform 0.15s;
+}
+.vinyl-range:hover::-webkit-slider-thumb,
+.vinyl-range:active::-webkit-slider-thumb {
+  transform: scaleY(1.3);
+}
+.vinyl-range:hover::-moz-range-thumb,
+.vinyl-range:active::-moz-range-thumb {
+  transform: scaleY(1.3);
+}
+
+/* ---------- Transport + slim volume fader ---------- */
+.vinyl-transport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.vinyl-transport > button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(243, 239, 230, 0.04);
+  border: 1px solid rgba(243, 239, 230, 0.1);
+  color: rgba(243, 239, 230, 0.8);
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s,
+    transform 0.15s;
+}
+.vinyl-transport > button:hover {
+  background: rgba(243, 239, 230, 0.09);
+  border-color: rgba(243, 239, 230, 0.22);
+  color: var(--cream);
+}
+.vinyl-transport > button:active {
+  transform: scale(0.94);
+}
+.vinyl-transport > .vinyl-play {
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--electric);
+  color: var(--obsidian);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.18),
+    0 8px 22px rgba(255, 77, 28, 0.35);
+}
+.vinyl-transport > .vinyl-play:hover {
+  background: #ff6334;
+  color: var(--obsidian);
+  border: 0;
+}
+.vinyl-volume {
+  display: flex;
+  margin-left: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  flex: 1;
+  min-width: 0;
+  color: var(--muted);
+}
+.vinyl-panel input.vinyl-fader {
+  flex: 0 1 110px;
+  width: 110px;
+  min-width: 48px;
+  height: 16px;
+}
+.vinyl-fader::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(243, 239, 230, 0.6) 0 calc(var(--v, 0) * 100%),
+    rgba(243, 239, 230, 0.14) calc(var(--v, 0) * 100%)
+  );
+}
+.vinyl-fader::-moz-range-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(243, 239, 230, 0.6) 0 calc(var(--v, 0) * 100%),
+    rgba(243, 239, 230, 0.14) calc(var(--v, 0) * 100%)
+  );
+}
+.vinyl-fader::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 6px;
+  height: 12px;
+  margin-top: -5px;
+  border: 0;
+  border-radius: 1.5px;
+  background: linear-gradient(
+    180deg,
+    var(--cream) 0 44%,
+    #0b0b0e 44% 56%,
+    var(--cream) 56%
+  );
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+.vinyl-fader::-moz-range-thumb {
+  width: 6px;
+  height: 12px;
+  border: 0;
+  border-radius: 1.5px;
+  background: linear-gradient(
+    180deg,
+    var(--cream) 0 44%,
+    #0b0b0e 44% 56%,
+    var(--cream) 56%
+  );
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+.vinyl-volume-readout {
+  width: 30px;
+  font: 600 9px var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ---------- Swiss editorial tracklist ---------- */
+.vinyl-list {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(243, 239, 230, 0.06);
+}
+.vinyl-list li {
+  border-bottom: 1px solid rgba(243, 239, 230, 0.06);
+}
+.vinyl-list button {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 2px 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+.vinyl-list button:hover {
+  background: rgba(243, 239, 230, 0.035);
+}
+.vinyl-list button[aria-current="true"] {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 77, 28, 0.14) 0%,
+    rgba(255, 77, 28, 0.02) 100%
+  );
+  box-shadow: inset 2.5px 0 0 var(--electric);
+}
+.vinyl-list-num {
+  font: 600 10px var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: rgba(243, 239, 230, 0.35);
+}
+.vinyl-list button[aria-current="true"] .vinyl-list-num {
+  color: var(--electric);
+}
+.vinyl-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+.vinyl-eq i {
+  width: 3px;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--electric);
+  transform-origin: bottom;
+  animation: vinyl-eq 0.9s ease-in-out infinite;
+}
+.vinyl-eq i:nth-child(2) {
+  animation-duration: 0.7s;
+  animation-delay: -0.3s;
+}
+.vinyl-eq i:nth-child(3) {
+  animation-duration: 1.1s;
+  animation-delay: -0.6s;
+}
+@keyframes vinyl-eq {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.vinyl-list-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.vinyl-list-copy b {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--cream);
+}
+.vinyl-list-copy small {
+  font-size: 0.72rem;
+  color: rgba(243, 239, 230, 0.45);
+}
+.vinyl-list-time {
+  font: 10px var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: rgba(243, 239, 230, 0.45);
+}
+
+/* ---------- Turntable deck ---------- */
+.deck {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #121216 0%, #0a0a0d 100%);
+  border: 1px solid rgba(243, 239, 230, 0.09);
+  box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+.deck-platter {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    #0d0d10 0 92%,
+    #18181d 96.5%,
+    #0c0c0f 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(243, 239, 230, 0.18),
+    0 12px 26px rgba(0, 0, 0, 0.75);
+}
+.deck-strobe {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0.28;
+  background: repeating-conic-gradient(
+    rgba(243, 239, 230, 1) 0 0.35deg,
+    transparent 0.35deg 2deg
+  );
+  -webkit-mask: radial-gradient(
+    circle closest-side,
+    transparent 0 97%,
+    #000 97.4% 99.3%,
+    transparent 99.6%
+  );
+  mask: radial-gradient(
+    circle closest-side,
+    transparent 0 97%,
+    #000 97.4% 99.3%,
+    transparent 99.6%
+  );
+  will-change: transform;
+}
+.deck-mat {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(
+      circle,
+      rgba(243, 239, 230, 0.025) 0 1px,
+      transparent 1px 6px
+    ),
+    radial-gradient(circle closest-side, #121216, #0b0b0e);
+}
+.deck-record {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform, opacity;
+  filter: drop-shadow(
+    0 calc(3px + var(--raised, 0) * 14px) calc(6px + var(--raised, 0) * 18px)
+      #000d
+  );
+}
+.deck-record-spin {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  will-change: transform;
+}
+.deck-grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle closest-side,
+      transparent 0 34%,
+      #151518 34.5% 45%,
+      transparent 45.6%
+    ),
+    radial-gradient(
+      circle closest-side,
+      transparent 0 62.8%,
+      #26262b 63.2% 63.8%,
+      transparent 64.2%
+    ),
+    radial-gradient(
+      circle closest-side,
+      transparent 0 79%,
+      #26262b 79.4% 80%,
+      transparent 80.4%
+    ),
+    radial-gradient(
+      circle closest-side,
+      transparent 0 95.6%,
+      #1c1c20 96% 98.8%,
+      rgba(243, 239, 230, 0.22) 99.4%,
+      transparent 100%
+    ),
+    repeating-radial-gradient(
+      circle,
+      #09090b 0 0.7px,
+      #151518 0.9px 1.5px,
+      #0c0c0e 1.7px 2.2px
+    );
+}
+.deck-label {
+  position: absolute;
+  inset: 33.3%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    color-mix(in srgb, var(--label) 82%, #fff) 0 18%,
+    var(--label) 19% 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.25),
+    inset 0 0 8px rgba(0, 0, 0, 0.25);
+}
+.deck-label svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.deck-label text {
+  fill: #0b0b0e;
+  font-family: var(--font-pally), sans-serif;
+}
+.deck-label-ring {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.22);
+  stroke-width: 0.6;
+}
+.deck-label-title {
+  font-size: 7.6px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.deck-label-mark {
+  font-size: 8.8px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.deck-label-small {
+  font-size: 4.4px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  fill-opacity: 0.72;
+}
+.deck-dust {
+  position: absolute;
+  left: 76%;
+  top: 24%;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #ffffff45;
+  box-shadow:
+    -42px 61px 0 -0.3px #ffffff28,
+    -91px 18px 0 #ffffff1c;
+}
+/* Signature two-sided diagonal reflection; stays still while the record turns. */
+.deck-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(
+    from 35deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.07) 25deg,
+    transparent 55deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.07) 205deg,
+    transparent 235deg
+  );
+}
+/* Brushed-chrome spindle pin with a dark centre bore. */
+.deck-spindle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fbfbfd 0%,
+    #c4c4cb 35%,
+    #6a6a72 72%,
+    #2c2c32 100%
+  );
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.4);
+}
+.deck-spindle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: #08080a;
+  transform: translate(-50%, -50%);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.9);
+}
+
+/* Tonearm. */
+.deck-arm {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.arm-base {
+  stroke: rgba(243, 239, 230, 0.14);
+  stroke-width: 0.8;
+}
+.arm-base-ring {
+  fill: none;
+  stroke: rgba(243, 239, 230, 0.08);
+  stroke-width: 0.8;
+}
+.arm-base-screw {
+  fill: rgba(243, 239, 230, 0.35);
+}
+.arm-cue {
+  fill: #1a1a1f;
+  stroke: rgba(243, 239, 230, 0.14);
+}
+.arm-clip {
+  fill: none;
+  stroke: #c9c9d0;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.arm-edge {
+  stroke: rgba(243, 239, 230, 0.12);
+  stroke-width: 0.6;
+}
+.arm-knurl {
+  stroke: rgba(243, 239, 230, 0.1);
+  stroke-width: 0.6;
+}
+.arm-index {
+  stroke: var(--electric, #ff4d1c);
+  stroke-width: 0.9;
+}
+.arm-tube {
+  fill: none;
+  stroke-width: 4.6;
+  stroke-linecap: round;
+}
+.arm-tube-shine {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+.arm-head {
+  fill: #0b0b0e;
+  stroke: rgba(243, 239, 230, 0.22);
+  stroke-width: 0.7;
+}
+.arm-slot {
+  fill: rgba(243, 239, 230, 0.12);
+}
+.arm-cartridge {
+  fill: #141418;
+  stroke: rgba(243, 239, 230, 0.12);
+  stroke-width: 0.5;
+}
+.arm-cartridge-line {
+  fill: var(--label);
+}
+.arm-finger {
+  fill: none;
+  stroke: #c9c9d0;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.arm-stylus-glow {
+  fill: #ff4d1c;
+  opacity: 0.75;
+}
+.arm-stylus {
+  fill: #ff4d1c;
+}
+.arm-gimbal {
+  fill: #141418;
+  stroke: rgba(243, 239, 230, 0.4);
+  stroke-width: 1.2;
+}
+.arm-gimbal-ring {
+  fill: none;
+  stroke: rgba(243, 239, 230, 0.15);
+  stroke-width: 0.8;
+}
+.arm-shadow * {
+  fill: #000 !important;
+  stroke: #000 !important;
+}
+.arm-shadow .arm-stylus-glow {
+  opacity: 0;
+}
+
+/* LED bar along the top edge of the keycap. */
+
+/* ---------- Phones ---------- */
+@media (max-width: 759px) {
+  .vinyl-panel {
+    width: auto;
+    max-height: calc(100dvh - 32px);
+    border-radius: 18px;
+  }
+  .vinyl-body {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 14px 14px 16px;
+  }
+  .vinyl-deck-col {
+    max-width: 360px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .vinyl-panel input.vinyl-fader {
+    width: 84px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vinyl-panel *,
+  .vinyl-panel {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Hand cueing: grab the tonearm anywhere along the tube or headshell. */
+.arm-hit {
+  fill: transparent;
+  stroke: transparent;
+  pointer-events: all;
+  cursor: grab;
+  touch-action: none;
+}
+.arm-hit-tube {
+  fill: none;
+  stroke-width: 16;
+  stroke-linecap: round;
+  pointer-events: stroke;
+}
+.deck[data-dragging="true"],
+.deck[data-dragging="true"] .arm-hit {
+  cursor: grabbing;
+}
+
+/* ---------- Left column: deck + signal analyzer / FX bay ---------- */
+.vinyl-deck-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+.signal-bay {
+  flex: 1;
+  min-height: 175px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #111115 0%, #09090c 100%);
+  border: 1px solid rgba(243, 239, 230, 0.09);
+  box-shadow: inset 0 4px 18px rgba(0, 0, 0, 0.75);
+}
+.bay-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: rgba(243, 239, 230, 0.6);
+  white-space: nowrap;
+}
+.bay-head > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.bay-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--label);
+  box-shadow: 0 0 6px var(--label);
+}
+.bay-meta {
+  color: rgba(243, 239, 230, 0.4);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Recessed OLED screen with a dot-matrix grid. */
+.bay-screen {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(243, 239, 230, 0.07);
+  background:
+    radial-gradient(circle, rgba(243, 239, 230, 0.05) 0.6px, transparent 0.8px)
+      0 0 / 4px 4px,
+    #060608;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+.bay-bars {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 30px;
+}
+/* Each bar spans the full height; the level clips it from the top so the
+   colour gradient stays fixed: label colour low, orange then cream at peaks. */
+.bay-bars i {
+  width: 4px;
+  border-radius: 1.5px;
+  background:
+    repeating-linear-gradient(
+      to top,
+      transparent 0 2px,
+      rgba(6, 6, 8, 0.85) 2px 3px
+    ),
+    linear-gradient(to top, var(--label) 0%, #ff4d1c 68%, #f3efe6 100%);
+  clip-path: inset(calc((1 - var(--v, 0)) * (100% - 2px)) 0 0 0 round 1.5px);
+}
+.bay-meters {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  align-items: center;
+  gap: 4px 8px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.46rem;
+  letter-spacing: 0.1em;
+  color: rgba(243, 239, 230, 0.45);
+}
+.bay-segments {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 2px;
+}
+.bay-segments i {
+  height: 4px;
+  border-radius: 1px;
+  background: rgba(243, 239, 230, 0.07);
+  transition: background 0.08s;
+}
+.bay-segments i[data-on="true"] {
+  background: #e9c58d;
+  box-shadow: 0 0 4px rgba(233, 197, 141, 0.5);
+}
+.bay-segments i[data-on="true"][data-peak="true"] {
+  background: #ff4d1c;
+  box-shadow: 0 0 5px #ff4d1c;
+}
+.bay-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.42rem;
+  color: rgba(243, 239, 230, 0.3);
+}
+
+/* Three working hardware switches. */
+.bay-switches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.vinyl-panel .bay-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #1b1b22 0%, #121217 100%);
+  border: 1px solid rgba(243, 239, 230, 0.1);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.12em;
+  color: rgba(243, 239, 230, 0.65);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+.vinyl-panel .bay-switch:hover {
+  color: #f3efe6;
+  border-color: rgba(243, 239, 230, 0.2);
+}
+.vinyl-panel .bay-switch:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.bay-switch i {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3a1a12;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
+}
+.vinyl-panel .bay-switch[aria-pressed="true"] {
+  color: #f3efe6;
+  border-color: rgba(255, 77, 28, 0.5);
+}
+.bay-switch[aria-pressed="true"] i {
+  background: #ff4d1c;
+  box-shadow: 0 0 6px #ff4d1c;
+}
+@media (max-width: 420px) {
+  .vinyl-panel .bay-switch {
+    font-size: 0.46rem;
+    letter-spacing: 0.06em;
+  }
+  .bay-meta {
+    display: none;
+  }
+}
