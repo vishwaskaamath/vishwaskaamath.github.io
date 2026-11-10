@@ -131,7 +131,7 @@ h2 { margin: 0 0 7px; padding-bottom: 4px; border-bottom: 1px solid rgba(9,9,11,
       </section>
       <section class="rows"><h2>LANGUAGES</h2>
         <div>English <em>FLUENT</em></div>
-        <div>Hindi <em>NATIVE / FLUENT</em></div>
+        <div>Hindi <em>PROFICIENT</em></div>
       </section>
     </aside>
     <main class="main">

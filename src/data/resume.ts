@@ -216,7 +216,7 @@ export const resume = {
     ["SGPA", ["8.45"]],
     [
       "LANGUAGES",
-      ["English (fluent)", "Hindi (native)"],
+      ["English (fluent)", "Hindi (proficient)"],
     ],
     ["BASED IN", ["Bengaluru, India", "Open to remote & on-site"]],
     ["AVAILABLE FOR", ["Freelance, agency & studio roles"]],

@@ -258,7 +258,6 @@ export default function ResumePage() {
         {/* ---------- TIMELINE ---------- */}
         <section className="cut-section" aria-labelledby="timeline-title">
           <header className="cut-head" data-in>
-            <span className="cut-index">01</span>
             <h2 id="timeline-title">THE TIMELINE</h2>
             <p>
               Five years of work, laid out like an edit. Click a clip to open
@@ -272,16 +271,13 @@ export default function ResumePage() {
         {/* ---------- THE KIT: software dock + skill bins as rows ---------- */}
         <section className="cut-section" aria-labelledby="kit-title">
           <header className="cut-head" data-in>
-            <span className="cut-index">02</span>
             <h2 id="kit-title">THE KIT</h2>
             <p>What I bring to a project, sorted the way I sort footage.</p>
           </header>
           <div className="kit">
             <div className="kit-soft" data-in>
               <header className="kit-label">
-                <span>BIN 01</span>
                 <strong>SOFTWARE</strong>
-                <em>{resume.software.length} APPS</em>
               </header>
               <ul className="kit-apps">
                 {resume.software.map(([id, label]) => (
@@ -297,9 +293,7 @@ export default function ResumePage() {
             {resume.bins.map((bin, b) => (
               <div className="kit-row" key={bin.title} data-in>
                 <header className="kit-label">
-                  <span>BIN {two(b + 2)}</span>
                   <strong>{bin.title}</strong>
-                  <em>{bin.items.length} ITEMS</em>
                 </header>
                 <ul className="kit-chips">
                   {bin.items.map((item) => (
