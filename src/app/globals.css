@@ -4865,6 +4865,7 @@ html[data-story-transition="true"] .tool-caption.toolkit-viewport {
    video and software tile sit the same distance (--hero-gap) from its edges.
    The arcs themselves are drawn in ProjectWheels.tsx (ARC_* constants). */
 .work-scene {
+  --u: 1vw;
   --title-w: clamp(200px, 20vw, 420px);
   --hero-gap: clamp(48px, 6.5vw, 150px);
   --card-w: clamp(220px, 23vw, 520px);
@@ -4974,35 +4975,38 @@ img[src*="/media/mono/induction"] {
    reads exactly like 1920x1080. 1920 and smaller are untouched. */
 @media (min-width: 1921px) {
   .work-scene {
-    --title-w: 20vw;
-    --hero-gap: 6.5vw;
-    --card-w: 23vw;
-    --tile-size: 12.5vw;
+    /* 1vw at 1920, then grows at 30% of the viewport rate: about 1.1x at
+       2560 instead of 1.33x, so the hero doesn't balloon on big screens. */
+    --u: calc(13.44px + 0.3vw);
+    --title-w: calc(20 * var(--u));
+    --hero-gap: calc(6.5 * var(--u));
+    --card-w: calc(23 * var(--u));
+    --tile-size: calc(12.5 * var(--u));
   }
   .work-scene .project-metadata .project-title {
-    font-size: 3.637vw !important;
+    font-size: calc(3.637 * var(--u)) !important;
   }
   .work-scene .project-metadata .cinema-metadata-row,
   .work-scene .project-metadata .project-meta-row,
   .work-scene .project-year {
-    font-size: 0.594vw !important;
+    font-size: calc(0.594 * var(--u)) !important;
   }
   .work-scene .view-project-button {
-    font-size: 0.78vw !important;
+    font-size: calc(0.78 * var(--u)) !important;
   }
   .work-scene .toolkit-viewport .micro-label {
-    font-size: 0.58vw !important;
+    font-size: calc(0.58 * var(--u)) !important;
   }
   .work-scene .toolkit-viewport .tool-caption-slot > span:last-child {
-    font-size: 0.759vw !important;
+    font-size: calc(0.759 * var(--u)) !important;
   }
   .work-scene .software-wheel .adobe-symbol {
-    font-size: 4.896vw !important;
+    font-size: calc(4.896 * var(--u)) !important;
   }
   .work-scene .tile-brand {
-    font-size: 0.365vw !important;
+    font-size: calc(0.365 * var(--u)) !important;
   }
   .work-scene .work-toolkit-static {
-    top: calc(50vh + var(--tile-size) / 2 + 2.083vw) !important;
+    top: calc(50vh + var(--tile-size) / 2 + calc(2.083 * var(--u))) !important;
   }
 }
