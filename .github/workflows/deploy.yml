@@ -12,6 +12,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 # One deployment at a time; a newer push replaces a queued one.
 concurrency:
@@ -50,5 +51,25 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Safeguard: if Settings → Pages is ever left on "Deploy from a branch",
+      # GitHub also runs its own Jekyll build ("pages build and deployment")
+      # on every push and publishes the README over the site. Wait for that
+      # run to finish so this deployment always lands last.
+      - name: Wait for GitHub's branch build, if any
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          sleep 20
+          for i in $(seq 1 30); do
+            busy=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$REPO/actions/runs?head_sha=$SHA&per_page=20" \
+              | jq '[.workflow_runs[] | select(.name == "pages build and deployment" and .status != "completed")] | length')
+            if [ "$busy" = "0" ]; then break; fi
+            echo "Waiting for pages build and deployment ($busy running)"
+            sleep 10
+          done
+
       - id: deployment
         uses: actions/deploy-pages@v4
