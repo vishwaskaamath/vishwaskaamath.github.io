@@ -194,11 +194,11 @@ export default function ProjectWheels({
         "--reel-glitch",
         `${Math.min(0.15, Math.abs(scrollVelocity) * 0.06)}`,
       );
-      centerTitle.style.transform = `translate3d(calc(-50% + ${mobile ? 0 : p * 16.5} * var(--u, 1vw)), -50%, 0)`;
-      activeLogoGroup.style.transform = `translate3d(calc(${mobile ? 0 : p * 12.5} * var(--u, 1vw)),0,0)`;
+      centerTitle.style.transform = `translate3d(calc(-50% + ${mobile ? 0 : p * 16.5}vw), -50%, 0)`;
+      activeLogoGroup.style.transform = `translate3d(${mobile ? 0 : p * 12.5}vw,0,0)`;
       // The toolkit caption sits outside the wheel: move it with the logos
       // (the `translate` property stacks with its centring transform).
-      if (toolkit) toolkit.style.translate = `calc(${mobile ? 0 : p * 12.5} * var(--u, 1vw)) 0`;
+      if (toolkit) toolkit.style.translate = `${mobile ? 0 : p * 12.5}vw 0`;
       // No layout reads, independent tweens, or React animation state in this loop.
       projects.forEach((_, i) => {
         const d = reelOffset(i, currentScroll, projects.length);

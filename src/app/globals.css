@@ -4865,7 +4865,6 @@ html[data-story-transition="true"] .tool-caption.toolkit-viewport {
    video and software tile sit the same distance (--hero-gap) from its edges.
    The arcs themselves are drawn in ProjectWheels.tsx (ARC_* constants). */
 .work-scene {
-  --u: 1vw;
   --title-w: clamp(200px, 20vw, 420px);
   --hero-gap: clamp(48px, 6.5vw, 150px);
   --card-w: clamp(220px, 23vw, 520px);
@@ -4966,47 +4965,4 @@ img[src*="/media/induction"],
 img[src*="/media/mono/induction"] {
   scale: 1.12;
   transform-origin: 50% 51%;
-}
-
-/* ---------- Above 1920px: the landing scales up as a whole ----------
-   Every landing size below is capped in px, so on 1440p and 4K screens the
-   hero stayed 1920-sized and drifted off balance. Past 1920px wide the same
-   proportions continue (each value = its 1920px size as vw), so 2560x1440
-   reads exactly like 1920x1080. 1920 and smaller are untouched. */
-@media (min-width: 1921px) {
-  .work-scene {
-    /* 1vw at 1920, then grows at 30% of the viewport rate: about 1.1x at
-       2560 instead of 1.33x, so the hero doesn't balloon on big screens. */
-    --u: calc(13.44px + 0.3vw);
-    --title-w: calc(20 * var(--u));
-    --hero-gap: calc(6.5 * var(--u));
-    --card-w: calc(23 * var(--u));
-    --tile-size: calc(12.5 * var(--u));
-  }
-  .work-scene .project-metadata .project-title {
-    font-size: calc(3.637 * var(--u)) !important;
-  }
-  .work-scene .project-metadata .cinema-metadata-row,
-  .work-scene .project-metadata .project-meta-row,
-  .work-scene .project-year {
-    font-size: calc(0.594 * var(--u)) !important;
-  }
-  .work-scene .view-project-button {
-    font-size: calc(0.78 * var(--u)) !important;
-  }
-  .work-scene .toolkit-viewport .micro-label {
-    font-size: calc(0.58 * var(--u)) !important;
-  }
-  .work-scene .toolkit-viewport .tool-caption-slot > span:last-child {
-    font-size: calc(0.759 * var(--u)) !important;
-  }
-  .work-scene .software-wheel .adobe-symbol {
-    font-size: calc(4.896 * var(--u)) !important;
-  }
-  .work-scene .tile-brand {
-    font-size: calc(0.365 * var(--u)) !important;
-  }
-  .work-scene .work-toolkit-static {
-    top: calc(50vh + var(--tile-size) / 2 + calc(2.083 * var(--u))) !important;
-  }
 }
