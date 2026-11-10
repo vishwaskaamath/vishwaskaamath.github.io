@@ -4966,3 +4966,14 @@ img[src*="/media/mono/induction"] {
   scale: 1.12;
   transform-origin: 50% 51%;
 }
+
+/* 2560x1440 only: nudge the landing hero 2% right. margin-left (not a
+   transform) so the wheels' offsetLeft-based hover maths stays in sync. */
+@media (min-width: 2401px) and (max-width: 2800px) {
+  .work-scene .video-wheel,
+  .work-scene .project-metadata,
+  .work-scene .software-wheel,
+  .work-scene .work-toolkit-static {
+    margin-left: 2vw !important;
+  }
+}
