@@ -105,6 +105,16 @@ export default function LoadingScreen({
             <div className="loader-bar">
               <i className="loader-line" />
               <span data-label>STANDBY</span>
+              <span className="loader-hint">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <rect x="1.5" y="2.5" width="13" height="8.5" rx="1.2" />
+                  <path d="M6 13.5h4M8 11v2.5" />
+                </svg>
+                <span className="loader-hint-long">
+                  BEST VIEWED ON A LAPTOP OR DESKTOP
+                </span>
+                <span className="loader-hint-short">BEST ON A COMPUTER</span>
+              </span>
               <span className="loader-count" data-count>
                 000%
               </span>

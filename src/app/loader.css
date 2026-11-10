@@ -97,7 +97,41 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.12em;
 }
+/* "Best viewed on a computer" note, centred in the bar. */
+.loader-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(243, 239, 230, 0.78);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.loader-hint svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: #ff4d1c;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+.loader-hint-short {
+  display: none;
+}
 @media (max-width: 759px) {
+  .loader-hint {
+    position: static;
+    transform: none;
+  }
+  .loader-hint-long {
+    display: none;
+  }
+  .loader-hint-short {
+    display: inline;
+  }
   .loader-bar {
     bottom: 22px;
     font-size: 9px;

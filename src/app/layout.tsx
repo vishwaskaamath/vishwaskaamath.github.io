@@ -7,6 +7,7 @@ import "./portal.css";
 import "./about.css";
 import "./loader.css";
 import "./resume.css";
+import "./responsive.css";
 import SiteShell from "@/components/SiteShell";
 
 const tanker = localFont({

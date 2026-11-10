@@ -1,0 +1,142 @@
+/* Small-screen fixes (laptops below 1080p and phones). Every rule here sits
+   behind a max-width query, so 1920x1080 and larger are untouched. Loaded
+   last so it wins over the per-section stylesheets. */
+
+/* ---------- Résumé timeline: the playhead already says NOW ---------- */
+.tl-ruler .tl-now {
+  color: transparent;
+}
+
+/* ---------- Phones and small tablets ---------- */
+@media (max-width: 640px) {
+  /* Compact header pills that sit in one tidy row. */
+  .minimal-hud {
+    inset: 14px 14px auto;
+  }
+  .minimal-controls .vinyl-pill {
+    gap: 8px;
+    height: 38px;
+    padding: 0 4px;
+  }
+  .vinyl-pill-disc,
+  .vinyl-pill-flood {
+    width: 28px;
+    height: 28px;
+  }
+  .vinyl-pill-title {
+    max-width: 84px;
+    font-size: 0.64rem;
+  }
+  .resume-trigger,
+  .cut-back {
+    top: 14px;
+    left: 14px;
+  }
+  .resume-trigger .kpill,
+  .cut-back .kpill,
+  .cut-hud .kpill {
+    gap: 10px;
+    height: 38px;
+    padding-left: 14px;
+  }
+  .resume-trigger .kpill-title,
+  .cut-back .kpill-title {
+    font-size: 0.64rem;
+  }
+  .resume-trigger .kpill-circle,
+  .cut-back .kpill-circle,
+  .resume-trigger .kpill-flood,
+  .cut-back .kpill-flood {
+    width: 28px;
+    height: 28px;
+  }
+  .resume-trigger .kpill-flood,
+  .cut-back .kpill-flood {
+    right: 5px;
+    margin-top: -14px;
+  }
+
+  /* "This is my thing": every row starts on the same left edge (the
+     scroll-in slide is for wide screens). */
+  .kinetic-discipline h3 {
+    --row-offset: 0px !important;
+  }
+
+  /* Email bar: address on top, a full-width copy button under it. */
+  .email-capsule {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: min(100%, 360px);
+    height: auto;
+    padding: 16px 8px 8px;
+    border-radius: 28px;
+  }
+  .email-capsule-address {
+    font-size: 0.95rem;
+    text-align: center;
+  }
+  .email-capsule-action {
+    justify-content: center;
+    height: 48px;
+  }
+  .email-capsule-flood {
+    display: none;
+  }
+
+  /* Contact footer: stacked and centred instead of three cramped columns. */
+  .kinetic-contact .contact-bottom {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+  .kinetic-contact .contact-bottom > span {
+    white-space: nowrap;
+  }
+
+  /* Résumé slate: one clean top row. */
+  .slate-top .slate-label {
+    display: none;
+  }
+  .slate-top {
+    justify-content: flex-end;
+  }
+  .slate-cut {
+    display: inline-flex;
+    gap: 10px;
+    font-size: 0.58rem;
+    white-space: nowrap;
+  }
+  .slate-count {
+    white-space: nowrap;
+  }
+  /* All four résumé buttons on one row. */
+  .cut-actions {
+    gap: 8px;
+  }
+  .cut-actions .kpill {
+    padding: 0 14px;
+  }
+  .cut-icon {
+    width: 40px;
+    height: 40px;
+  }
+  /* The timecode badge would sit on top of the text. */
+  .cut-tc {
+    display: none;
+  }
+  /* Timeline: a narrower track column leaves room for the clips. */
+  .tl {
+    grid-template-columns: 112px minmax(0, 1fr);
+    min-width: 640px;
+  }
+  .tl-labels span,
+  .tl-corner {
+    padding: 0 10px;
+  }
+  .tl-labels span {
+    gap: 7px;
+    font-size: 0.58rem;
+  }
+}
